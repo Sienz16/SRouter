@@ -1,4 +1,4 @@
-import { Hono } from "hono";
+import { Hono, type Context } from "hono";
 import { upsertProviderDB } from "@srouter/db";
 import {
     generatePKCE,
@@ -9,23 +9,48 @@ import { registry } from "../../services/registry.js";
 
 export const authRoute = new Hono();
 
-// In-memory PKCE session store keyed by state
-const pkceSessions = new Map<
-    string,
-    { codeVerifier: string; createdAt: number }
->();
+export interface PKCESession {
+    codeVerifier: string;
+    clientId: string;
+    redirectUri: string;
+    createdAt: number;
+}
 
-const oauth = new OpenAICodexOAuth();
+// In-memory PKCE session store keyed by state
+const pkceSessions = new Map<string, PKCESession>();
+
+function cleanupExpiredSessions(): void {
+    const now = Date.now();
+    const maxAge = 15 * 60 * 1000;
+    for (const [state, session] of pkceSessions.entries()) {
+        if (now - session.createdAt > maxAge) {
+            pkceSessions.delete(state);
+        }
+    }
+}
 
 // 1. GET /v1/auth/openai/login - Initiate OAuth PKCE Login Flow
 authRoute.get("/auth/openai/login", (c) => {
+    cleanupExpiredSessions();
+    const customClientId =
+        c.req.query("client_id") || "app_EMoamEEZ73f0CkXaXp7hrann";
+    const redirectUri =
+        c.req.query("redirect_uri") || "http://localhost:1455/auth/callback";
+
+    const oauthInstance = new OpenAICodexOAuth({
+        clientId: customClientId,
+        redirectUri,
+    });
+
     const pkce = generatePKCE();
     pkceSessions.set(pkce.state, {
         codeVerifier: pkce.codeVerifier,
+        clientId: customClientId,
+        redirectUri,
         createdAt: Date.now(),
     });
 
-    const authorizeUrl = oauth.getAuthorizationUrl(pkce);
+    const authorizeUrl = oauthInstance.getAuthorizationUrl(pkce);
 
     // If client prefers JSON response vs HTTP redirect
     if (c.req.query("format") === "json") {
@@ -33,14 +58,16 @@ authRoute.get("/auth/openai/login", (c) => {
             authorizeUrl,
             state: pkce.state,
             codeVerifier: pkce.codeVerifier,
+            redirectUri,
         });
     }
 
     return c.redirect(authorizeUrl);
 });
 
-// 2. GET /v1/auth/openai/callback - OAuth Callback Receiver (Direct DB Save)
-authRoute.get("/auth/openai/callback", async (c) => {
+// Callback handler reusable by both port 3000 (/v1/auth/openai/callback) and port 1455 (/auth/callback)
+export async function handleOAuthCallback(c: Context) {
+    cleanupExpiredSessions();
     const code = c.req.query("code");
     const state = c.req.query("state");
 
@@ -67,7 +94,11 @@ authRoute.get("/auth/openai/callback", async (c) => {
     pkceSessions.delete(state);
 
     try {
-        const tokens = await oauth.exchangeCodeForTokens(
+        const oauthInstance = new OpenAICodexOAuth({
+            clientId: session.clientId,
+            redirectUri: session.redirectUri,
+        });
+        const tokens = await oauthInstance.exchangeCodeForTokens(
             code,
             session.codeVerifier,
         );
@@ -93,23 +124,42 @@ authRoute.get("/auth/openai/callback", async (c) => {
         });
         registry.registerProvider(providerInstance);
 
-        return c.json({
-            success: true,
-            message:
-                "Successfully authenticated with OpenAI Codex! Tokens automatically saved to SQLite database.",
-            provider: providerConfig,
-            accessToken: tokens.accessToken,
-            refreshToken: tokens.refreshToken,
-            expiresIn: tokens.expiresIn,
-        });
+        return c.html(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <title>SRouter - OpenAI Login Success</title>
+                <style>
+                    body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+                    .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 2.5rem; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); }
+                    .icon { font-size: 3rem; margin-bottom: 1rem; }
+                    h2 { margin-top: 0; color: #38bdf8; }
+                    p { color: #94a3b8; line-height: 1.6; }
+                    .badge { background: #059669; color: white; font-weight: 600; padding: 0.5rem 1rem; border-radius: 9999px; display: inline-block; margin-top: 1rem; }
+                </style>
+            </head>
+            <body>
+                <div class="card">
+                    <div class="icon">🎉</div>
+                    <h2>Login OpenAI Codex Berhasil!</h2>
+                    <p>Access token & Refresh token telah <strong>tersimpan secara otomatis ke database SQLite (srouter.db)</strong>.</p>
+                    <div class="badge">SRouter Ready</div>
+                </div>
+            </body>
+            </html>
+        `);
     } catch (err) {
         const errorMessage = err instanceof Error ? err.message : String(err);
         return c.json({ error: { message: errorMessage } }, 500);
     }
-});
+}
 
-// 3. POST /v1/auth/openai/token - Manual Access Token Direct DB Save
-authRoute.post("/auth/openai/token", async (c) => {
+// 2. GET /v1/auth/openai/callback - OAuth Callback Receiver (Direct DB Save)
+authRoute.get("/auth/openai/callback", (c) => handleOAuthCallback(c));
+
+// Helper for Token Importing
+const handleTokenImport = async (c: Context) => {
     let body: { accessToken: string; refreshToken?: string; name?: string };
     try {
         body = await c.req.json();
@@ -124,7 +174,7 @@ authRoute.post("/auth/openai/token", async (c) => {
         );
     }
 
-    const providerName = body.name || "OpenAI Codex (Manual Token)";
+    const providerName = body.name || "OpenAI Codex (OAuth Token)";
 
     // 1. Save directly to SQLite database
     const providerConfig = upsertProviderDB({
@@ -156,4 +206,8 @@ authRoute.post("/auth/openai/token", async (c) => {
         },
         201,
     );
-});
+};
+
+// 3. POST /v1/auth/openai/token & POST /v1/auth/openai/import-token (9Router-style token import)
+authRoute.post("/auth/openai/token", handleTokenImport);
+authRoute.post("/auth/openai/import-token", handleTokenImport);

@@ -4,6 +4,7 @@
     "description": "",
     "scripts": {
         "dev": "pnpm --dir apps/api dev",
+        "start": "pnpm --dir apps/api start",
         "build": "turbo build",
         "format": "prettier --write .",
         "format:check": "prettier --check .",

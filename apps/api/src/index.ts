@@ -1,6 +1,6 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
-import { authRoute } from "./routes/v1/auth.js";
+import { authRoute, handleOAuthCallback } from "./routes/v1/auth.js";
 import { chatRoute } from "./routes/v1/chat.js";
 import { keysRoute } from "./routes/v1/keys.js";
 import { logsRoute } from "./routes/v1/logs.js";
@@ -45,5 +45,27 @@ serve(
         );
     },
 );
+
+// Secondary listener on Port 1455 for OpenAI OAuth Codex callback
+const oauthApp = new Hono();
+oauthApp.get("/auth/callback", (c) => handleOAuthCallback(c));
+
+const oauthPort = Number(process.env.OAUTH_PORT) || 1455;
+
+try {
+    serve(
+        {
+            fetch: oauthApp.fetch,
+            port: oauthPort,
+        },
+        (info) => {
+            console.log(
+                `🔑 OpenAI OAuth Callback Server running at http://localhost:${info.port}/auth/callback`,
+            );
+        },
+    );
+} catch (err) {
+    console.warn(`Could not start OAuth server on port ${oauthPort}:`, err);
+}
 
 export default app;

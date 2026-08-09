@@ -46,18 +46,16 @@ export class OpenAICodexOAuth {
     private tokenUrl: string;
 
     constructor(options: OpenAIOAuthOptions = {}) {
-        // Standard OpenAI OAuth Client ID or custom client ID
+        // Official OpenAI OAuth Public Client ID (from Context7 openai-oauth docs)
         this.clientId =
             options.clientId ??
             process.env.OPENAI_OAUTH_CLIENT_ID ??
-            "app-codex-cli";
+            "app_EMoamEEZ73f0CkXaXp7hrann";
         this.redirectUri =
             options.redirectUri ??
             process.env.OPENAI_OAUTH_REDIRECT_URI ??
-            "http://localhost:3000/v1/auth/openai/callback";
-        this.scope =
-            options.scope ??
-            "openid profile email offline_access model.request";
+            "http://localhost:1455/auth/callback";
+        this.scope = options.scope ?? "openid profile email offline_access";
         this.authorizeUrl =
             options.authorizeUrl ?? "https://auth.openai.com/authorize";
         this.tokenUrl =
@@ -65,7 +63,7 @@ export class OpenAICodexOAuth {
     }
 
     /**
-     * Generates PKCE parameters and returns authorization URL
+     * Generates PKCE parameters and returns authorization URL (Context7 OpenAI OAuth Compliant)
      */
     getAuthorizationUrl(pkce: PKCEPair): string {
         const params = new URLSearchParams({
