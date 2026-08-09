@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { CreateAPIKeySchema } from "@srouter/types";
-import { KeysController } from "../../controllers/keys.controller.js";
-import { validateJson } from "../../middleware/validator.js";
+import { KeysController } from "@/controllers/keys.controller.js";
+import { validateJson } from "@/middleware/validator.js";
 
 export const keysRoute = new Hono();
 

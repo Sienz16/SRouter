@@ -1,5 +1,5 @@
 import type { Context } from "hono";
-import { AuthLogic } from "../logic/auth.logic.js";
+import { AuthLogic } from "@/logic/auth.logic.js";
 
 export interface OAuthCallbackBody {
     code?: string;

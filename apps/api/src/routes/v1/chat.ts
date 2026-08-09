@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { ChatCompletionRequestSchema } from "@srouter/types";
-import { ChatController } from "../../controllers/chat.controller.js";
-import { validateJson } from "../../middleware/validator.js";
+import { ChatController } from "@/controllers/chat.controller.js";
+import { validateJson } from "@/middleware/validator.js";
 
 export const chatRoute = new Hono();
 

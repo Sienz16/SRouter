@@ -1,6 +1,6 @@
 import type { Context } from "hono";
 import type { CreateAPIKeyZod } from "@srouter/types";
-import { KeysLogic } from "../logic/keys.logic.js";
+import { KeysLogic } from "@/logic/keys.logic.js";
 
 export class KeysController {
     public static listKeys(c: Context): Response {

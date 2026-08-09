@@ -1,5 +1,5 @@
 import type { ModelObject } from "@srouter/types";
-import { registry } from "../services/registry.js";
+import { registry } from "@/services/registry.js";
 
 export class ModelsLogic {
     public static async getAllModels(): Promise<ModelObject[]> {

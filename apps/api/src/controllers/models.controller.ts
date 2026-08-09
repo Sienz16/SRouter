@@ -1,6 +1,6 @@
 import type { Context } from "hono";
 import type { ModelListResponse } from "@srouter/types";
-import { ModelsLogic } from "../logic/models.logic.js";
+import { ModelsLogic } from "@/logic/models.logic.js";
 
 export class ModelsController {
     public static async listModels(c: Context): Promise<Response> {

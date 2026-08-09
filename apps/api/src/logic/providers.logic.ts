@@ -1,5 +1,5 @@
 import type { ProviderDefinition } from "@srouter/types";
-import { registry } from "../services/registry.js";
+import { registry } from "@/services/registry.js";
 
 export interface GroupedCatalog {
     custom: ProviderDefinition[];

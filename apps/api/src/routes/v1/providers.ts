@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { ProvidersController } from "../../controllers/providers.controller.js";
+import { ProvidersController } from "@/controllers/providers.controller.js";
 
 export const providersRoute = new Hono();
 

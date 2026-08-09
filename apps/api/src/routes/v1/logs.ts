@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { LogsController } from "../../controllers/logs.controller.js";
+import { LogsController } from "@/controllers/logs.controller.js";
 
 export const logsRoute = new Hono();
 

@@ -1,6 +1,6 @@
 import { logRequestDB } from "@srouter/db";
 import type { ChatCompletionChunk, ChatCompletionRequest, ChatCompletionResponse } from "@srouter/types";
-import { registry } from "../services/registry.js";
+import { registry } from "@/services/registry.js";
 
 export class ChatLogic {
     public static async processNonStreamingCompletion(body: ChatCompletionRequest, startTime: number): Promise<ChatCompletionResponse> {

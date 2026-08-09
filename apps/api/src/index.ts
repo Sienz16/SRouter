@@ -1,11 +1,11 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
-import { authRoute, handleOAuthCallback } from "./routes/v1/auth.js";
-import { chatRoute } from "./routes/v1/chat.js";
-import { keysRoute } from "./routes/v1/keys.js";
-import { logsRoute } from "./routes/v1/logs.js";
-import { modelsRoute } from "./routes/v1/models.js";
-import { providersRoute } from "./routes/v1/providers.js";
+import { authRoute, handleOAuthCallback } from "@/routes/v1/auth.js";
+import { chatRoute } from "@/routes/v1/chat.js";
+import { keysRoute } from "@/routes/v1/keys.js";
+import { logsRoute } from "@/routes/v1/logs.js";
+import { modelsRoute } from "@/routes/v1/models.js";
+import { providersRoute } from "@/routes/v1/providers.js";
 
 const app = new Hono();
 

@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { ModelsController } from "../../controllers/models.controller.js";
+import { ModelsController } from "@/controllers/models.controller.js";
 
 export const modelsRoute = new Hono();
 

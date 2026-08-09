@@ -1,7 +1,7 @@
 import { upsertProviderDB } from "@srouter/db";
 import { generatePKCE, OpenAICodexOAuth, OpenAIProvider, type PKCEPair } from "@srouter/providers";
 import type { ProviderConfig } from "@srouter/types";
-import { registry } from "../services/registry.js";
+import { registry } from "@/services/registry.js";
 
 export interface PKCESession {
     codeVerifier: string;

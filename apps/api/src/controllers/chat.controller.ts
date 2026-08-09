@@ -1,7 +1,7 @@
 import type { Context } from "hono";
 import { streamSSE } from "hono/streaming";
 import type { ChatCompletionRequest } from "@srouter/types";
-import { ChatLogic } from "../logic/chat.logic.js";
+import { ChatLogic } from "@/logic/chat.logic.js";
 
 export class ChatController {
     public static async createCompletion(c: Context): Promise<Response> {

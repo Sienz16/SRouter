@@ -1,5 +1,5 @@
 import type { Context } from "hono";
-import { LogsLogic } from "../logic/logs.logic.js";
+import { LogsLogic } from "@/logic/logs.logic.js";
 
 export class LogsController {
     public static listLogs(c: Context): Response {
