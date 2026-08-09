@@ -1,11 +1,4 @@
-import type {
-    AIProvider,
-    ChatCompletionChunk,
-    ChatCompletionRequest,
-    ChatCompletionResponse,
-    ModelListResponse,
-    ModelObject,
-} from "@srouter/types";
+import type { AIProvider, ChatCompletionChunk, ChatCompletionRequest, ChatCompletionResponse, ModelListResponse, ModelObject } from "@srouter/types";
 
 export interface OpenAIProviderOptions {
     id?: string;
@@ -25,13 +18,9 @@ export class OpenAIProvider implements AIProvider {
     constructor(options: OpenAIProviderOptions = {}) {
         this.id = options.id ?? "openai";
         this.name = options.name ?? "OpenAI Provider";
-        this.baseUrl = (options.baseUrl ?? "https://api.openai.com/v1").replace(
-            /\/$/,
-            "",
-        );
+        this.baseUrl = (options.baseUrl ?? "https://api.openai.com/v1").replace(/\/$/, "");
         this.apiKey = options.apiKey ?? process.env.OPENAI_API_KEY ?? "";
-        this.accessToken =
-            options.accessToken ?? process.env.OPENAI_ACCESS_TOKEN ?? "";
+        this.accessToken = options.accessToken ?? process.env.OPENAI_ACCESS_TOKEN ?? "";
     }
 
     private getHeaders(): Record<string, string> {
@@ -61,9 +50,7 @@ export class OpenAIProvider implements AIProvider {
         }
     }
 
-    async chatCompletion(
-        req: ChatCompletionRequest,
-    ): Promise<ChatCompletionResponse> {
+    async chatCompletion(req: ChatCompletionRequest): Promise<ChatCompletionResponse> {
         const res = await fetch(`${this.baseUrl}/chat/completions`, {
             method: "POST",
             headers: this.getHeaders(),
@@ -72,17 +59,13 @@ export class OpenAIProvider implements AIProvider {
 
         if (!res.ok) {
             const errorText = await res.text();
-            throw new Error(
-                `OpenAI Provider Error (${res.status}): ${errorText}`,
-            );
+            throw new Error(`OpenAI Provider Error (${res.status}): ${errorText}`);
         }
 
         return (await res.json()) as ChatCompletionResponse;
     }
 
-    async *chatCompletionStream(
-        req: ChatCompletionRequest,
-    ): AsyncGenerator<ChatCompletionChunk, void, void> {
+    async *chatCompletionStream(req: ChatCompletionRequest): AsyncGenerator<ChatCompletionChunk, void, void> {
         const res = await fetch(`${this.baseUrl}/chat/completions`, {
             method: "POST",
             headers: this.getHeaders(),
@@ -91,9 +74,7 @@ export class OpenAIProvider implements AIProvider {
 
         if (!res.ok) {
             const errorText = await res.text();
-            throw new Error(
-                `OpenAI Provider Stream Error (${res.status}): ${errorText}`,
-            );
+            throw new Error(`OpenAI Provider Stream Error (${res.status}): ${errorText}`);
         }
 
         if (!res.body) {
@@ -123,9 +104,7 @@ export class OpenAIProvider implements AIProvider {
                 if (trimmed.startsWith("data: ")) {
                     const jsonStr = trimmed.slice(6);
                     try {
-                        const parsed = JSON.parse(
-                            jsonStr,
-                        ) as ChatCompletionChunk;
+                        const parsed = JSON.parse(jsonStr) as ChatCompletionChunk;
                         yield parsed;
                     } catch {
                         // ignore malformed JSON chunk

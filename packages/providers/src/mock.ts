@@ -1,10 +1,4 @@
-import type {
-    AIProvider,
-    ChatCompletionChunk,
-    ChatCompletionRequest,
-    ChatCompletionResponse,
-    ModelObject,
-} from "@srouter/types";
+import type { AIProvider, ChatCompletionChunk, ChatCompletionRequest, ChatCompletionResponse, ModelObject } from "@srouter/types";
 
 export class MockProvider implements AIProvider {
     id = "mock";
@@ -29,14 +23,9 @@ export class MockProvider implements AIProvider {
         return this.models;
     }
 
-    async chatCompletion(
-        req: ChatCompletionRequest,
-    ): Promise<ChatCompletionResponse> {
+    async chatCompletion(req: ChatCompletionRequest): Promise<ChatCompletionResponse> {
         const lastMessage = req.messages[req.messages.length - 1];
-        const userPrompt =
-            typeof lastMessage?.content === "string"
-                ? lastMessage.content
-                : JSON.stringify(lastMessage?.content ?? "");
+        const userPrompt = typeof lastMessage?.content === "string" ? lastMessage.content : JSON.stringify(lastMessage?.content ?? "");
 
         const responseText = `[SRouter Mock Response] Received your prompt: "${userPrompt}". Using model: ${req.model}`;
 
@@ -58,21 +47,14 @@ export class MockProvider implements AIProvider {
             usage: {
                 prompt_tokens: Math.max(1, userPrompt.length / 4),
                 completion_tokens: Math.max(1, responseText.length / 4),
-                total_tokens:
-                    Math.max(1, userPrompt.length / 4) +
-                    Math.max(1, responseText.length / 4),
+                total_tokens: Math.max(1, userPrompt.length / 4) + Math.max(1, responseText.length / 4),
             },
         };
     }
 
-    async *chatCompletionStream(
-        req: ChatCompletionRequest,
-    ): AsyncGenerator<ChatCompletionChunk, void, void> {
+    async *chatCompletionStream(req: ChatCompletionRequest): AsyncGenerator<ChatCompletionChunk, void, void> {
         const lastMessage = req.messages[req.messages.length - 1];
-        const userPrompt =
-            typeof lastMessage?.content === "string"
-                ? lastMessage.content
-                : JSON.stringify(lastMessage?.content ?? "");
+        const userPrompt = typeof lastMessage?.content === "string" ? lastMessage.content : JSON.stringify(lastMessage?.content ?? "");
 
         const responseText = `[SRouter Mock Stream] Response for prompt: "${userPrompt}" via model ${req.model}`;
         const completionId = `chatcmpl-${Math.random().toString(36).substring(2, 11)}`;

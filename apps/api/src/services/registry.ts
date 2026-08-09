@@ -1,11 +1,5 @@
 import { getAllProvidersDB } from "@srouter/db";
-import {
-    AnthropicProvider,
-    MockProvider,
-    OpenAIProvider,
-    OpenRouterProvider,
-    ProviderRegistry,
-} from "@srouter/providers";
+import { AnthropicProvider, MockProvider, OpenAIProvider, OpenRouterProvider, ProviderRegistry } from "@srouter/providers";
 
 // Create a global ProviderRegistry instance with Mock fallback
 export const registry = new ProviderRegistry(new MockProvider());
@@ -32,9 +26,7 @@ if (process.env.ANTHROPIC_API_KEY) {
             id: "anthropic",
             name: "Anthropic",
             apiKey: process.env.ANTHROPIC_API_KEY,
-            baseUrl:
-                process.env.ANTHROPIC_BASE_URL ||
-                "https://api.anthropic.com/v1",
+            baseUrl: process.env.ANTHROPIC_BASE_URL || "https://api.anthropic.com/v1",
         }),
     );
 }
@@ -48,11 +40,7 @@ export function loadSavedProvidersFromDB(): void {
         for (const p of savedProviders) {
             if (!p.enabled) continue;
 
-            if (
-                p.providerId === "openai_codex" ||
-                p.providerId === "openai" ||
-                p.providerId === "custom_openai"
-            ) {
+            if (p.providerId === "openai_codex" || p.providerId === "openai" || p.providerId === "custom_openai") {
                 registry.registerProvider(
                     new OpenAIProvider({
                         id: p.providerId,
@@ -62,10 +50,7 @@ export function loadSavedProvidersFromDB(): void {
                         accessToken: p.accessToken,
                     }),
                 );
-            } else if (
-                p.providerId === "anthropic" ||
-                p.providerId === "custom_anthropic"
-            ) {
+            } else if (p.providerId === "anthropic" || p.providerId === "custom_anthropic") {
                 registry.registerProvider(
                     new AnthropicProvider({
                         id: p.providerId,

@@ -24,8 +24,7 @@ export const ToolCallSchema = z.object({
 
 export const ChatMessageSchema = z.object({
     role: z.enum(["system", "user", "assistant", "tool", "function"], {
-        required_error:
-            "Role is required and must be 'system', 'user', 'assistant', 'tool', or 'function'",
+        required_error: "Role is required and must be 'system', 'user', 'assistant', 'tool', or 'function'",
     }),
     content: z.union([z.string(), z.array(ContentPartSchema), z.null()], {
         required_error: "Content is required",
@@ -108,8 +107,6 @@ export const CreateProviderSchema = z.object({
     customHeaders: z.record(z.string()).optional(),
 });
 
-export type ChatCompletionRequestZod = z.infer<
-    typeof ChatCompletionRequestSchema
->;
+export type ChatCompletionRequestZod = z.infer<typeof ChatCompletionRequestSchema>;
 export type CreateAPIKeyZod = z.infer<typeof CreateAPIKeySchema>;
 export type CreateProviderZod = z.infer<typeof CreateProviderSchema>;

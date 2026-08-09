@@ -40,8 +40,7 @@ export interface AnthropicMessageResponse {
     role: "assistant";
     content: AnthropicContentBlock[];
     model: string;
-    stop_reason:
-        "end_turn" | "max_tokens" | "stop_sequence" | "tool_use" | null;
+    stop_reason: "end_turn" | "max_tokens" | "stop_sequence" | "tool_use" | null;
     stop_sequence?: string | null;
     usage: {
         input_tokens: number;

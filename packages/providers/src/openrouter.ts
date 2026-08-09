@@ -1,10 +1,4 @@
-import type {
-    AIProvider,
-    ChatCompletionChunk,
-    ChatCompletionRequest,
-    ChatCompletionResponse,
-    ModelObject,
-} from "@srouter/types";
+import type { AIProvider, ChatCompletionChunk, ChatCompletionRequest, ChatCompletionResponse, ModelObject } from "@srouter/types";
 
 export class OpenRouterProvider implements AIProvider {
     id = "openrouter";
@@ -61,9 +55,7 @@ export class OpenRouterProvider implements AIProvider {
         return [];
     }
 
-    async chatCompletion(
-        req: ChatCompletionRequest,
-    ): Promise<ChatCompletionResponse> {
+    async chatCompletion(req: ChatCompletionRequest): Promise<ChatCompletionResponse> {
         const res = await fetch(`${this.baseUrl}/chat/completions`, {
             method: "POST",
             headers: this.getHeaders(),
@@ -72,17 +64,13 @@ export class OpenRouterProvider implements AIProvider {
 
         if (!res.ok) {
             const errorText = await res.text();
-            throw new Error(
-                `OpenRouter API Error (${res.status}): ${errorText}`,
-            );
+            throw new Error(`OpenRouter API Error (${res.status}): ${errorText}`);
         }
 
         return (await res.json()) as ChatCompletionResponse;
     }
 
-    async *chatCompletionStream(
-        req: ChatCompletionRequest,
-    ): AsyncGenerator<ChatCompletionChunk, void, void> {
+    async *chatCompletionStream(req: ChatCompletionRequest): AsyncGenerator<ChatCompletionChunk, void, void> {
         const res = await fetch(`${this.baseUrl}/chat/completions`, {
             method: "POST",
             headers: this.getHeaders(),
@@ -91,9 +79,7 @@ export class OpenRouterProvider implements AIProvider {
 
         if (!res.ok) {
             const errorText = await res.text();
-            throw new Error(
-                `OpenRouter Stream Error (${res.status}): ${errorText}`,
-            );
+            throw new Error(`OpenRouter Stream Error (${res.status}): ${errorText}`);
         }
 
         if (!res.body) {
@@ -123,9 +109,7 @@ export class OpenRouterProvider implements AIProvider {
                 if (trimmed.startsWith("data: ")) {
                     const jsonStr = trimmed.slice(6);
                     try {
-                        const parsed = JSON.parse(
-                            jsonStr,
-                        ) as ChatCompletionChunk;
+                        const parsed = JSON.parse(jsonStr) as ChatCompletionChunk;
                         yield parsed;
                     } catch {
                         // ignore malformed JSON chunk

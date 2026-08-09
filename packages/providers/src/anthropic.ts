@@ -1,16 +1,5 @@
-import type {
-    AIProvider,
-    AnthropicMessageResponse,
-    ChatCompletionChunk,
-    ChatCompletionRequest,
-    ChatCompletionResponse,
-    ModelObject,
-} from "@srouter/types";
-import {
-    anthropicEventToOpenAIChunk,
-    anthropicToOpenAIResponse,
-    openAIToAnthropicRequest,
-} from "./adapter.js";
+import type { AIProvider, AnthropicMessageResponse, ChatCompletionChunk, ChatCompletionRequest, ChatCompletionResponse, ModelObject } from "@srouter/types";
+import { anthropicEventToOpenAIChunk, anthropicToOpenAIResponse, openAIToAnthropicRequest } from "./adapter.js";
 
 export interface AnthropicProviderOptions {
     id?: string;
@@ -30,9 +19,7 @@ export class AnthropicProvider implements AIProvider {
     constructor(options: AnthropicProviderOptions = {}) {
         this.id = options.id ?? "anthropic";
         this.name = options.name ?? "Anthropic Provider";
-        this.baseUrl = (
-            options.baseUrl ?? "https://api.anthropic.com/v1"
-        ).replace(/\/$/, "");
+        this.baseUrl = (options.baseUrl ?? "https://api.anthropic.com/v1").replace(/\/$/, "");
         this.apiKey = options.apiKey ?? process.env.ANTHROPIC_API_KEY ?? "";
     }
 
@@ -94,9 +81,7 @@ export class AnthropicProvider implements AIProvider {
                 return json.data.map((m) => ({
                     id: m.id,
                     object: "model",
-                    created: m.created_at
-                        ? Math.floor(new Date(m.created_at).getTime() / 1000)
-                        : Math.floor(Date.now() / 1000),
+                    created: m.created_at ? Math.floor(new Date(m.created_at).getTime() / 1000) : Math.floor(Date.now() / 1000),
                     owned_by: "anthropic",
                 }));
             }
@@ -126,9 +111,7 @@ export class AnthropicProvider implements AIProvider {
         ];
     }
 
-    async chatCompletion(
-        req: ChatCompletionRequest,
-    ): Promise<ChatCompletionResponse> {
+    async chatCompletion(req: ChatCompletionRequest): Promise<ChatCompletionResponse> {
         const anthropicReq = openAIToAnthropicRequest(req);
         anthropicReq.stream = false;
 
@@ -140,18 +123,14 @@ export class AnthropicProvider implements AIProvider {
 
         if (!res.ok) {
             const errorText = await res.text();
-            throw new Error(
-                `Anthropic API Error (${res.status}): ${errorText}`,
-            );
+            throw new Error(`Anthropic API Error (${res.status}): ${errorText}`);
         }
 
         const data = (await res.json()) as AnthropicMessageResponse;
         return anthropicToOpenAIResponse(data, req.model);
     }
 
-    async *chatCompletionStream(
-        req: ChatCompletionRequest,
-    ): AsyncGenerator<ChatCompletionChunk, void, void> {
+    async *chatCompletionStream(req: ChatCompletionRequest): AsyncGenerator<ChatCompletionChunk, void, void> {
         const anthropicReq = openAIToAnthropicRequest(req);
         anthropicReq.stream = true;
 
@@ -163,9 +142,7 @@ export class AnthropicProvider implements AIProvider {
 
         if (!res.ok) {
             const errorText = await res.text();
-            throw new Error(
-                `Anthropic API Stream Error (${res.status}): ${errorText}`,
-            );
+            throw new Error(`Anthropic API Stream Error (${res.status}): ${errorText}`);
         }
 
         if (!res.body) {
@@ -199,11 +176,7 @@ export class AnthropicProvider implements AIProvider {
                     const jsonStr = trimmed.slice(6);
                     try {
                         const parsedJson = JSON.parse(jsonStr);
-                        const chunk = anthropicEventToOpenAIChunk(
-                            currentEventType,
-                            parsedJson,
-                            req.model,
-                        );
+                        const chunk = anthropicEventToOpenAIChunk(currentEventType, parsedJson, req.model);
                         if (chunk) {
                             yield chunk;
                         }

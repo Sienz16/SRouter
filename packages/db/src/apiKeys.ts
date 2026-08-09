@@ -28,9 +28,7 @@ export function getAllAPIKeysDB(): DBAPIKey[] {
 }
 
 export function getAPIKeyByKeyDB(key: string): DBAPIKey | null {
-    const query = db.prepare(
-        "SELECT * FROM api_keys WHERE key = ? AND enabled = 1",
-    );
+    const query = db.prepare("SELECT * FROM api_keys WHERE key = ? AND enabled = 1");
     const row = query.get(key);
 
     if (!row) return null;
@@ -47,15 +45,9 @@ export function getAPIKeyByKeyDB(key: string): DBAPIKey | null {
     };
 }
 
-export function createAPIKeyDB(data: {
-    name: string;
-    rateLimit?: number;
-    quotaLimit?: number;
-}): DBAPIKey {
+export function createAPIKeyDB(data: { name: string; rateLimit?: number; quotaLimit?: number }): DBAPIKey {
     const id = `key_${Math.random().toString(36).substring(2, 11)}`;
-    const randomHex = Array.from({ length: 16 }, () =>
-        Math.floor(Math.random() * 16).toString(16),
-    ).join("");
+    const randomHex = Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
     const key = `sr-live-${randomHex}`;
     const createdAt = Date.now();
 
@@ -64,14 +56,7 @@ export function createAPIKeyDB(data: {
         VALUES (?, ?, ?, 1, ?, ?, 0, ?)
     `);
 
-    query.run(
-        id,
-        key,
-        data.name,
-        data.rateLimit ?? 0,
-        data.quotaLimit ?? 0,
-        createdAt,
-    );
+    query.run(id, key, data.name, data.rateLimit ?? 0, data.quotaLimit ?? 0, createdAt);
 
     return {
         id,
@@ -86,9 +71,7 @@ export function createAPIKeyDB(data: {
 }
 
 export function incrementAPIKeyUsageDB(keyId: string, tokens: number): void {
-    const query = db.prepare(
-        "UPDATE api_keys SET usage_tokens = usage_tokens + ? WHERE id = ?",
-    );
+    const query = db.prepare("UPDATE api_keys SET usage_tokens = usage_tokens + ? WHERE id = ?");
     query.run(tokens, keyId);
 }
 

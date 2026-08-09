@@ -13,9 +13,7 @@ export interface RequestLogEntry {
     createdAt: number;
 }
 
-export function logRequestDB(
-    entry: Omit<RequestLogEntry, "id" | "createdAt">,
-): RequestLogEntry {
+export function logRequestDB(entry: Omit<RequestLogEntry, "id" | "createdAt">): RequestLogEntry {
     const id = `log_${Math.random().toString(36).substring(2, 11)}`;
     const createdAt = Date.now();
 
@@ -24,18 +22,7 @@ export function logRequestDB(
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
-    query.run(
-        id,
-        entry.apiKeyId ?? null,
-        entry.providerId,
-        entry.model,
-        entry.promptTokens,
-        entry.completionTokens,
-        entry.totalTokens,
-        entry.statusCode,
-        entry.latencyMs,
-        createdAt,
-    );
+    query.run(id, entry.apiKeyId ?? null, entry.providerId, entry.model, entry.promptTokens, entry.completionTokens, entry.totalTokens, entry.statusCode, entry.latencyMs, createdAt);
 
     return {
         id,
@@ -45,9 +32,7 @@ export function logRequestDB(
 }
 
 export function getRecentLogsDB(limit = 50): RequestLogEntry[] {
-    const query = db.prepare(
-        "SELECT * FROM request_logs ORDER BY created_at DESC LIMIT ?",
-    );
+    const query = db.prepare("SELECT * FROM request_logs ORDER BY created_at DESC LIMIT ?");
     const rows = query.all(limit);
 
     return rows.map((row) => ({

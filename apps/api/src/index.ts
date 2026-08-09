@@ -15,8 +15,7 @@ app.get("/", (c) => {
         name: "SRouter API",
         status: "ok",
         version: "1.0.0",
-        documentation:
-            "Multi-Provider OpenAI & Anthropic Compatible LLM Gateway",
+        documentation: "Multi-Provider OpenAI & Anthropic Compatible LLM Gateway",
     });
 });
 
@@ -40,9 +39,7 @@ serve(
         port,
     },
     (info) => {
-        console.log(
-            `🚀 SRouter API Server running at http://localhost:${info.port}`,
-        );
+        console.log(`🚀 SRouter API Server running at http://localhost:${info.port}`);
     },
 );
 
@@ -59,9 +56,7 @@ try {
             port: oauthPort,
         },
         (info) => {
-            console.log(
-                `🔑 OpenAI OAuth Callback Server running at http://localhost:${info.port}/auth/callback`,
-            );
+            console.log(`🔑 OpenAI OAuth Callback Server running at http://localhost:${info.port}/auth/callback`);
         },
     );
 } catch (err) {

@@ -2,8 +2,7 @@ import { DatabaseSync } from "node:sqlite";
 import path from "node:path";
 import fs from "node:fs";
 
-const dbPath =
-    process.env.DATABASE_PATH || path.resolve(process.cwd(), "srouter.db");
+const dbPath = process.env.DATABASE_PATH || path.resolve(process.cwd(), "srouter.db");
 
 // Ensure parent folder exists if path contains subdirectories
 const dbDir = path.dirname(dbPath);

@@ -336,8 +336,7 @@ export const PROVIDER_CATALOG: ProviderDefinition[] = [
         category: "api_key",
         protocol: "openai",
         defaultBaseUrl: "https://api.groq.com/openai/v1",
-        description:
-            "Ultra-fast Groq LPU inference (Llama 3.3 70B, DeepSeek R1)",
+        description: "Ultra-fast Groq LPU inference (Llama 3.3 70B, DeepSeek R1)",
         requiresApiKey: true,
         status: { state: "no_connections" },
         models: [

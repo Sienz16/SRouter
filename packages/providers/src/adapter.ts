@@ -1,35 +1,19 @@
-import type {
-    AnthropicContentBlock,
-    AnthropicMessage,
-    AnthropicMessageRequest,
-    AnthropicMessageResponse,
-    ChatCompletionChunk,
-    ChatCompletionRequest,
-    ChatCompletionResponse,
-} from "@srouter/types";
+import type { AnthropicContentBlock, AnthropicMessage, AnthropicMessageRequest, AnthropicMessageResponse, ChatCompletionChunk, ChatCompletionRequest, ChatCompletionResponse } from "@srouter/types";
 
 /**
  * Converts OpenAI ChatCompletionRequest into Anthropic MessageRequest format
  */
-export function openAIToAnthropicRequest(
-    req: ChatCompletionRequest,
-): AnthropicMessageRequest {
+export function openAIToAnthropicRequest(req: ChatCompletionRequest): AnthropicMessageRequest {
     let systemPrompt: string | undefined = undefined;
     const anthropicMessages: AnthropicMessage[] = [];
 
     for (const msg of req.messages) {
         if (msg.role === "system") {
-            systemPrompt =
-                typeof msg.content === "string"
-                    ? msg.content
-                    : JSON.stringify(msg.content);
+            systemPrompt = typeof msg.content === "string" ? msg.content : JSON.stringify(msg.content);
         } else if (msg.role === "user" || msg.role === "assistant") {
             anthropicMessages.push({
                 role: msg.role,
-                content:
-                    (typeof msg.content === "string"
-                        ? msg.content
-                        : (msg.content as AnthropicContentBlock[])) ?? "",
+                content: (typeof msg.content === "string" ? msg.content : (msg.content as AnthropicContentBlock[])) ?? "",
             });
         }
     }
@@ -48,10 +32,7 @@ export function openAIToAnthropicRequest(
 /**
  * Converts Anthropic MessageResponse into OpenAI ChatCompletionResponse format
  */
-export function anthropicToOpenAIResponse(
-    res: AnthropicMessageResponse,
-    requestedModel: string,
-): ChatCompletionResponse {
+export function anthropicToOpenAIResponse(res: AnthropicMessageResponse, requestedModel: string): ChatCompletionResponse {
     const textContent = res.content
         .filter((c) => c.type === "text")
         .map((c) => c.text ?? "")
@@ -69,8 +50,7 @@ export function anthropicToOpenAIResponse(
                     role: "assistant",
                     content: textContent,
                 },
-                finish_reason:
-                    res.stop_reason === "max_tokens" ? "length" : "stop",
+                finish_reason: res.stop_reason === "max_tokens" ? "length" : "stop",
             },
         ],
         usage: {
@@ -90,13 +70,8 @@ interface AnthropicStreamEventData {
 /**
  * Converts an Anthropic stream SSE line or chunk into an OpenAI ChatCompletionChunk
  */
-export function anthropicEventToOpenAIChunk(
-    event: string,
-    dataJson: AnthropicStreamEventData,
-    requestedModel: string,
-): ChatCompletionChunk | null {
-    const completionId =
-        dataJson?.message?.id || `chatcmpl-${dataJson?.index ?? 0}`;
+export function anthropicEventToOpenAIChunk(event: string, dataJson: AnthropicStreamEventData, requestedModel: string): ChatCompletionChunk | null {
+    const completionId = dataJson?.message?.id || `chatcmpl-${dataJson?.index ?? 0}`;
     const created = Math.floor(Date.now() / 1000);
 
     if (event === "content_block_delta") {

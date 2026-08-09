@@ -1,11 +1,4 @@
-import type {
-    AIProvider,
-    ChatCompletionChunk,
-    ChatCompletionRequest,
-    ChatCompletionResponse,
-    ModelObject,
-    ProviderDefinition,
-} from "@srouter/types";
+import type { AIProvider, ChatCompletionChunk, ChatCompletionRequest, ChatCompletionResponse, ModelObject, ProviderDefinition } from "@srouter/types";
 import { PROVIDER_CATALOG } from "./catalog.js";
 import { MockProvider } from "./mock.js";
 
@@ -83,16 +76,12 @@ export class ProviderRegistry {
         return allModels;
     }
 
-    async chatCompletion(
-        req: ChatCompletionRequest,
-    ): Promise<ChatCompletionResponse> {
+    async chatCompletion(req: ChatCompletionRequest): Promise<ChatCompletionResponse> {
         const provider = await this.getProviderForModel(req.model);
         return provider.chatCompletion(req);
     }
 
-    async *chatCompletionStream(
-        req: ChatCompletionRequest,
-    ): AsyncGenerator<ChatCompletionChunk, void, void> {
+    async *chatCompletionStream(req: ChatCompletionRequest): AsyncGenerator<ChatCompletionChunk, void, void> {
         const provider = await this.getProviderForModel(req.model);
         yield* provider.chatCompletionStream(req);
     }

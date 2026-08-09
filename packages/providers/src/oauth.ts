@@ -47,19 +47,11 @@ export class OpenAICodexOAuth {
 
     constructor(options: OpenAIOAuthOptions = {}) {
         // Official OpenAI OAuth Public Client ID (from Context7 openai-oauth docs)
-        this.clientId =
-            options.clientId ??
-            process.env.OPENAI_OAUTH_CLIENT_ID ??
-            "app_EMoamEEZ73f0CkXaXp7hrann";
-        this.redirectUri =
-            options.redirectUri ??
-            process.env.OPENAI_OAUTH_REDIRECT_URI ??
-            "http://localhost:1455/auth/callback";
+        this.clientId = options.clientId ?? process.env.OPENAI_OAUTH_CLIENT_ID ?? "app_EMoamEEZ73f0CkXaXp7hrann";
+        this.redirectUri = options.redirectUri ?? process.env.OPENAI_OAUTH_REDIRECT_URI ?? "http://localhost:1455/auth/callback";
         this.scope = options.scope ?? "openid profile email offline_access";
-        this.authorizeUrl =
-            options.authorizeUrl ?? "https://auth.openai.com/authorize";
-        this.tokenUrl =
-            options.tokenUrl ?? "https://auth.openai.com/oauth/token";
+        this.authorizeUrl = options.authorizeUrl ?? "https://auth.openai.com/authorize";
+        this.tokenUrl = options.tokenUrl ?? "https://auth.openai.com/oauth/token";
     }
 
     /**
@@ -82,10 +74,7 @@ export class OpenAICodexOAuth {
     /**
      * Exchanges authorization code and code_verifier for Access Token
      */
-    async exchangeCodeForTokens(
-        code: string,
-        codeVerifier: string,
-    ): Promise<OAuthTokenResponse> {
+    async exchangeCodeForTokens(code: string, codeVerifier: string): Promise<OAuthTokenResponse> {
         const res = await fetch(this.tokenUrl, {
             method: "POST",
             headers: {
@@ -102,9 +91,7 @@ export class OpenAICodexOAuth {
 
         if (!res.ok) {
             const errorText = await res.text();
-            throw new Error(
-                `OpenAI OAuth Exchange Failed (${res.status}): ${errorText}`,
-            );
+            throw new Error(`OpenAI OAuth Exchange Failed (${res.status}): ${errorText}`);
         }
 
         const data = (await res.json()) as {
@@ -142,9 +129,7 @@ export class OpenAICodexOAuth {
 
         if (!res.ok) {
             const errorText = await res.text();
-            throw new Error(
-                `OpenAI OAuth Refresh Failed (${res.status}): ${errorText}`,
-            );
+            throw new Error(`OpenAI OAuth Refresh Failed (${res.status}): ${errorText}`);
         }
 
         const data = (await res.json()) as {
