@@ -10,6 +10,16 @@
             "persistent": true,
             "dependsOn": ["^build"],
             "outputLogs": "new-only"
+        },
+        "start": {
+            "cache": false,
+            "persistent": true,
+            "dependsOn": ["^build"],
+            "outputLogs": "new-only"
+        },
+        "lint": {},
+        "test": {
+            "dependsOn": ["^build"]
         }
     }
 }
