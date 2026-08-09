@@ -1,4 +1,4 @@
-import { db } from './db.js';
+import { db } from "./db.js";
 
 export interface DBAPIKey {
     id: string;
@@ -12,13 +12,13 @@ export interface DBAPIKey {
 }
 
 export function getAllAPIKeysDB(): DBAPIKey[] {
-    const query = db.prepare('SELECT * FROM api_keys ORDER BY created_at DESC');
+    const query = db.prepare("SELECT * FROM api_keys ORDER BY created_at DESC");
     const rows = query.all();
 
     return rows.map((row) => ({
-        id: String(row.id ?? ''),
-        key: String(row.key ?? ''),
-        name: String(row.name ?? ''),
+        id: String(row.id ?? ""),
+        key: String(row.key ?? ""),
+        name: String(row.name ?? ""),
         enabled: Boolean(row.enabled),
         rateLimit: Number(row.rate_limit ?? 0),
         quotaLimit: Number(row.quota_limit ?? 0),
@@ -28,15 +28,17 @@ export function getAllAPIKeysDB(): DBAPIKey[] {
 }
 
 export function getAPIKeyByKeyDB(key: string): DBAPIKey | null {
-    const query = db.prepare('SELECT * FROM api_keys WHERE key = ? AND enabled = 1');
+    const query = db.prepare(
+        "SELECT * FROM api_keys WHERE key = ? AND enabled = 1",
+    );
     const row = query.get(key);
 
     if (!row) return null;
 
     return {
-        id: String(row.id ?? ''),
-        key: String(row.key ?? ''),
-        name: String(row.name ?? ''),
+        id: String(row.id ?? ""),
+        key: String(row.key ?? ""),
+        name: String(row.name ?? ""),
         enabled: Boolean(row.enabled),
         rateLimit: Number(row.rate_limit ?? 0),
         quotaLimit: Number(row.quota_limit ?? 0),
@@ -45,11 +47,15 @@ export function getAPIKeyByKeyDB(key: string): DBAPIKey | null {
     };
 }
 
-export function createAPIKeyDB(data: { name: string; rateLimit?: number; quotaLimit?: number }): DBAPIKey {
+export function createAPIKeyDB(data: {
+    name: string;
+    rateLimit?: number;
+    quotaLimit?: number;
+}): DBAPIKey {
     const id = `key_${Math.random().toString(36).substring(2, 11)}`;
     const randomHex = Array.from({ length: 16 }, () =>
-        Math.floor(Math.random() * 16).toString(16)
-    ).join('');
+        Math.floor(Math.random() * 16).toString(16),
+    ).join("");
     const key = `sr-live-${randomHex}`;
     const createdAt = Date.now();
 
@@ -58,7 +64,14 @@ export function createAPIKeyDB(data: { name: string; rateLimit?: number; quotaLi
         VALUES (?, ?, ?, 1, ?, ?, 0, ?)
     `);
 
-    query.run(id, key, data.name, data.rateLimit ?? 0, data.quotaLimit ?? 0, createdAt);
+    query.run(
+        id,
+        key,
+        data.name,
+        data.rateLimit ?? 0,
+        data.quotaLimit ?? 0,
+        createdAt,
+    );
 
     return {
         id,
@@ -73,12 +86,14 @@ export function createAPIKeyDB(data: { name: string; rateLimit?: number; quotaLi
 }
 
 export function incrementAPIKeyUsageDB(keyId: string, tokens: number): void {
-    const query = db.prepare('UPDATE api_keys SET usage_tokens = usage_tokens + ? WHERE id = ?');
+    const query = db.prepare(
+        "UPDATE api_keys SET usage_tokens = usage_tokens + ? WHERE id = ?",
+    );
     query.run(tokens, keyId);
 }
 
 export function deleteAPIKeyDB(id: string): boolean {
-    const query = db.prepare('DELETE FROM api_keys WHERE id = ?');
+    const query = db.prepare("DELETE FROM api_keys WHERE id = ?");
     const result = query.run(id);
     return (result.changes ?? 0) > 0;
 }

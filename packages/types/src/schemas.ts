@@ -1,12 +1,12 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const ContentPartSchema = z.object({
-    type: z.enum(['text', 'image_url']),
+    type: z.enum(["text", "image_url"]),
     text: z.string().optional(),
     image_url: z
         .object({
             url: z.string(),
-            detail: z.enum(['auto', 'low', 'high']).optional(),
+            detail: z.enum(["auto", "low", "high"]).optional(),
         })
         .optional(),
 });
@@ -18,16 +18,17 @@ export const ToolCallFunctionSchema = z.object({
 
 export const ToolCallSchema = z.object({
     id: z.string(),
-    type: z.literal('function'),
+    type: z.literal("function"),
     function: ToolCallFunctionSchema,
 });
 
 export const ChatMessageSchema = z.object({
-    role: z.enum(['system', 'user', 'assistant', 'tool', 'function'], {
-        required_error: "Role is required and must be 'system', 'user', 'assistant', 'tool', or 'function'",
+    role: z.enum(["system", "user", "assistant", "tool", "function"], {
+        required_error:
+            "Role is required and must be 'system', 'user', 'assistant', 'tool', or 'function'",
     }),
     content: z.union([z.string(), z.array(ContentPartSchema), z.null()], {
-        required_error: 'Content is required',
+        required_error: "Content is required",
     }),
     name: z.string().optional(),
     tool_calls: z.array(ToolCallSchema).optional(),
@@ -41,13 +42,13 @@ export const ToolParameterPropertySchema = z.object({
 });
 
 export const ToolParametersSchema = z.object({
-    type: z.literal('object'),
+    type: z.literal("object"),
     properties: z.record(ToolParameterPropertySchema).optional(),
     required: z.array(z.string()).optional(),
 });
 
 export const ToolDefinitionSchema = z.object({
-    type: z.literal('function'),
+    type: z.literal("function"),
     function: z.object({
         name: z.string(),
         description: z.string().optional(),
@@ -56,9 +57,9 @@ export const ToolDefinitionSchema = z.object({
 });
 
 export const ToolChoiceSchema = z.union([
-    z.enum(['none', 'auto', 'required']),
+    z.enum(["none", "auto", "required"]),
     z.object({
-        type: z.literal('function'),
+        type: z.literal("function"),
         function: z.object({ name: z.string() }),
     }),
 ]);
@@ -87,9 +88,11 @@ export const ChatCompletionRequestSchema = z.object({
 });
 
 export const CreateAPIKeySchema = z.object({
-    name: z.string({
-        required_error: "Field 'name' is required",
-    }).min(1, "Field 'name' cannot be empty"),
+    name: z
+        .string({
+            required_error: "Field 'name' is required",
+        })
+        .min(1, "Field 'name' cannot be empty"),
     rateLimit: z.number().int().nonnegative().optional(),
     quotaLimit: z.number().int().nonnegative().optional(),
 });
@@ -97,14 +100,16 @@ export const CreateAPIKeySchema = z.object({
 export const CreateProviderSchema = z.object({
     providerId: z.string({ required_error: "Field 'providerId' is required" }),
     name: z.string({ required_error: "Field 'name' is required" }),
-    category: z.enum(['custom', 'oauth', 'free_tier', 'api_key']),
-    protocol: z.enum(['openai', 'anthropic', 'gemini', 'custom']),
+    category: z.enum(["custom", "oauth", "free_tier", "api_key"]),
+    protocol: z.enum(["openai", "anthropic", "gemini", "custom"]),
     baseUrl: z.string().url().optional(),
     apiKey: z.string().optional(),
     accessToken: z.string().optional(),
     customHeaders: z.record(z.string()).optional(),
 });
 
-export type ChatCompletionRequestZod = z.infer<typeof ChatCompletionRequestSchema>;
+export type ChatCompletionRequestZod = z.infer<
+    typeof ChatCompletionRequestSchema
+>;
 export type CreateAPIKeyZod = z.infer<typeof CreateAPIKeySchema>;
 export type CreateProviderZod = z.infer<typeof CreateProviderSchema>;

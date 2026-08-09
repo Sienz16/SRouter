@@ -1,4 +1,4 @@
-import { db } from './db.js';
+import { db } from "./db.js";
 
 export interface RequestLogEntry {
     id: string;
@@ -13,7 +13,9 @@ export interface RequestLogEntry {
     createdAt: number;
 }
 
-export function logRequestDB(entry: Omit<RequestLogEntry, 'id' | 'createdAt'>): RequestLogEntry {
+export function logRequestDB(
+    entry: Omit<RequestLogEntry, "id" | "createdAt">,
+): RequestLogEntry {
     const id = `log_${Math.random().toString(36).substring(2, 11)}`;
     const createdAt = Date.now();
 
@@ -32,7 +34,7 @@ export function logRequestDB(entry: Omit<RequestLogEntry, 'id' | 'createdAt'>): 
         entry.totalTokens,
         entry.statusCode,
         entry.latencyMs,
-        createdAt
+        createdAt,
     );
 
     return {
@@ -43,14 +45,16 @@ export function logRequestDB(entry: Omit<RequestLogEntry, 'id' | 'createdAt'>): 
 }
 
 export function getRecentLogsDB(limit = 50): RequestLogEntry[] {
-    const query = db.prepare('SELECT * FROM request_logs ORDER BY created_at DESC LIMIT ?');
+    const query = db.prepare(
+        "SELECT * FROM request_logs ORDER BY created_at DESC LIMIT ?",
+    );
     const rows = query.all(limit);
 
     return rows.map((row) => ({
-        id: String(row.id ?? ''),
+        id: String(row.id ?? ""),
         apiKeyId: row.api_key_id ? String(row.api_key_id) : undefined,
-        providerId: String(row.provider_id ?? ''),
-        model: String(row.model ?? ''),
+        providerId: String(row.provider_id ?? ""),
+        model: String(row.model ?? ""),
         promptTokens: Number(row.prompt_tokens ?? 0),
         completionTokens: Number(row.completion_tokens ?? 0),
         totalTokens: Number(row.total_tokens ?? 0),

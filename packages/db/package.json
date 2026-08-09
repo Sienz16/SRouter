@@ -1,23 +1,23 @@
 {
-  "name": "@srouter/db",
-  "version": "1.0.0",
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+    "name": "@srouter/db",
+    "version": "1.0.0",
+    "type": "module",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+        }
+    },
+    "scripts": {
+        "build": "tsc"
+    },
+    "dependencies": {
+        "@srouter/types": "workspace:*"
+    },
+    "devDependencies": {
+        "@types/node": "^26.1.1",
+        "typescript": "^5.0.0"
     }
-  },
-  "scripts": {
-    "build": "tsc"
-  },
-  "dependencies": {
-    "@srouter/types": "workspace:*"
-  },
-  "devDependencies": {
-    "@types/node": "^26.1.1",
-    "typescript": "^5.0.0"
-  }
 }

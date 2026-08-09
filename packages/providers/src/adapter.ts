@@ -6,25 +6,30 @@ import type {
     ChatCompletionChunk,
     ChatCompletionRequest,
     ChatCompletionResponse,
-} from '@srouter/types';
+} from "@srouter/types";
 
 /**
  * Converts OpenAI ChatCompletionRequest into Anthropic MessageRequest format
  */
-export function openAIToAnthropicRequest(req: ChatCompletionRequest): AnthropicMessageRequest {
+export function openAIToAnthropicRequest(
+    req: ChatCompletionRequest,
+): AnthropicMessageRequest {
     let systemPrompt: string | undefined = undefined;
     const anthropicMessages: AnthropicMessage[] = [];
 
     for (const msg of req.messages) {
-        if (msg.role === 'system') {
+        if (msg.role === "system") {
             systemPrompt =
-                typeof msg.content === 'string'
+                typeof msg.content === "string"
                     ? msg.content
                     : JSON.stringify(msg.content);
-        } else if (msg.role === 'user' || msg.role === 'assistant') {
+        } else if (msg.role === "user" || msg.role === "assistant") {
             anthropicMessages.push({
                 role: msg.role,
-                content: (typeof msg.content === 'string' ? msg.content : (msg.content as AnthropicContentBlock[])) ?? '',
+                content:
+                    (typeof msg.content === "string"
+                        ? msg.content
+                        : (msg.content as AnthropicContentBlock[])) ?? "",
             });
         }
     }
@@ -45,26 +50,27 @@ export function openAIToAnthropicRequest(req: ChatCompletionRequest): AnthropicM
  */
 export function anthropicToOpenAIResponse(
     res: AnthropicMessageResponse,
-    requestedModel: string
+    requestedModel: string,
 ): ChatCompletionResponse {
     const textContent = res.content
-        .filter((c) => c.type === 'text')
-        .map((c) => c.text ?? '')
-        .join('');
+        .filter((c) => c.type === "text")
+        .map((c) => c.text ?? "")
+        .join("");
 
     return {
         id: res.id,
-        object: 'chat.completion',
+        object: "chat.completion",
         created: Math.floor(Date.now() / 1000),
         model: requestedModel,
         choices: [
             {
                 index: 0,
                 message: {
-                    role: 'assistant',
+                    role: "assistant",
                     content: textContent,
                 },
-                finish_reason: res.stop_reason === 'max_tokens' ? 'length' : 'stop',
+                finish_reason:
+                    res.stop_reason === "max_tokens" ? "length" : "stop",
             },
         ],
         usage: {
@@ -87,16 +93,17 @@ interface AnthropicStreamEventData {
 export function anthropicEventToOpenAIChunk(
     event: string,
     dataJson: AnthropicStreamEventData,
-    requestedModel: string
+    requestedModel: string,
 ): ChatCompletionChunk | null {
-    const completionId = dataJson?.message?.id || `chatcmpl-${dataJson?.index ?? 0}`;
+    const completionId =
+        dataJson?.message?.id || `chatcmpl-${dataJson?.index ?? 0}`;
     const created = Math.floor(Date.now() / 1000);
 
-    if (event === 'content_block_delta') {
-        const deltaText = dataJson?.delta?.text ?? '';
+    if (event === "content_block_delta") {
+        const deltaText = dataJson?.delta?.text ?? "";
         return {
             id: completionId,
-            object: 'chat.completion.chunk',
+            object: "chat.completion.chunk",
             created,
             model: requestedModel,
             choices: [
@@ -109,17 +116,17 @@ export function anthropicEventToOpenAIChunk(
         };
     }
 
-    if (event === 'message_stop') {
+    if (event === "message_stop") {
         return {
             id: completionId,
-            object: 'chat.completion.chunk',
+            object: "chat.completion.chunk",
             created,
             model: requestedModel,
             choices: [
                 {
                     index: 0,
                     delta: {},
-                    finish_reason: 'stop',
+                    finish_reason: "stop",
                 },
             ],
         };

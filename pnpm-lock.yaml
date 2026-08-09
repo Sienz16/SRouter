@@ -211,6 +211,9 @@ importers:
         specifier: ^2.10.9
         version: 2.10.9
     devDependencies:
+      prettier:
+        specifier: ^3.5.0
+        version: 3.9.6
       typescript:
         specifier: ^5.0.0
         version: 5.9.3
@@ -502,6 +505,11 @@ packages:
     resolution: {integrity: sha512-kdJoFVv2xmayw6cY09H7AbMJMt8Jn5jdlEdXsP7AGBdF2DIptVlKlOLKXP41yPip4/a3yQPv9gVcJYI8YY04dw==}
     engines: {node: '>=16.9.0'}
 
+  prettier@3.9.6:
+    resolution: {integrity: sha512-OpN0zzVdiaiAhxpuuj5efpIS4sY9j7bY6uR5mnj5yPzGkdkjNKSJeUThPb60Jw29QuAZgA4o+/iB49kFiaBX6g==}
+    engines: {node: '>=14'}
+    hasBin: true
+
   tsx@4.23.11:
     resolution: {integrity: sha512-Ry2oTEUnhBdeEdWIztY8kf3/nBGnPnjMLVGL0YfdRXMORuPER5NlKmayqxtxRxwB1xBN+RivRaJfe7PM1rtiyw==}
     engines: {node: '>=18.0.0'}
@@ -666,6 +674,8 @@ snapshots:
     optional: true
 
   hono@4.13.1: {}
+
+  prettier@3.9.6: {}
 
   tsx@4.23.11:
     dependencies:

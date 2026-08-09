@@ -1,17 +1,18 @@
-export type ChatMessageRole = 'system' | 'user' | 'assistant' | 'tool' | 'function';
+export type ChatMessageRole =
+    "system" | "user" | "assistant" | "tool" | "function";
 
 export interface ChatMessageContentPart {
-    type: 'text' | 'image_url';
+    type: "text" | "image_url";
     text?: string;
     image_url?: {
         url: string;
-        detail?: 'auto' | 'low' | 'high';
+        detail?: "auto" | "low" | "high";
     };
 }
 
 export interface ToolCall {
     id: string;
-    type: 'function';
+    type: "function";
     function: {
         name: string;
         arguments: string;
@@ -25,13 +26,13 @@ export interface ToolFunctionParameterProperty {
 }
 
 export interface ToolFunctionParameters {
-    type: 'object';
+    type: "object";
     properties?: Record<string, ToolFunctionParameterProperty>;
     required?: string[];
 }
 
 export interface ToolDefinition {
-    type: 'function';
+    type: "function";
     function: {
         name: string;
         description?: string;
@@ -40,10 +41,10 @@ export interface ToolDefinition {
 }
 
 export type ToolChoiceOption =
-    | 'none'
-    | 'auto'
-    | 'required'
-    | { type: 'function'; function: { name: string } };
+    | "none"
+    | "auto"
+    | "required"
+    | { type: "function"; function: { name: string } };
 
 export interface ChatMessage {
     role: ChatMessageRole;
@@ -79,12 +80,12 @@ export interface UsageInfo {
 export interface ChatCompletionChoice {
     index: number;
     message: ChatMessage;
-    finish_reason: 'stop' | 'length' | 'tool_calls' | 'content_filter' | null;
+    finish_reason: "stop" | "length" | "tool_calls" | "content_filter" | null;
 }
 
 export interface ChatCompletionResponse {
     id: string;
-    object: 'chat.completion';
+    object: "chat.completion";
     created: number;
     model: string;
     choices: ChatCompletionChoice[];
@@ -101,12 +102,12 @@ export interface ChatCompletionChunkDelta {
 export interface ChatCompletionChunkChoice {
     index: number;
     delta: ChatCompletionChunkDelta;
-    finish_reason: 'stop' | 'length' | 'tool_calls' | 'content_filter' | null;
+    finish_reason: "stop" | "length" | "tool_calls" | "content_filter" | null;
 }
 
 export interface ChatCompletionChunk {
     id: string;
-    object: 'chat.completion.chunk';
+    object: "chat.completion.chunk";
     created: number;
     model: string;
     choices: ChatCompletionChunkChoice[];
@@ -115,23 +116,24 @@ export interface ChatCompletionChunk {
 
 export interface ModelObject {
     id: string;
-    object: 'model';
+    object: "model";
     created: number;
     owned_by: string;
 }
 
 export interface ModelListResponse {
-    object: 'list';
+    object: "list";
     data: ModelObject[];
 }
 
 // --- Provider Spectrum & Catalog Types ---
 
-export type ProviderCategory = 'custom' | 'oauth' | 'free_tier' | 'api_key';
+export type ProviderCategory = "custom" | "oauth" | "free_tier" | "api_key";
 
-export type ProviderProtocol = 'openai' | 'anthropic' | 'gemini' | 'custom';
+export type ProviderProtocol = "openai" | "anthropic" | "gemini" | "custom";
 
-export type ProviderStatusState = 'connected' | 'disconnected' | 'ready' | 'no_connections' | 'error';
+export type ProviderStatusState =
+    "connected" | "disconnected" | "ready" | "no_connections" | "error";
 
 export interface ProviderStatus {
     state: ProviderStatusState;
@@ -161,6 +163,7 @@ export interface ProviderConfig {
     baseUrl?: string;
     apiKey?: string;
     accessToken?: string;
+    refreshToken?: string;
     customHeaders?: Record<string, string>;
     enabled: boolean;
     createdAt: number;
@@ -169,10 +172,10 @@ export interface ProviderConfig {
 // --- Anthropic Messages API Protocol Types ---
 
 export interface AnthropicContentBlock {
-    type: 'text' | 'image' | 'tool_use' | 'tool_result';
+    type: "text" | "image" | "tool_use" | "tool_result";
     text?: string;
     source?: {
-        type: 'base64';
+        type: "base64";
         media_type: string;
         data: string;
     };
@@ -184,7 +187,7 @@ export interface AnthropicContentBlock {
 }
 
 export interface AnthropicMessage {
-    role: 'user' | 'assistant';
+    role: "user" | "assistant";
     content: string | AnthropicContentBlock[];
 }
 
@@ -204,11 +207,12 @@ export interface AnthropicMessageRequest {
 
 export interface AnthropicMessageResponse {
     id: string;
-    type: 'message';
-    role: 'assistant';
+    type: "message";
+    role: "assistant";
     content: AnthropicContentBlock[];
     model: string;
-    stop_reason: 'end_turn' | 'max_tokens' | 'stop_sequence' | 'tool_use' | null;
+    stop_reason:
+        "end_turn" | "max_tokens" | "stop_sequence" | "tool_use" | null;
     stop_sequence?: string | null;
     usage: {
         input_tokens: number;
@@ -224,6 +228,6 @@ export interface AIProvider {
     listModels(): Promise<ModelObject[]>;
     chatCompletion(req: ChatCompletionRequest): Promise<ChatCompletionResponse>;
     chatCompletionStream(
-        req: ChatCompletionRequest
+        req: ChatCompletionRequest,
     ): AsyncGenerator<ChatCompletionChunk, void, void>;
 }

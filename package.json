@@ -5,8 +5,9 @@
     "scripts": {
         "dev": "pnpm --dir apps/api dev",
         "build": "turbo build",
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
         "lint": "turbo lint",
-        "format": "turbo format",
         "test": "turbo test"
     },
     "keywords": [],
@@ -24,6 +25,7 @@
         "turbo": "^2.10.9"
     },
     "devDependencies": {
+        "prettier": "^3.5.0",
         "typescript": "^5.0.0"
     }
 }

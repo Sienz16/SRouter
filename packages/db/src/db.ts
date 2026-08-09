@@ -1,8 +1,9 @@
-import { DatabaseSync } from 'node:sqlite';
-import path from 'node:path';
-import fs from 'node:fs';
+import { DatabaseSync } from "node:sqlite";
+import path from "node:path";
+import fs from "node:fs";
 
-const dbPath = process.env.DATABASE_PATH || path.resolve(process.cwd(), 'srouter.db');
+const dbPath =
+    process.env.DATABASE_PATH || path.resolve(process.cwd(), "srouter.db");
 
 // Ensure parent folder exists if path contains subdirectories
 const dbDir = path.dirname(dbPath);
@@ -13,8 +14,8 @@ if (!fs.existsSync(dbDir)) {
 export const db = new DatabaseSync(dbPath);
 
 // Enable WAL mode for high performance concurrency
-db.exec('PRAGMA journal_mode = WAL;');
-db.exec('PRAGMA foreign_keys = ON;');
+db.exec("PRAGMA journal_mode = WAL;");
+db.exec("PRAGMA foreign_keys = ON;");
 
 /**
  * Initialize database schema tables if they do not exist
@@ -31,11 +32,19 @@ export function initDatabase(): void {
             base_url TEXT,
             api_key TEXT,
             access_token TEXT,
+            refresh_token TEXT,
             custom_headers TEXT,
             enabled INTEGER NOT NULL DEFAULT 1,
             created_at INTEGER NOT NULL
         );
     `);
+
+    // Ensure refresh_token column exists if table was created previously
+    try {
+        db.exec("ALTER TABLE providers ADD COLUMN refresh_token TEXT;");
+    } catch {
+        // column already exists
+    }
 
     // 2. Table for Client API Keys / Endpoint Keys
     db.exec(`

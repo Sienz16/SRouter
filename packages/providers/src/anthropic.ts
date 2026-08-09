@@ -5,12 +5,12 @@ import type {
     ChatCompletionRequest,
     ChatCompletionResponse,
     ModelObject,
-} from '@srouter/types';
+} from "@srouter/types";
 import {
     anthropicEventToOpenAIChunk,
     anthropicToOpenAIResponse,
     openAIToAnthropicRequest,
-} from './adapter.js';
+} from "./adapter.js";
 
 export interface AnthropicProviderOptions {
     id?: string;
@@ -22,23 +22,25 @@ export interface AnthropicProviderOptions {
 export class AnthropicProvider implements AIProvider {
     id: string;
     name: string;
-    category: 'api_key' = 'api_key';
-    protocol: 'anthropic' = 'anthropic';
+    category: "api_key" = "api_key";
+    protocol: "anthropic" = "anthropic";
     private baseUrl: string;
     private apiKey: string;
 
     constructor(options: AnthropicProviderOptions = {}) {
-        this.id = options.id ?? 'anthropic';
-        this.name = options.name ?? 'Anthropic Provider';
-        this.baseUrl = (options.baseUrl ?? 'https://api.anthropic.com/v1').replace(/\/$/, '');
-        this.apiKey = options.apiKey ?? process.env.ANTHROPIC_API_KEY ?? '';
+        this.id = options.id ?? "anthropic";
+        this.name = options.name ?? "Anthropic Provider";
+        this.baseUrl = (
+            options.baseUrl ?? "https://api.anthropic.com/v1"
+        ).replace(/\/$/, "");
+        this.apiKey = options.apiKey ?? process.env.ANTHROPIC_API_KEY ?? "";
     }
 
     private getHeaders(): Record<string, string> {
         return {
-            'Content-Type': 'application/json',
-            'x-api-key': this.apiKey,
-            'anthropic-version': '2023-06-01',
+            "Content-Type": "application/json",
+            "x-api-key": this.apiKey,
+            "anthropic-version": "2023-06-01",
         };
     }
 
@@ -50,29 +52,29 @@ export class AnthropicProvider implements AIProvider {
             // Fallback list if no API key configured
             return [
                 {
-                    id: 'claude-3-7-sonnet-20250219',
-                    object: 'model',
+                    id: "claude-3-7-sonnet-20250219",
+                    object: "model",
                     created: Math.floor(Date.now() / 1000),
-                    owned_by: 'anthropic',
+                    owned_by: "anthropic",
                 },
                 {
-                    id: 'claude-3-5-sonnet-20241022',
-                    object: 'model',
+                    id: "claude-3-5-sonnet-20241022",
+                    object: "model",
                     created: Math.floor(Date.now() / 1000),
-                    owned_by: 'anthropic',
+                    owned_by: "anthropic",
                 },
                 {
-                    id: 'claude-3-5-haiku-20241022',
-                    object: 'model',
+                    id: "claude-3-5-haiku-20241022",
+                    object: "model",
                     created: Math.floor(Date.now() / 1000),
-                    owned_by: 'anthropic',
+                    owned_by: "anthropic",
                 },
             ];
         }
 
         try {
             const res = await fetch(`${this.baseUrl}/models`, {
-                method: 'GET',
+                method: "GET",
                 headers: this.getHeaders(),
             });
 
@@ -81,17 +83,21 @@ export class AnthropicProvider implements AIProvider {
             }
 
             const json = (await res.json()) as {
-                data?: Array<{ id: string; created_at?: string; display_name?: string }>;
+                data?: Array<{
+                    id: string;
+                    created_at?: string;
+                    display_name?: string;
+                }>;
             };
 
             if (json.data && Array.isArray(json.data)) {
                 return json.data.map((m) => ({
                     id: m.id,
-                    object: 'model',
+                    object: "model",
                     created: m.created_at
                         ? Math.floor(new Date(m.created_at).getTime() / 1000)
                         : Math.floor(Date.now() / 1000),
-                    owned_by: 'anthropic',
+                    owned_by: "anthropic",
                 }));
             }
         } catch {
@@ -100,39 +106,43 @@ export class AnthropicProvider implements AIProvider {
 
         return [
             {
-                id: 'claude-3-7-sonnet-20250219',
-                object: 'model',
+                id: "claude-3-7-sonnet-20250219",
+                object: "model",
                 created: Math.floor(Date.now() / 1000),
-                owned_by: 'anthropic',
+                owned_by: "anthropic",
             },
             {
-                id: 'claude-3-5-sonnet-20241022',
-                object: 'model',
+                id: "claude-3-5-sonnet-20241022",
+                object: "model",
                 created: Math.floor(Date.now() / 1000),
-                owned_by: 'anthropic',
+                owned_by: "anthropic",
             },
             {
-                id: 'claude-3-5-haiku-20241022',
-                object: 'model',
+                id: "claude-3-5-haiku-20241022",
+                object: "model",
                 created: Math.floor(Date.now() / 1000),
-                owned_by: 'anthropic',
+                owned_by: "anthropic",
             },
         ];
     }
 
-    async chatCompletion(req: ChatCompletionRequest): Promise<ChatCompletionResponse> {
+    async chatCompletion(
+        req: ChatCompletionRequest,
+    ): Promise<ChatCompletionResponse> {
         const anthropicReq = openAIToAnthropicRequest(req);
         anthropicReq.stream = false;
 
         const res = await fetch(`${this.baseUrl}/messages`, {
-            method: 'POST',
+            method: "POST",
             headers: this.getHeaders(),
             body: JSON.stringify(anthropicReq),
         });
 
         if (!res.ok) {
             const errorText = await res.text();
-            throw new Error(`Anthropic API Error (${res.status}): ${errorText}`);
+            throw new Error(
+                `Anthropic API Error (${res.status}): ${errorText}`,
+            );
         }
 
         const data = (await res.json()) as AnthropicMessageResponse;
@@ -140,57 +150,59 @@ export class AnthropicProvider implements AIProvider {
     }
 
     async *chatCompletionStream(
-        req: ChatCompletionRequest
+        req: ChatCompletionRequest,
     ): AsyncGenerator<ChatCompletionChunk, void, void> {
         const anthropicReq = openAIToAnthropicRequest(req);
         anthropicReq.stream = true;
 
         const res = await fetch(`${this.baseUrl}/messages`, {
-            method: 'POST',
+            method: "POST",
             headers: this.getHeaders(),
             body: JSON.stringify(anthropicReq),
         });
 
         if (!res.ok) {
             const errorText = await res.text();
-            throw new Error(`Anthropic API Stream Error (${res.status}): ${errorText}`);
+            throw new Error(
+                `Anthropic API Stream Error (${res.status}): ${errorText}`,
+            );
         }
 
         if (!res.body) {
-            throw new Error('No response body received from Anthropic');
+            throw new Error("No response body received from Anthropic");
         }
 
         const reader = res.body.getReader();
-        const decoder = new TextDecoder('utf-8');
-        let buffer = '';
+        const decoder = new TextDecoder("utf-8");
+        let buffer = "";
 
         while (true) {
             const { done, value } = await reader.read();
             if (done) break;
 
             buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split('\n');
-            buffer = lines.pop() ?? '';
+            const lines = buffer.split("\n");
+            buffer = lines.pop() ?? "";
 
-            let currentEventType = '';
+            let currentEventType = "";
 
             for (const line of lines) {
                 const trimmed = line.trim();
                 if (!trimmed) continue;
 
-                if (trimmed.startsWith('event: ')) {
+                if (trimmed.startsWith("event: ")) {
                     currentEventType = trimmed.slice(7);
                     continue;
                 }
 
-                if (trimmed.startsWith('data: ')) {
+                if (trimmed.startsWith("data: ")) {
                     const jsonStr = trimmed.slice(6);
                     try {
                         const parsedJson = JSON.parse(jsonStr);
                         const chunk = anthropicEventToOpenAIChunk(
                             currentEventType,
                             parsedJson,
-                            req.model
+                            req.model,
                         );
                         if (chunk) {
                             yield chunk;

@@ -1,46 +1,68 @@
-import type { ProviderConfig } from '@srouter/types';
-import { db } from './db.js';
+import type { ProviderConfig } from "@srouter/types";
+import { db } from "./db.js";
 
 export function getAllProvidersDB(): ProviderConfig[] {
-    const query = db.prepare('SELECT * FROM providers ORDER BY created_at DESC');
+    const query = db.prepare(
+        "SELECT * FROM providers ORDER BY created_at DESC",
+    );
     const rows = query.all();
 
     return rows.map((row) => ({
-        id: String(row.id ?? ''),
-        providerId: String(row.provider_id ?? ''),
-        name: String(row.name ?? ''),
+        id: String(row.id ?? ""),
+        providerId: String(row.provider_id ?? ""),
+        name: String(row.name ?? ""),
         baseUrl: row.base_url ? String(row.base_url) : undefined,
         apiKey: row.api_key ? String(row.api_key) : undefined,
         accessToken: row.access_token ? String(row.access_token) : undefined,
-        customHeaders: row.custom_headers ? JSON.parse(String(row.custom_headers)) : undefined,
+        refreshToken: row.refresh_token ? String(row.refresh_token) : undefined,
+        customHeaders: row.custom_headers
+            ? JSON.parse(String(row.custom_headers))
+            : undefined,
         enabled: Boolean(row.enabled),
         createdAt: Number(row.created_at ?? 0),
     }));
 }
 
 export function getProviderByIdDB(id: string): ProviderConfig | null {
-    const query = db.prepare('SELECT * FROM providers WHERE id = ?');
+    const query = db.prepare("SELECT * FROM providers WHERE id = ?");
     const row = query.get(id);
 
     if (!row) return null;
 
     return {
-        id: String(row.id ?? ''),
-        providerId: String(row.provider_id ?? ''),
-        name: String(row.name ?? ''),
+        id: String(row.id ?? ""),
+        providerId: String(row.provider_id ?? ""),
+        name: String(row.name ?? ""),
         baseUrl: row.base_url ? String(row.base_url) : undefined,
         apiKey: row.api_key ? String(row.api_key) : undefined,
         accessToken: row.access_token ? String(row.access_token) : undefined,
-        customHeaders: row.custom_headers ? JSON.parse(String(row.custom_headers)) : undefined,
+        refreshToken: row.refresh_token ? String(row.refresh_token) : undefined,
+        customHeaders: row.custom_headers
+            ? JSON.parse(String(row.custom_headers))
+            : undefined,
         enabled: Boolean(row.enabled),
         createdAt: Number(row.created_at ?? 0),
     };
 }
 
-export function createProviderDB(config: ProviderConfig & { category: string; protocol: string }): ProviderConfig {
+export function upsertProviderDB(
+    config: ProviderConfig & { category: string; protocol: string },
+): ProviderConfig {
     const query = db.prepare(`
-        INSERT INTO providers (id, provider_id, name, category, protocol, base_url, api_key, access_token, custom_headers, enabled, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO providers (id, provider_id, name, category, protocol, base_url, api_key, access_token, refresh_token, custom_headers, enabled, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET
+            provider_id = excluded.provider_id,
+            name = excluded.name,
+            category = excluded.category,
+            protocol = excluded.protocol,
+            base_url = excluded.base_url,
+            api_key = excluded.api_key,
+            access_token = excluded.access_token,
+            refresh_token = excluded.refresh_token,
+            custom_headers = excluded.custom_headers,
+            enabled = excluded.enabled,
+            created_at = excluded.created_at;
     `);
 
     query.run(
@@ -52,16 +74,23 @@ export function createProviderDB(config: ProviderConfig & { category: string; pr
         config.baseUrl ?? null,
         config.apiKey ?? null,
         config.accessToken ?? null,
+        config.refreshToken ?? null,
         config.customHeaders ? JSON.stringify(config.customHeaders) : null,
         config.enabled ? 1 : 0,
-        config.createdAt
+        config.createdAt,
     );
 
     return config;
 }
 
+export function createProviderDB(
+    config: ProviderConfig & { category: string; protocol: string },
+): ProviderConfig {
+    return upsertProviderDB(config);
+}
+
 export function deleteProviderDB(id: string): boolean {
-    const query = db.prepare('DELETE FROM providers WHERE id = ?');
+    const query = db.prepare("DELETE FROM providers WHERE id = ?");
     const result = query.run(id);
     return (result.changes ?? 0) > 0;
 }

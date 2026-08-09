@@ -5,9 +5,9 @@ import type {
     ChatCompletionResponse,
     ModelObject,
     ProviderDefinition,
-} from '@srouter/types';
-import { PROVIDER_CATALOG } from './catalog.js';
-import { MockProvider } from './mock.js';
+} from "@srouter/types";
+import { PROVIDER_CATALOG } from "./catalog.js";
+import { MockProvider } from "./mock.js";
 
 export class ProviderRegistry {
     private providers: Map<string, AIProvider> = new Map();
@@ -24,7 +24,7 @@ export class ProviderRegistry {
         // Update catalog status if matched
         const catItem = this.catalog.find((c) => c.id === provider.id);
         if (catItem) {
-            catItem.status = { state: 'connected', connectedCount: 1 };
+            catItem.status = { state: "connected", connectedCount: 1 };
         }
     }
 
@@ -83,13 +83,15 @@ export class ProviderRegistry {
         return allModels;
     }
 
-    async chatCompletion(req: ChatCompletionRequest): Promise<ChatCompletionResponse> {
+    async chatCompletion(
+        req: ChatCompletionRequest,
+    ): Promise<ChatCompletionResponse> {
         const provider = await this.getProviderForModel(req.model);
         return provider.chatCompletion(req);
     }
 
     async *chatCompletionStream(
-        req: ChatCompletionRequest
+        req: ChatCompletionRequest,
     ): AsyncGenerator<ChatCompletionChunk, void, void> {
         const provider = await this.getProviderForModel(req.model);
         yield* provider.chatCompletionStream(req);
