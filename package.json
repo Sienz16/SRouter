@@ -1,0 +1,29 @@
+{
+    "name": "SRouter",
+    "version": "1.0.0",
+    "description": "",
+    "scripts": {
+        "dev": "pnpm --dir apps/api dev",
+        "build": "turbo build",
+        "lint": "turbo lint",
+        "format": "turbo format",
+        "test": "turbo test"
+    },
+    "keywords": [],
+    "author": "Muhammad Adriansyah ",
+    "license": "MIT",
+    "devEngines": {
+        "packageManager": {
+            "name": "pnpm",
+            "version": "^11.17.0",
+            "onFail": "download"
+        }
+    },
+    "type": "module",
+    "dependencies": {
+        "turbo": "^2.10.9"
+    },
+    "devDependencies": {
+        "typescript": "^5.0.0"
+    }
+}
