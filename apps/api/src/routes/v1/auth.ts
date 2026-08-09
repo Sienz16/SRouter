@@ -68,8 +68,32 @@ authRoute.get("/auth/openai/login", (c) => {
 // Callback handler reusable by both port 3000 (/v1/auth/openai/callback) and port 1455 (/auth/callback)
 export async function handleOAuthCallback(c: Context) {
     cleanupExpiredSessions();
-    const code = c.req.query("code");
-    const state = c.req.query("state");
+
+    let code = c.req.query("code") || undefined;
+    let state = c.req.query("state") || undefined;
+
+    if ((!code || !state) && c.req.method === "POST") {
+        try {
+            const body = await c.req.json<{
+                code?: string;
+                state?: string;
+                callbackUrl?: string;
+            }>();
+            if (body.callbackUrl) {
+                try {
+                    const parsedUrl = new URL(body.callbackUrl);
+                    code = code || parsedUrl.searchParams.get("code") || undefined;
+                    state = state || parsedUrl.searchParams.get("state") || undefined;
+                } catch {
+                    // Ignore invalid URL string
+                }
+            }
+            code = code || body.code;
+            state = state || body.state;
+        } catch {
+            // Ignore JSON parse error
+        }
+    }
 
     if (!code || !state) {
         return c.json(
@@ -124,6 +148,17 @@ export async function handleOAuthCallback(c: Context) {
         });
         registry.registerProvider(providerInstance);
 
+        if (
+            c.req.method === "POST" ||
+            c.req.header("accept")?.includes("application/json")
+        ) {
+            return c.json({
+                success: true,
+                message: "Login OpenAI Codex Berhasil!",
+                provider: providerConfig,
+            });
+        }
+
         return c.html(`
             <!DOCTYPE html>
             <html lang="en">
@@ -155,8 +190,9 @@ export async function handleOAuthCallback(c: Context) {
     }
 }
 
-// 2. GET /v1/auth/openai/callback - OAuth Callback Receiver (Direct DB Save)
+// 2. GET & POST /v1/auth/openai/callback - OAuth Callback Receiver (Direct DB Save)
 authRoute.get("/auth/openai/callback", (c) => handleOAuthCallback(c));
+authRoute.post("/auth/openai/callback", (c) => handleOAuthCallback(c));
 
 // Helper for Token Importing
 const handleTokenImport = async (c: Context) => {
