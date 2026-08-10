@@ -51,10 +51,15 @@ export class OpenAIProvider implements AIProvider {
     }
 
     async chatCompletion(req: ChatCompletionRequest): Promise<ChatCompletionResponse> {
+        let targetModel = req.model.includes("/") ? (req.model.split("/")[1] ?? req.model) : req.model;
+        if (targetModel === "gpt-4o-code") {
+            targetModel = "gpt-4o";
+        }
+
         const res = await fetch(`${this.baseUrl}/chat/completions`, {
             method: "POST",
             headers: this.getHeaders(),
-            body: JSON.stringify({ ...req, stream: false }),
+            body: JSON.stringify({ ...req, model: targetModel, stream: false }),
         });
 
         if (!res.ok) {
@@ -66,10 +71,15 @@ export class OpenAIProvider implements AIProvider {
     }
 
     async *chatCompletionStream(req: ChatCompletionRequest): AsyncGenerator<ChatCompletionChunk, void, void> {
+        let targetModel = req.model.includes("/") ? (req.model.split("/")[1] ?? req.model) : req.model;
+        if (targetModel === "gpt-4o-code") {
+            targetModel = "gpt-4o";
+        }
+
         const res = await fetch(`${this.baseUrl}/chat/completions`, {
             method: "POST",
             headers: this.getHeaders(),
-            body: JSON.stringify({ ...req, stream: true }),
+            body: JSON.stringify({ ...req, model: targetModel, stream: true }),
         });
 
         if (!res.ok) {

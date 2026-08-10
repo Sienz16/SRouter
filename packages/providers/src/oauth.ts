@@ -36,6 +36,7 @@ export interface OpenAIOAuthOptions {
     scope?: string;
     authorizeUrl?: string;
     tokenUrl?: string;
+    prompt?: string;
 }
 
 export class OpenAICodexOAuth {
@@ -44,31 +45,41 @@ export class OpenAICodexOAuth {
     private scope: string;
     private authorizeUrl: string;
     private tokenUrl: string;
+    private prompt?: string;
 
     constructor(options: OpenAIOAuthOptions = {}) {
         // Official OpenAI OAuth Public Client ID (from Context7 openai-oauth docs)
         this.clientId = options.clientId ?? process.env.OPENAI_OAUTH_CLIENT_ID ?? "app_EMoamEEZ73f0CkXaXp7hrann";
         this.redirectUri = options.redirectUri ?? process.env.OPENAI_OAUTH_REDIRECT_URI ?? "http://localhost:1455/auth/callback";
         this.scope = options.scope ?? "openid profile email offline_access";
-        this.authorizeUrl = options.authorizeUrl ?? "https://auth.openai.com/authorize";
+        this.authorizeUrl = options.authorizeUrl ?? "https://auth.openai.com/oauth/authorize";
         this.tokenUrl = options.tokenUrl ?? "https://auth.openai.com/oauth/token";
+        this.prompt = options.prompt ?? process.env.OPENAI_OAUTH_PROMPT ?? "login";
     }
 
     /**
      * Generates PKCE parameters and returns authorization URL (Context7 OpenAI OAuth Compliant)
      */
     getAuthorizationUrl(pkce: PKCEPair): string {
-        const params = new URLSearchParams({
+        const params: Record<string, string> = {
             response_type: "code",
             client_id: this.clientId,
             redirect_uri: this.redirectUri,
             scope: this.scope,
-            state: pkce.state,
             code_challenge: pkce.codeChallenge,
             code_challenge_method: "S256",
-        });
+            state: pkce.state,
+        };
 
-        return `${this.authorizeUrl}?${params.toString()}`;
+        if (this.prompt) {
+            params.prompt = this.prompt;
+        }
+
+        const queryString = Object.entries(params)
+            .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+            .join("&");
+
+        return `${this.authorizeUrl}?${queryString}`;
     }
 
     /**

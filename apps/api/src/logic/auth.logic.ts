@@ -13,6 +13,7 @@ export interface PKCESession {
 export interface OAuthLoginParams {
     clientId?: string;
     redirectUri?: string;
+    prompt?: string;
 }
 
 export interface OAuthLoginResult {
@@ -45,10 +46,12 @@ export class AuthLogic {
         cleanupExpiredSessions();
         const clientId = params.clientId || "app_EMoamEEZ73f0CkXaXp7hrann";
         const redirectUri = params.redirectUri || "http://localhost:1455/auth/callback";
+        const prompt = params.prompt;
 
         const oauthInstance = new OpenAICodexOAuth({
             clientId,
             redirectUri,
+            prompt,
         });
 
         const pkce: PKCEPair = generatePKCE();
