@@ -32,6 +32,8 @@ export interface ProviderConfig {
     id: string;
     providerId: string;
     name: string;
+    category?: ProviderCategory;
+    protocol?: ProviderProtocol;
     baseUrl?: string;
     apiKey?: string;
     accessToken?: string;

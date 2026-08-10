@@ -1,11 +1,11 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
-import { authRoute, handleOAuthCallback } from "@/routes/v1/auth.js";
+import { authRoute, handleAntigravityOAuthCallback, handleOAuthCallback } from "@/routes/v1/auth.js";
 import { chatRoute } from "@/routes/v1/chat.js";
-import { keysRoute } from "@/routes/v1/keys.js";
 import { logsRoute } from "@/routes/v1/logs.js";
 import { modelsRoute } from "@/routes/v1/models.js";
 import { providersRoute } from "@/routes/v1/providers.js";
+import { quotaRoute } from "@/routes/v1/quota.js";
 
 const app = new Hono();
 
@@ -27,9 +27,9 @@ app.get("/health", (c) => {
 app.route("/v1", modelsRoute);
 app.route("/v1", chatRoute);
 app.route("/v1", providersRoute);
-app.route("/v1", keysRoute);
 app.route("/v1", logsRoute);
 app.route("/v1", authRoute);
+app.route("/v1", quotaRoute);
 
 const port = Number(process.env.PORT) || 3000;
 
@@ -43,9 +43,12 @@ serve(
     },
 );
 
-// Secondary listener on Port 1455 for OpenAI OAuth Codex callback
+// Secondary listener on Port 1455 for OAuth callbacks
 const oauthApp = new Hono();
 oauthApp.get("/auth/callback", (c) => handleOAuthCallback(c));
+oauthApp.post("/auth/callback", (c) => handleOAuthCallback(c));
+oauthApp.get("/auth/antigravity/callback", (c) => handleAntigravityOAuthCallback(c));
+oauthApp.post("/auth/antigravity/callback", (c) => handleAntigravityOAuthCallback(c));
 
 const oauthPort = Number(process.env.OAUTH_PORT) || 1455;
 
@@ -56,7 +59,7 @@ try {
             port: oauthPort,
         },
         (info) => {
-            console.log(`🔑 OpenAI OAuth Callback Server running at http://localhost:${info.port}/auth/callback`);
+            console.log(`🔑 OAuth Callback Server running at http://localhost:${info.port}/auth/callback & /auth/antigravity/callback`);
         },
     );
 } catch (err) {

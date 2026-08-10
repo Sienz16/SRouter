@@ -73,3 +73,65 @@ export function getUsageSummaryDB(): {
         totalCompletionTokens: Number(result?.totalCompletionTokens ?? 0),
     };
 }
+
+export function getProviderUsageSummaryDB(providerId: string): {
+    totalRequests: number;
+    totalTokens: number;
+    totalPromptTokens: number;
+    totalCompletionTokens: number;
+} {
+    const query = db.prepare(`
+        SELECT 
+            COUNT(*) as totalRequests,
+            COALESCE(SUM(total_tokens), 0) as totalTokens,
+            COALESCE(SUM(prompt_tokens), 0) as totalPromptTokens,
+            COALESCE(SUM(completion_tokens), 0) as totalCompletionTokens
+        FROM request_logs
+        WHERE provider_id = ?
+    `);
+
+    const result = query.get(providerId);
+
+    return {
+        totalRequests: Number(result?.totalRequests ?? 0),
+        totalTokens: Number(result?.totalTokens ?? 0),
+        totalPromptTokens: Number(result?.totalPromptTokens ?? 0),
+        totalCompletionTokens: Number(result?.totalCompletionTokens ?? 0),
+    };
+}
+
+export interface ModelUsageSummaryRow {
+    model: string;
+    totalRequests: number;
+    totalTokens: number;
+    promptTokens: number;
+    completionTokens: number;
+    lastUsedAt: number | null;
+}
+
+export function getProviderModelUsageDB(providerId: string): ModelUsageSummaryRow[] {
+    const query = db.prepare(`
+        SELECT 
+            model,
+            COUNT(*) as totalRequests,
+            COALESCE(SUM(total_tokens), 0) as totalTokens,
+            COALESCE(SUM(prompt_tokens), 0) as promptTokens,
+            COALESCE(SUM(completion_tokens), 0) as completionTokens,
+            MAX(created_at) as lastUsedAt
+        FROM request_logs
+        WHERE provider_id = ?
+        GROUP BY model
+        ORDER BY lastUsedAt DESC
+    `);
+
+    const rows = query.all(providerId);
+
+    return rows.map((row) => ({
+        model: String(row.model ?? ""),
+        totalRequests: Number(row.totalRequests ?? 0),
+        totalTokens: Number(row.totalTokens ?? 0),
+        promptTokens: Number(row.promptTokens ?? 0),
+        completionTokens: Number(row.completionTokens ?? 0),
+        lastUsedAt: row.lastUsedAt ? Number(row.lastUsedAt) : null,
+    }));
+}

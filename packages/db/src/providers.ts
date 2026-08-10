@@ -1,4 +1,4 @@
-import type { ProviderConfig } from "@srouter/types";
+import type { ProviderCategory, ProviderConfig, ProviderProtocol } from "@srouter/types";
 import { db } from "./db.js";
 
 export function getAllProvidersDB(): ProviderConfig[] {
@@ -9,6 +9,8 @@ export function getAllProvidersDB(): ProviderConfig[] {
         id: String(row.id ?? ""),
         providerId: String(row.provider_id ?? ""),
         name: String(row.name ?? ""),
+        category: row.category ? (String(row.category) as ProviderCategory) : undefined,
+        protocol: row.protocol ? (String(row.protocol) as ProviderProtocol) : undefined,
         baseUrl: row.base_url ? String(row.base_url) : undefined,
         apiKey: row.api_key ? String(row.api_key) : undefined,
         accessToken: row.access_token ? String(row.access_token) : undefined,
@@ -29,6 +31,8 @@ export function getProviderByIdDB(id: string): ProviderConfig | null {
         id: String(row.id ?? ""),
         providerId: String(row.provider_id ?? ""),
         name: String(row.name ?? ""),
+        category: row.category ? (String(row.category) as ProviderCategory) : undefined,
+        protocol: row.protocol ? (String(row.protocol) as ProviderProtocol) : undefined,
         baseUrl: row.base_url ? String(row.base_url) : undefined,
         apiKey: row.api_key ? String(row.api_key) : undefined,
         accessToken: row.access_token ? String(row.access_token) : undefined,

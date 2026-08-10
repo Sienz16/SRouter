@@ -30,31 +30,46 @@ export class OpenAIProvider implements AIProvider {
         const token = this.accessToken || this.apiKey;
         if (token) {
             headers["Authorization"] = `Bearer ${token}`;
+            if (token.startsWith("AIzaSy")) {
+                headers["x-goog-api-key"] = token;
+            } else if (token.startsWith("ya29.")) {
+                headers["User-Agent"] = "Antigravity/1.0 (VSCode)";
+                headers["x-goog-api-client"] = "gl-node/18.0.0 gd/1.0.0";
+            }
         }
         return headers;
     }
 
     async listModels(): Promise<ModelObject[]> {
+        const result: ModelObject[] = [];
         try {
             const res = await fetch(`${this.baseUrl}/models`, {
                 method: "GET",
                 headers: this.getHeaders(),
             });
-            if (!res.ok) {
-                return [];
+            if (res.ok) {
+                const data = (await res.json()) as ModelListResponse;
+                if (data.data && Array.isArray(data.data)) {
+                    const baseId = this.id.split("_")[0]?.split("-")[0] ?? this.id;
+                    for (const m of data.data) {
+                        result.push(m);
+                        if (!m.id.startsWith(`${baseId}/`)) {
+                            result.push({
+                                ...m,
+                                id: `${baseId}/${m.id}`,
+                            });
+                        }
+                    }
+                }
             }
-            const data = (await res.json()) as ModelListResponse;
-            return data.data ?? [];
         } catch {
-            return [];
+            // network fetch fallback
         }
+        return result;
     }
 
     async chatCompletion(req: ChatCompletionRequest): Promise<ChatCompletionResponse> {
         let targetModel = req.model.includes("/") ? (req.model.split("/")[1] ?? req.model) : req.model;
-        if (targetModel === "gpt-4o-code") {
-            targetModel = "gpt-4o";
-        }
 
         const res = await fetch(`${this.baseUrl}/chat/completions`, {
             method: "POST",
@@ -72,9 +87,6 @@ export class OpenAIProvider implements AIProvider {
 
     async *chatCompletionStream(req: ChatCompletionRequest): AsyncGenerator<ChatCompletionChunk, void, void> {
         let targetModel = req.model.includes("/") ? (req.model.split("/")[1] ?? req.model) : req.model;
-        if (targetModel === "gpt-4o-code") {
-            targetModel = "gpt-4o";
-        }
 
         const res = await fetch(`${this.baseUrl}/chat/completions`, {
             method: "POST",

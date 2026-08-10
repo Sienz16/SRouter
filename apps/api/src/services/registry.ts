@@ -1,5 +1,5 @@
 import { getAllProvidersDB } from "@srouter/db";
-import { AnthropicProvider, OpenAIProvider, ProviderRegistry } from "@srouter/providers";
+import { AntigravityProvider, AnthropicProvider, OpenAIProvider, ProviderRegistry } from "@srouter/providers";
 
 // Create a global ProviderRegistry instance
 export const registry = new ProviderRegistry();
@@ -37,22 +37,35 @@ export function loadSavedProvidersFromDB(): void {
         for (const p of savedProviders) {
             if (!p.enabled) continue;
 
-            if (p.providerId === "openai_codex" || p.providerId === "openai" || p.providerId === "custom_openai") {
+            const providerType = p.providerId || p.id;
+            const baseUrl = p.baseUrl || (providerType === "antigravity" || p.id.startsWith("antigravity") ? process.env.ANTIGRAVITY_BASE_URL : undefined);
+
+            if (providerType === "antigravity" || p.id.startsWith("antigravity")) {
                 registry.registerProvider(
-                    new OpenAIProvider({
-                        id: p.providerId,
+                    new AntigravityProvider({
+                        id: p.id || p.providerId,
                         name: p.name,
-                        baseUrl: p.baseUrl,
+                        baseUrl,
                         apiKey: p.apiKey,
                         accessToken: p.accessToken,
                     }),
                 );
-            } else if (p.providerId === "anthropic" || p.providerId === "custom_anthropic") {
+            } else if (p.protocol === "openai" || p.category === "oauth" || providerType === "openai_codex" || providerType === "openai" || providerType === "custom_openai") {
+                registry.registerProvider(
+                    new OpenAIProvider({
+                        id: p.id || p.providerId,
+                        name: p.name,
+                        baseUrl,
+                        apiKey: p.apiKey,
+                        accessToken: p.accessToken,
+                    }),
+                );
+            } else if (p.protocol === "anthropic" || providerType === "anthropic" || providerType === "custom_anthropic") {
                 registry.registerProvider(
                     new AnthropicProvider({
-                        id: p.providerId,
+                        id: p.id || p.providerId,
                         name: p.name,
-                        baseUrl: p.baseUrl,
+                        baseUrl,
                         apiKey: p.apiKey,
                     }),
                 );
