@@ -1,5 +1,6 @@
 import type { Context } from "hono";
 import { AuthLogic } from "@/logic/auth.logic.js";
+import { err, ok } from "@/utils/response.js";
 
 export interface OAuthCallbackBody {
     code?: string;
@@ -18,14 +19,16 @@ export class AuthController {
     public static loginOpenAI(c: Context): Response {
         const customClientId = c.req.query("client_id") || undefined;
         const redirectUri = c.req.query("redirect_uri") || undefined;
+        const prompt = c.req.query("prompt") || undefined;
 
         const result = AuthLogic.initiateOAuthPKCE({
             clientId: customClientId,
             redirectUri,
+            prompt,
         });
 
         if (c.req.query("format") === "json") {
-            return c.json(result);
+            return ok(c, result);
         }
 
         return c.redirect(result.authorizeUrl);
@@ -56,21 +59,16 @@ export class AuthController {
         }
 
         if (!code || !state) {
-            return c.json(
-                {
-                    error: {
-                        message: "Missing required 'code' or 'state' parameters in OAuth callback",
-                    },
-                },
-                400,
-            );
+            return err(c, "Missing required 'code' or 'state' parameters in OAuth callback", 400, {
+                type: "invalid_request_error",
+            });
         }
 
         try {
             const providerConfig = await AuthLogic.processOAuthCallback(code, state);
 
             if (c.req.method === "POST" || c.req.header("accept")?.includes("application/json")) {
-                return c.json({
+                return ok(c, {
                     success: true,
                     message: "Login OpenAI Codex Berhasil!",
                     provider: providerConfig,
@@ -102,9 +100,9 @@ export class AuthController {
                 </body>
                 </html>
             `);
-        } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : String(err);
-            return c.json({ error: { message: errorMessage } }, 500);
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            return err(c, errorMessage, 500);
         }
     }
 
@@ -114,16 +112,17 @@ export class AuthController {
         try {
             body = await c.req.json<TokenImportBody>();
         } catch {
-            return c.json({ error: { message: "Invalid JSON body" } }, 400);
+            return err(c, "Invalid JSON body", 400, { type: "invalid_request_error" });
         }
 
         if (!body.accessToken) {
-            return c.json({ error: { message: "Field 'accessToken' is required" } }, 400);
+            return err(c, "Field 'accessToken' is required", 400, { type: "invalid_request_error" });
         }
 
         const providerConfig = AuthLogic.processTokenImport(body);
 
-        return c.json(
+        return ok(
+            c,
             {
                 success: true,
                 message: "OpenAI Codex Access Token registered and saved directly to SQLite database!",

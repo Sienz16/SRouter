@@ -1,5 +1,6 @@
 import type { Context } from "hono";
 import { LogsLogic } from "@/logic/logs.logic.js";
+import { ok } from "@/utils/response.js";
 
 export class LogsController {
     public static listLogs(c: Context): Response {
@@ -7,7 +8,7 @@ export class LogsController {
         const limit = limitParam ? parseInt(limitParam, 10) : 50;
         const logs = LogsLogic.getRecentLogs(limit);
 
-        return c.json({
+        return ok(c, {
             object: "list",
             data: logs,
         });
@@ -15,6 +16,6 @@ export class LogsController {
 
     public static getStats(c: Context): Response {
         const stats = LogsLogic.getUsageStats();
-        return c.json(stats);
+        return ok(c, stats);
     }
 }

@@ -2,6 +2,7 @@ import type { Context } from "hono";
 import { streamSSE } from "hono/streaming";
 import type { ChatCompletionRequest } from "@srouter/types";
 import { ChatLogic } from "@/logic/chat.logic.js";
+import { err, formatErrorPayload, ok } from "@/utils/response.js";
 
 export class ChatController {
     public static async createCompletion(c: Context): Promise<Response> {
@@ -21,15 +22,10 @@ export class ChatController {
                     await stream.writeSSE({
                         data: "[DONE]",
                     });
-                } catch (err) {
-                    const errorMessage = err instanceof Error ? err.message : String(err);
+                } catch (error) {
+                    const errorMessage = error instanceof Error ? error.message : String(error);
                     await stream.writeSSE({
-                        data: JSON.stringify({
-                            error: {
-                                message: errorMessage || "Error occurred during streaming",
-                                type: "api_error",
-                            },
-                        }),
+                        data: JSON.stringify(formatErrorPayload(errorMessage || "Error occurred during streaming")),
                     });
                 }
             });
@@ -38,18 +34,10 @@ export class ChatController {
         // 2. Non-streaming response (JSON)
         try {
             const response = await ChatLogic.processNonStreamingCompletion(body, startTime);
-            return c.json(response);
-        } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : String(err);
-            return c.json(
-                {
-                    error: {
-                        message: errorMessage || "Internal server error",
-                        type: "api_error",
-                    },
-                },
-                500,
-            );
+            return ok(c, response);
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            return err(c, errorMessage || "Internal server error", 500);
         }
     }
 }

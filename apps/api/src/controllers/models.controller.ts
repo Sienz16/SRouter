@@ -1,6 +1,7 @@
 import type { Context } from "hono";
 import type { ModelListResponse } from "@srouter/types";
 import { ModelsLogic } from "@/logic/models.logic.js";
+import { err, ok } from "@/utils/response.js";
 
 export class ModelsController {
     public static async listModels(c: Context): Promise<Response> {
@@ -9,37 +10,25 @@ export class ModelsController {
             object: "list",
             data: models,
         };
-        return c.json(response);
+        return ok(c, response);
     }
 
     public static async getModelById(c: Context): Promise<Response> {
         const modelId = c.req.param("model");
         if (!modelId) {
-            return c.json(
-                {
-                    error: {
-                        message: "Model ID parameter is required",
-                        type: "invalid_request_error",
-                    },
-                },
-                400,
-            );
+            return err(c, "Model ID parameter is required", 400, {
+                type: "invalid_request_error",
+            });
         }
         const model = await ModelsLogic.getModelById(modelId);
 
         if (!model) {
-            return c.json(
-                {
-                    error: {
-                        message: `Model '${modelId}' not found`,
-                        type: "invalid_request_error",
-                        code: "model_not_found",
-                    },
-                },
-                404,
-            );
+            return err(c, `Model '${modelId}' not found`, 404, {
+                type: "invalid_request_error",
+                code: "model_not_found",
+            });
         }
 
-        return c.json(model);
+        return ok(c, model);
     }
 }
