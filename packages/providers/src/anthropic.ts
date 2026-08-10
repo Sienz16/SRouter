@@ -35,30 +35,6 @@ export class AnthropicProvider implements AIProvider {
      * Dynamically fetches official model list from Anthropic API (https://api.anthropic.com/v1/models)
      */
     async listModels(): Promise<ModelObject[]> {
-        if (!this.apiKey) {
-            // Fallback list if no API key configured
-            return [
-                {
-                    id: "claude-3-7-sonnet-20250219",
-                    object: "model",
-                    created: Math.floor(Date.now() / 1000),
-                    owned_by: "anthropic",
-                },
-                {
-                    id: "claude-3-5-sonnet-20241022",
-                    object: "model",
-                    created: Math.floor(Date.now() / 1000),
-                    owned_by: "anthropic",
-                },
-                {
-                    id: "claude-3-5-haiku-20241022",
-                    object: "model",
-                    created: Math.floor(Date.now() / 1000),
-                    owned_by: "anthropic",
-                },
-            ];
-        }
-
         try {
             const res = await fetch(`${this.baseUrl}/models`, {
                 method: "GET",

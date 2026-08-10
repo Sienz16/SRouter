@@ -1,13 +1,10 @@
 import { getAllProvidersDB } from "@srouter/db";
-import { AnthropicProvider, MockProvider, OpenAIProvider, OpenRouterProvider, ProviderRegistry } from "@srouter/providers";
+import { AnthropicProvider, OpenAIProvider, ProviderRegistry } from "@srouter/providers";
 
-// Create a global ProviderRegistry instance with Mock fallback
-export const registry = new ProviderRegistry(new MockProvider());
+// Create a global ProviderRegistry instance
+export const registry = new ProviderRegistry();
 
-// 1. Register OpenRouter Provider for live public model listing
-registry.registerProvider(new OpenRouterProvider());
-
-// 2. Register env-configured OpenAI Provider if present
+// 1. Register env-configured OpenAI Provider if present
 if (process.env.OPENAI_API_KEY) {
     registry.registerProvider(
         new OpenAIProvider({
@@ -19,7 +16,7 @@ if (process.env.OPENAI_API_KEY) {
     );
 }
 
-// 3. Register env-configured Anthropic Provider if present
+// 2. Register env-configured Anthropic Provider if present
 if (process.env.ANTHROPIC_API_KEY) {
     registry.registerProvider(
         new AnthropicProvider({

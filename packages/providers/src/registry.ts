@@ -1,6 +1,5 @@
 import type { AIProvider, ChatCompletionChunk, ChatCompletionRequest, ChatCompletionResponse, ModelObject, ProviderDefinition } from "@srouter/types";
 import { PROVIDER_CATALOG } from "./catalog.js";
-import { MockProvider } from "./mock.js";
 
 export class ProviderRegistry {
     private providers: Map<string, AIProvider> = new Map();
@@ -8,7 +7,19 @@ export class ProviderRegistry {
     private catalog: ProviderDefinition[] = [...PROVIDER_CATALOG];
 
     constructor(defaultProvider?: AIProvider) {
-        this.defaultProvider = defaultProvider ?? new MockProvider();
+        this.defaultProvider = defaultProvider ?? {
+            id: "default",
+            name: "Default Provider",
+            category: "api_key",
+            protocol: "openai",
+            listModels: async () => [],
+            chatCompletion: async (req: ChatCompletionRequest) => {
+                throw new Error("No default provider set for chatCompletion");
+            },
+            chatCompletionStream: async function* (req: ChatCompletionRequest): AsyncGenerator<ChatCompletionChunk, void, void> {
+                throw new Error("No default provider set for chatCompletionStream");
+            },
+        };
         this.registerProvider(this.defaultProvider);
     }
 
