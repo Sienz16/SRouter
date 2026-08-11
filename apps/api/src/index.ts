@@ -6,6 +6,7 @@ import { Hono } from "hono";
 import {
     authRoute,
     handleAntigravityOAuthCallback,
+    handleClaudeOAuthCallback,
     handleOAuthCallback,
     handleQoderOAuthCallback
 } from "@/routes/v1/auth.js";
@@ -93,6 +94,8 @@ oauthApp.get("/auth/callback", (c) => handleOAuthCallback(c));
 oauthApp.post("/auth/callback", (c) => handleOAuthCallback(c));
 oauthApp.get("/auth/antigravity/callback", (c) => handleAntigravityOAuthCallback(c));
 oauthApp.post("/auth/antigravity/callback", (c) => handleAntigravityOAuthCallback(c));
+oauthApp.get("/auth/claude/callback", (c) => handleClaudeOAuthCallback(c));
+oauthApp.post("/auth/claude/callback", (c) => handleClaudeOAuthCallback(c));
 oauthApp.get("/auth/qoder/callback", (c) => handleQoderOAuthCallback(c));
 oauthApp.post("/auth/qoder/callback", (c) => handleQoderOAuthCallback(c));
 oauthApp.route("/v1", messagesRoute);
@@ -110,7 +113,7 @@ try {
         },
         (info) => {
             console.log(
-                `🔑 OAuth Callback Server running at http://localhost:${info.port}/auth/callback & /auth/antigravity/callback`
+                `🔑 OAuth Callback Server running at http://localhost:${info.port}/auth/callback & /auth/antigravity/callback & /auth/claude/callback`
             );
         }
     );

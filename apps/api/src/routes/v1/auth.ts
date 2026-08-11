@@ -6,6 +6,7 @@ export const authRoute = new Hono();
 
 export const handleOAuthCallback = AuthController.handleOAuthCallback;
 export const handleAntigravityOAuthCallback = AuthController.handleAntigravityOAuthCallback;
+export const handleClaudeOAuthCallback = AuthController.handleClaudeOAuthCallback;
 export const handleCommandCodeTokenImport = AuthController.importCommandCodeToken;
 export const handleQoderOAuthCallback = AuthController.handleQoderOAuthCallback;
 
@@ -42,6 +43,18 @@ authRoute.post("/auth/commandcode/import-token", adminAuth, AuthController.impor
 // 1. POST /v1/auth/anthropic/token & POST /v1/auth/anthropic/import-token
 authRoute.post("/auth/anthropic/token", adminAuth, AuthController.importAnthropicToken);
 authRoute.post("/auth/anthropic/import-token", adminAuth, AuthController.importAnthropicToken);
+
+// --- Claude Code OAuth ---
+// 1. GET /v1/auth/claude/login - Initiate Claude Code OAuth PKCE Login Flow
+authRoute.get("/auth/claude/login", adminAuth, AuthController.loginClaude);
+
+// 2. GET & POST /v1/auth/claude/callback - OAuth Callback Receiver
+authRoute.get("/auth/claude/callback", AuthController.handleClaudeOAuthCallback);
+authRoute.post("/auth/claude/callback", AuthController.handleClaudeOAuthCallback);
+
+// 3. POST /v1/auth/claude/token & POST /v1/auth/claude/import-token
+authRoute.post("/auth/claude/token", adminAuth, AuthController.importClaudeToken);
+authRoute.post("/auth/claude/import-token", adminAuth, AuthController.importClaudeToken);
 
 // --- GoRouter Provider (API key) ---
 // 1. POST /v1/auth/gorouter/token & POST /v1/auth/gorouter/import-token
