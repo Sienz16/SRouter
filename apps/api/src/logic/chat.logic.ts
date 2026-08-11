@@ -1,4 +1,5 @@
 import { logRequestDB } from "@srouter/db";
+import { extractUsageBreakdown, estimateCostForUsage } from "@srouter/translator";
 import type { ChatCompletionChunk, ChatCompletionRequest, ChatCompletionResponse } from "@srouter/types";
 import { registry } from "@/services/registry.js";
 
@@ -7,13 +8,19 @@ export class ChatLogic {
         try {
             const response = await registry.chatCompletion(body);
             const latencyMs = Date.now() - startTime;
+            const provider = body.model.split("/")[0] || "default";
+            const breakdown = extractUsageBreakdown(provider, response.usage);
 
             logRequestDB({
-                providerId: body.model.split("/")[0] || "default",
+                providerId: provider,
                 model: body.model,
-                promptTokens: response.usage?.prompt_tokens ?? 0,
-                completionTokens: response.usage?.completion_tokens ?? 0,
-                totalTokens: response.usage?.total_tokens ?? 0,
+                promptTokens: breakdown.promptTokens,
+                completionTokens: breakdown.completionTokens,
+                totalTokens: breakdown.totalTokens,
+                cachedTokens: breakdown.cachedTokens,
+                cacheCreationTokens: breakdown.cacheCreationTokens,
+                reasoningTokens: breakdown.reasoningTokens,
+                estimatedCost: estimateCostForUsage(provider, body.model, breakdown),
                 statusCode: 200,
                 latencyMs,
             });
@@ -34,25 +41,34 @@ export class ChatLogic {
     }
 
     public static async *processStreamingCompletion(body: ChatCompletionRequest, startTime: number): AsyncGenerator<ChatCompletionChunk, void, void> {
-        const totalTokens = 0;
+        const provider = body.model.split("/")[0] || "default";
+        let usage: unknown = null;
         try {
             const generator = registry.chatCompletionStream(body);
             for await (const chunk of generator) {
+                if (chunk.usage) {
+                    usage = chunk.usage;
+                }
                 yield chunk;
             }
 
+            const breakdown = extractUsageBreakdown(provider, usage);
             logRequestDB({
-                providerId: body.model.split("/")[0] || "default",
+                providerId: provider,
                 model: body.model,
-                promptTokens: 10,
-                completionTokens: totalTokens,
-                totalTokens: 10 + totalTokens,
+                promptTokens: breakdown.promptTokens,
+                completionTokens: breakdown.completionTokens,
+                totalTokens: breakdown.totalTokens,
+                cachedTokens: breakdown.cachedTokens,
+                cacheCreationTokens: breakdown.cacheCreationTokens,
+                reasoningTokens: breakdown.reasoningTokens,
+                estimatedCost: estimateCostForUsage(provider, body.model, breakdown),
                 statusCode: 200,
                 latencyMs: Date.now() - startTime,
             });
         } catch (err) {
             logRequestDB({
-                providerId: body.model.split("/")[0] || "default",
+                providerId: provider,
                 model: body.model,
                 promptTokens: 0,
                 completionTokens: 0,

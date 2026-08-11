@@ -252,4 +252,56 @@ export class AuthController {
             201,
         );
     }
+
+    // --- CommandCode Provider Handlers ---
+    public static async importCommandCodeToken(c: Context): Promise<Response> {
+        let body: TokenImportBody;
+        try {
+            body = await c.req.json<TokenImportBody>();
+        } catch {
+            return err(c, "Invalid JSON body", 400, { type: "invalid_request_error" });
+        }
+
+        if (!body.accessToken) {
+            return err(c, "Field 'accessToken' is required", 400, { type: "invalid_request_error" });
+        }
+
+        const providerConfig = AuthLogic.processCommandCodeTokenImport(body);
+
+        return ok(
+            c,
+            {
+                success: true,
+                message: "Command Code API Key registered and saved directly to SQLite database!",
+                provider: providerConfig,
+            },
+            201,
+        );
+    }
+
+    // --- Anthropic Provider Handlers ---
+    public static async importAnthropicToken(c: Context): Promise<Response> {
+        let body: TokenImportBody;
+        try {
+            body = await c.req.json<TokenImportBody>();
+        } catch {
+            return err(c, "Invalid JSON body", 400, { type: "invalid_request_error" });
+        }
+
+        if (!body.accessToken) {
+            return err(c, "Field 'accessToken' is required", 400, { type: "invalid_request_error" });
+        }
+
+        const providerConfig = AuthLogic.processAnthropicTokenImport(body);
+
+        return ok(
+            c,
+            {
+                success: true,
+                message: "Anthropic API Key registered and saved directly to SQLite database!",
+                provider: providerConfig,
+            },
+            201,
+        );
+    }
 }

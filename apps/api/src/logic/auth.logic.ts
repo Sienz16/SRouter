@@ -1,5 +1,6 @@
 import { upsertProviderDB } from "@srouter/db";
-import { AntigravityOAuth, AntigravityProvider, generatePKCE, OpenAICodexOAuth, OpenAIProvider, type PKCEPair } from "@srouter/providers";
+import { AntigravityExecutor, AnthropicExecutor, CommandCodeExecutor, OpenAIExecutor } from "@srouter/executors";
+import { AntigravityOAuth, OpenAICodexOAuth, generatePKCE, type PKCEPair } from "@srouter/providers";
 import type { ProviderConfig } from "@srouter/types";
 import { registry } from "@/services/registry.js";
 
@@ -106,7 +107,7 @@ export class AuthLogic {
             createdAt: timestamp,
         });
 
-        const providerInstance = new OpenAIProvider({
+        const providerInstance = new OpenAIExecutor({
             id: accountId,
             name: accountName,
             accessToken: tokens.accessToken,
@@ -133,7 +134,7 @@ export class AuthLogic {
             createdAt: timestamp,
         });
 
-        const providerInstance = new OpenAIProvider({
+        const providerInstance = new OpenAIExecutor({
             id: accountId,
             name: providerName,
             accessToken: params.accessToken,
@@ -210,7 +211,7 @@ export class AuthLogic {
             createdAt: timestamp,
         });
 
-        const providerInstance = new AntigravityProvider({
+        const providerInstance = new AntigravityExecutor({
             id: accountId,
             name: accountName,
             baseUrl,
@@ -240,11 +241,73 @@ export class AuthLogic {
             createdAt: timestamp,
         });
 
-        const providerInstance = new AntigravityProvider({
+        const providerInstance = new AntigravityExecutor({
             id: accountId,
             name: providerName,
             baseUrl,
             accessToken: params.accessToken,
+        });
+        registry.registerProvider(providerInstance);
+
+        return providerConfig;
+    }
+
+    // --- CommandCode Provider (API key) ---
+    public static processCommandCodeTokenImport(params: TokenImportParams): ProviderConfig {
+        const timestamp = Date.now();
+        const accountId = params.id || `commandcode_${timestamp}`;
+        const providerName = params.name || `Command Code (Account #${timestamp.toString().slice(-4)})`;
+        const baseUrl = params.baseUrl || process.env.COMMANDCODE_BASE_URL || "https://api.commandcode.ai/alpha/generate";
+
+        const providerConfig = upsertProviderDB({
+            id: accountId,
+            providerId: "commandcode",
+            name: providerName,
+            category: "api_key",
+            protocol: "openai",
+            baseUrl,
+            apiKey: params.accessToken,
+            refreshToken: params.refreshToken,
+            enabled: true,
+            createdAt: timestamp,
+        });
+
+        const providerInstance = new CommandCodeExecutor({
+            id: accountId,
+            name: providerName,
+            baseUrl,
+            apiKey: params.accessToken,
+        });
+        registry.registerProvider(providerInstance);
+
+        return providerConfig;
+    }
+
+    // --- Anthropic Provider (API key / access token) ---
+    public static processAnthropicTokenImport(params: TokenImportParams): ProviderConfig {
+        const timestamp = Date.now();
+        const accountId = params.id || `anthropic_${timestamp}`;
+        const providerName = params.name || `Anthropic (Account #${timestamp.toString().slice(-4)})`;
+        const baseUrl = params.baseUrl || process.env.ANTHROPIC_BASE_URL || "https://api.anthropic.com/v1";
+
+        const providerConfig = upsertProviderDB({
+            id: accountId,
+            providerId: "anthropic",
+            name: providerName,
+            category: "api_key",
+            protocol: "anthropic",
+            baseUrl,
+            apiKey: params.accessToken,
+            refreshToken: params.refreshToken,
+            enabled: true,
+            createdAt: timestamp,
+        });
+
+        const providerInstance = new AnthropicExecutor({
+            id: accountId,
+            name: providerName,
+            baseUrl,
+            apiKey: params.accessToken,
         });
         registry.registerProvider(providerInstance);
 

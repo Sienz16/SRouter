@@ -1,10 +1,18 @@
-import { getRecentLogsDB, getUsageSummaryDB, type RequestLogEntry } from "@srouter/db";
+import { getRecentLogsDB, getUsageByModelDB, getUsageSummaryDB, type RequestLogEntry, type UsageSummary } from "@srouter/db";
+import { formatCost } from "@srouter/pricing";
 
-export interface UsageSummaryResult {
-    totalRequests: number;
-    totalTokens: number;
-    totalPromptTokens: number;
-    totalCompletionTokens: number;
+export interface UsageSummaryResult extends UsageSummary {
+    object: "usage";
+    costLabel: string;
+    estimated: boolean;
+    byModel: Array<{
+        model: string;
+        totalRequests: number;
+        totalInputTokens: number;
+        totalOutputTokens: number;
+        totalCachedTokens: number;
+        estCost: number;
+    }>;
 }
 
 export class LogsLogic {
@@ -13,6 +21,15 @@ export class LogsLogic {
     }
 
     public static getUsageStats(): UsageSummaryResult {
-        return getUsageSummaryDB();
+        const summary = getUsageSummaryDB();
+        const byModel = getUsageByModelDB();
+
+        return {
+            object: "usage",
+            ...summary,
+            costLabel: formatCost(summary.totalEstimatedCost),
+            estimated: true,
+            byModel,
+        };
     }
 }
