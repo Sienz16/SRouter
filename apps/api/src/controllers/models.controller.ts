@@ -26,17 +26,6 @@ export class ModelsController {
             return ok(c, model);
         }
 
-        // Fallback: treat the segment as a provider name (e.g. /v1/models/antigravity)
-        // and return that provider's models when it exists.
-        const providerModels = await ModelsLogic.getModelsByProvider(modelId);
-        if (providerModels.length > 0) {
-            const response: ModelListResponse = {
-                object: "list",
-                data: providerModels,
-            };
-            return ok(c, response);
-        }
-
         return err(c, `Model '${modelId}' not found`, 404, {
             type: "invalid_request_error",
             code: "model_not_found",

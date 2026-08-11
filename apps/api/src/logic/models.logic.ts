@@ -10,8 +10,4 @@ export class ModelsLogic {
         const models = await registry.listAllModels();
         return models.find((m) => m.id === modelId);
     }
-
-    public static async getModelsByProvider(provider: string): Promise<ModelObject[]> {
-        return await registry.listAllModels(provider);
-    }
 }

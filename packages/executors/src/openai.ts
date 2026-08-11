@@ -42,29 +42,27 @@ export class OpenAIExecutor implements AIProvider {
     }
 
     async listModels(): Promise<ModelObject[]> {
-        const result: ModelObject[] = [];
         try {
             const res = await fetch(`${this.baseUrl}/models`, {
                 method: "GET",
                 headers: this.getHeaders(),
             });
-            if (res.ok) {
-                const data = (await res.json()) as ModelListResponse;
-                if (data.data && Array.isArray(data.data)) {
-                    const baseId = this.id.split("_")[0]?.split("-")[0] ?? this.id;
-                    for (const m of data.data) {
-                        result.push({
-                            id: `${baseId}/${m.id}`,
-                            object: "model",
-                            owned_by: baseId,
-                        });
-                    }
-                }
+            if (!res.ok) {
+                return [];
             }
+            const data = (await res.json()) as ModelListResponse;
+            if (!data.data || !Array.isArray(data.data)) {
+                return [];
+            }
+            const baseId = this.id.split("_")[0]?.split("-")[0] ?? this.id;
+            return data.data.map((m) => ({
+                id: `${baseId}/${m.id}`,
+                object: "model",
+                owned_by: baseId,
+            }));
         } catch {
-            // network fetch fallback
+            return [];
         }
-        return result;
     }
 
     async chatCompletion(req: ChatCompletionRequest): Promise<ChatCompletionResponse> {

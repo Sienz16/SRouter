@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Shell(npx shadcn@latest add breadcrumb 2 >& 1)",
+      "Shell(npx tsc -b 2 >& 1)"
+    ],
+    "deny": [],
+    "defaultMode": "default"
+  }
+}

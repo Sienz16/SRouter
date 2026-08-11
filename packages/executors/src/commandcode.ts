@@ -13,9 +13,6 @@ export interface CommandCodeExecutorOptions {
 
 const DEFAULT_BASE_URL = "https://api.commandcode.ai/alpha/generate";
 
-// --- Static model catalog (mirrors 9router open-sse/providers/registry/commandcode.js) ---
-const FALLBACK_MODELS: string[] = ["deepseek/deepseek-v4-pro", "deepseek/deepseek-v4-flash", "moonshotai/Kimi-K2.6", "moonshotai/Kimi-K2.5", "zai-org/GLM-5.1", "zai-org/GLM-5", "MiniMaxAI/MiniMax-M2.7", "MiniMaxAI/MiniMax-M2.5", "Qwen/Qwen3.6-Max-Preview", "Qwen/Qwen3.6-Plus", "stepfun/Step-3.5-Flash"];
-
 export class CommandCodeExecutor implements AIProvider {
     id: string;
     name: string;
@@ -46,11 +43,7 @@ export class CommandCodeExecutor implements AIProvider {
     }
 
     async listModels(): Promise<ModelObject[]> {
-        return FALLBACK_MODELS.map((id) => ({
-            id,
-            object: "model" as const,
-            owned_by: "command-code",
-        }));
+        return [];
     }
 
     async chatCompletion(req: ChatCompletionRequest): Promise<ChatCompletionResponse> {

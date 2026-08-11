@@ -2,7 +2,6 @@
 // Only models currently available in SRouter are listed:
 //   - CommandCode Provider API (52 models)
 //   - Antigravity (5 models)
-//   - Anthropic fallback (3 models)
 // Unknown models fall back to DEFAULT_PRICING (estimated only, not actual billing).
 
 export interface ModelPrice {
@@ -99,7 +98,7 @@ export const MODEL_PRICING: Record<string, ModelPrice> = {
     "gemini-2.0-flash": { input: 0.1, output: 0.4, cached: 0.01, reasoning: 0.6, cache_creation: 0.1 },
     "gemini-1.5-pro": { input: 1.25, output: 5.0, cached: 0.625, reasoning: 7.5, cache_creation: 1.25 },
 
-    // === Anthropic (fallback list) ===
+    // === Anthropic ===
     "claude-3-7-sonnet-20250219": { input: 3.0, output: 15.0, cached: 1.5, reasoning: 15.0, cache_creation: 3.0 },
     "claude-3-5-sonnet-20241022": { input: 3.0, output: 15.0, cached: 1.5, reasoning: 15.0, cache_creation: 3.0 },
     "claude-3-5-haiku-20241022": { input: 0.8, output: 4.0, cached: 0.4, reasoning: 4.0, cache_creation: 0.8 },

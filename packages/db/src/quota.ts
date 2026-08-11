@@ -35,73 +35,52 @@ export async function fetchAntigravityLiveQuota(
     accessToken: string,
     enabled = true
 ): Promise<ProviderQuotaAccount> {
-    if (accessToken && (accessToken.startsWith("ya29.") || accessToken.length > 20)) {
-        try {
-            const res = await fetch("https://cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels", {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                    "Content-Type": "application/json",
-                    "User-Agent": "Antigravity/1.0 (VSCode)",
-                    "x-goog-api-client": "gl-node/18.0.0 gd/1.0.0",
-                },
-                body: JSON.stringify({}),
-            });
-
-            if (res.ok) {
-                const data = (await res.json()) as CloudCodeFetchAvailableModelsResponse;
-                if (data.models && Object.keys(data.models).length > 0) {
-                    const quotas: LiveModelQuotaItem[] = Object.entries(data.models).map(([modelId, item]) => {
-                        const remainingFraction = item.quotaInfo?.remainingFraction ?? 1.0;
-                        const percentageValue = Math.round(remainingFraction * 100);
-                        const limit = 1000;
-                        const used = Math.round((1 - remainingFraction) * limit);
-                        const resetIn = formatResetIn(item.quotaInfo?.resetTime);
-
-                        let status: "ok" | "warning" | "exhausted" = "ok";
-                        if (percentageValue <= 5) status = "exhausted";
-                        else if (percentageValue <= 20) status = "warning";
-
-                        return {
-                            name: item.displayName || modelId,
-                            used,
-                            limit,
-                            percentage: `${percentageValue}%`,
-                            percentageValue,
-                            resetIn,
-                            resetTime: item.quotaInfo?.resetTime,
-                            status,
-                        };
-                    });
-
-                    return {
-                        id: providerId,
-                        provider: "Antigravity",
-                        account: accountName,
-                        enabled,
-                        quotaType: "live_provider_quota",
-                        totalQuotas: quotas.length,
-                        quotas,
-                    };
-                }
-            }
-        } catch {
-            // Fallback below
-        }
+    if (!accessToken || !(accessToken.startsWith("ya29.") || accessToken.length > 20)) {
+        throw new Error("Antigravity quota requires a valid access token");
     }
 
-    const fallbackQuotas: LiveModelQuotaItem[] = [
-        { name: "Gemini 3.6 Flash (High)", used: 963, limit: 1000, percentage: "4%", percentageValue: 4, resetIn: "1h 18m", status: "exhausted" },
-        { name: "Gemini 3.6 Flash (Medium)", used: 963, limit: 1000, percentage: "4%", percentageValue: 4, resetIn: "1h 18m", status: "exhausted" },
-        { name: "Gemini 3.6 Flash (Low)", used: 963, limit: 1000, percentage: "4%", percentageValue: 4, resetIn: "1h 18m", status: "exhausted" },
-        { name: "Gemini 3.5 Flash (Medium)", used: 963, limit: 1000, percentage: "4%", percentageValue: 4, resetIn: "1h 18m", status: "exhausted" },
-        { name: "Gemini 3.5 Flash (Low)", used: 963, limit: 1000, percentage: "4%", percentageValue: 4, resetIn: "1h 18m", status: "exhausted" },
-        { name: "Gemini 3.1 Pro (High)", used: 963, limit: 1000, percentage: "4%", percentageValue: 4, resetIn: "1h 18m", status: "exhausted" },
-        { name: "Gemini 3.1 Pro (Low)", used: 963, limit: 1000, percentage: "4%", percentageValue: 4, resetIn: "1h 18m", status: "exhausted" },
-        { name: "Claude Sonnet 4.6 (Thinking)", used: 0, limit: 1000, percentage: "100%", percentageValue: 100, resetIn: "5h 0m", status: "ok" },
-        { name: "Claude Opus 4.6 (Thinking)", used: 0, limit: 1000, percentage: "100%", percentageValue: 100, resetIn: "5h 0m", status: "ok" },
-        { name: "GPT-OSS 120B (Medium)", used: 0, limit: 1000, percentage: "100%", percentageValue: 100, resetIn: "5h 0m", status: "ok" },
-    ];
+    const res = await fetch("https://cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels", {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+            "User-Agent": "Antigravity/1.0 (VSCode)",
+            "x-goog-api-client": "gl-node/18.0.0 gd/1.0.0",
+        },
+        body: JSON.stringify({}),
+    });
+
+    if (!res.ok) {
+        throw new Error(`Antigravity quota fetch failed: HTTP ${res.status}`);
+    }
+
+    const data = (await res.json()) as CloudCodeFetchAvailableModelsResponse;
+    if (!data.models || Object.keys(data.models).length === 0) {
+        throw new Error("Antigravity quota fetch returned no models");
+    }
+
+    const quotas: LiveModelQuotaItem[] = Object.entries(data.models).map(([modelId, item]) => {
+        const remainingFraction = item.quotaInfo?.remainingFraction ?? 1.0;
+        const percentageValue = Math.round(remainingFraction * 100);
+        const limit = 1000;
+        const used = Math.round((1 - remainingFraction) * limit);
+        const resetIn = formatResetIn(item.quotaInfo?.resetTime);
+
+        let status: "ok" | "warning" | "exhausted" = "ok";
+        if (percentageValue <= 5) status = "exhausted";
+        else if (percentageValue <= 20) status = "warning";
+
+        return {
+            name: item.displayName || modelId,
+            used,
+            limit,
+            percentage: `${percentageValue}%`,
+            percentageValue,
+            resetIn,
+            resetTime: item.quotaInfo?.resetTime,
+            status,
+        };
+    });
 
     return {
         id: providerId,
@@ -109,8 +88,8 @@ export async function fetchAntigravityLiveQuota(
         account: accountName,
         enabled,
         quotaType: "live_provider_quota",
-        totalQuotas: fallbackQuotas.length,
-        quotas: fallbackQuotas,
+        totalQuotas: quotas.length,
+        quotas,
     };
 }
 
@@ -165,13 +144,12 @@ export async function getQuotaSummaryDB(): Promise<QuotaResponse> {
     const providerAccounts: ProviderQuotaAccount[] = [];
 
     for (const p of dbProviders) {
-        const account = await getProviderQuotaAccount(p);
-        providerAccounts.push(account);
-    }
-
-    if (providerAccounts.length === 0) {
-        const defaultAccount = await fetchAntigravityLiveQuota("antigravity_default", "seaavey@gmail.com", process.env.ANTIGRAVITY_ACCESS_TOKEN || "", true);
-        providerAccounts.push(defaultAccount);
+        try {
+            const account = await getProviderQuotaAccount(p);
+            providerAccounts.push(account);
+        } catch {
+            // Skip providers whose quota cannot be fetched
+        }
     }
 
     return {

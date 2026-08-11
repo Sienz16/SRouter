@@ -26,6 +26,7 @@ Inspired by 9Router Proxy, SRouter provides unified OpenAI & Anthropic compatibl
 ## 📂 Monorepo Architecture
 
 - `apps/api`: Main Hono API server listening on port `3000`.
+- `apps/web`: Dashboard frontend (Vite + React + TanStack Router) on port `5173`.
 - `packages/types`: Workspace types and Zod schemas (`ChatCompletionRequestSchema`, `CreateAPIKeySchema`, etc.).
 - `packages/providers`: Provider drivers (`OpenAIProvider`, `AnthropicProvider`, `OpenRouterProvider`, `MockProvider`) and protocol translation adapter.
 - `packages/db`: SQLite database initialization, API keys repository, and request logging module (`srouter.db`).
@@ -49,6 +50,14 @@ pnpm install
 
 ```bash
 pnpm dev
+```
+
+This starts both `apps/api` (port `3000`) and `apps/web` (port `5173`). The web dev server proxies `/v1` requests to the API, so no CORS config is needed.
+
+To run only the web dashboard:
+
+```bash
+pnpm --filter web dev
 ```
 
 ### Build

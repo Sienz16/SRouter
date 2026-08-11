@@ -51,7 +51,7 @@ export class AnthropicExecutor implements AIProvider {
             });
 
             if (!res.ok) {
-                throw new Error(`HTTP ${res.status}`);
+                return [];
             }
 
             const json = (await res.json()) as {
@@ -70,30 +70,11 @@ export class AnthropicExecutor implements AIProvider {
                     owned_by: "anthropic",
                 }));
             }
-        } catch {
-            // Fallback if fetch fails
-        }
 
-        return [
-            {
-                id: "claude-3-7-sonnet-20250219",
-                object: "model",
-                created: Math.floor(Date.now() / 1000),
-                owned_by: "anthropic",
-            },
-            {
-                id: "claude-3-5-sonnet-20241022",
-                object: "model",
-                created: Math.floor(Date.now() / 1000),
-                owned_by: "anthropic",
-            },
-            {
-                id: "claude-3-5-haiku-20241022",
-                object: "model",
-                created: Math.floor(Date.now() / 1000),
-                owned_by: "anthropic",
-            },
-        ];
+            return [];
+        } catch {
+            return [];
+        }
     }
 
     async chatCompletion(req: ChatCompletionRequest): Promise<ChatCompletionResponse> {

@@ -33,65 +33,61 @@ if (process.env.ANTHROPIC_API_KEY) {
  * Load saved OAuth & Custom providers from SQLite Database on startup
  */
 export function loadSavedProvidersFromDB(): void {
-    try {
-        const savedProviders = getAllProvidersDB();
-        for (const p of savedProviders) {
-            if (!p.enabled) continue;
+    const savedProviders = getAllProvidersDB();
+    for (const p of savedProviders) {
+        if (!p.enabled) continue;
 
-            const providerType = p.providerId || p.id;
-            const baseUrl = p.baseUrl || (providerType === "antigravity" || p.id.startsWith("antigravity") ? process.env.ANTIGRAVITY_BASE_URL : undefined);
+        const providerType = p.providerId || p.id;
+        const baseUrl = p.baseUrl || (providerType === "antigravity" || p.id.startsWith("antigravity") ? process.env.ANTIGRAVITY_BASE_URL : undefined);
 
-            switch (true) {
-                case providerType === "commandcode" || p.id.startsWith("commandcode"):
-                    registry.registerProvider(
-                        new CommandCodeExecutor({
-                            id: p.id || p.providerId,
-                            name: p.name,
-                            baseUrl,
-                            apiKey: p.apiKey,
-                            accessToken: p.accessToken,
-                        }),
-                    );
-                    break;
-                case providerType === "antigravity" || p.id.startsWith("antigravity"):
-                    registry.registerProvider(
-                        new AntigravityExecutor({
-                            id: p.id || p.providerId,
-                            name: p.name,
-                            baseUrl,
-                            apiKey: p.apiKey,
-                            accessToken: p.accessToken,
-                        }),
-                    );
-                    break;
-                case p.protocol === "openai" || p.category === "oauth" || providerType === "openai_codex" || providerType === "openai" || providerType === "custom_openai":
-                    registry.registerProvider(
-                        new OpenAIExecutor({
-                            id: p.id || p.providerId,
-                            name: p.name,
-                            baseUrl,
-                            apiKey: p.apiKey,
-                            accessToken: p.accessToken,
-                        }),
-                    );
-                    break;
-                case p.protocol === "anthropic" || providerType === "anthropic" || providerType === "custom_anthropic":
-                    registry.registerProvider(
-                        new AnthropicExecutor({
-                            id: p.id || p.providerId,
-                            name: p.name,
-                            baseUrl,
-                            apiKey: p.apiKey,
-                            accessToken: p.accessToken,
-                        }),
-                    );
-                    break;
-                default:
-                    break;
-            }
+        switch (true) {
+            case providerType === "commandcode" || p.id.startsWith("commandcode"):
+                registry.registerProvider(
+                    new CommandCodeExecutor({
+                        id: p.id || p.providerId,
+                        name: p.name,
+                        baseUrl,
+                        apiKey: p.apiKey,
+                        accessToken: p.accessToken,
+                    }),
+                );
+                break;
+            case providerType === "antigravity" || p.id.startsWith("antigravity"):
+                registry.registerProvider(
+                    new AntigravityExecutor({
+                        id: p.id || p.providerId,
+                        name: p.name,
+                        baseUrl,
+                        apiKey: p.apiKey,
+                        accessToken: p.accessToken,
+                    }),
+                );
+                break;
+            case p.protocol === "openai" || p.category === "oauth" || providerType === "openai_codex" || providerType === "openai" || providerType === "custom_openai":
+                registry.registerProvider(
+                    new OpenAIExecutor({
+                        id: p.id || p.providerId,
+                        name: p.name,
+                        baseUrl,
+                        apiKey: p.apiKey,
+                        accessToken: p.accessToken,
+                    }),
+                );
+                break;
+            case p.protocol === "anthropic" || providerType === "anthropic" || providerType === "custom_anthropic":
+                registry.registerProvider(
+                    new AnthropicExecutor({
+                        id: p.id || p.providerId,
+                        name: p.name,
+                        baseUrl,
+                        apiKey: p.apiKey,
+                        accessToken: p.accessToken,
+                    }),
+                );
+                break;
+            default:
+                break;
         }
-    } catch {
-        // database load fallback
     }
 }
 
