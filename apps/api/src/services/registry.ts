@@ -60,6 +60,7 @@ export function loadSavedProvidersFromDB(): void {
                         baseUrl,
                         apiKey: p.apiKey,
                         accessToken: p.accessToken,
+                        refreshToken: p.refreshToken,
                     }),
                 );
                 break;
@@ -84,19 +85,6 @@ export function loadSavedProvidersFromDB(): void {
                         baseUrl,
                         apiKey: p.apiKey,
                         accessToken: p.accessToken,
-                    }),
-                );
-                break;
-            case providerType === "claude" || p.id.startsWith("claude"):
-                registry.registerProvider(
-                    new AnthropicExecutor({
-                        id: p.id || p.providerId,
-                        name: p.name,
-                        baseUrl,
-                        apiKey: p.apiKey,
-                        accessToken: p.accessToken,
-                        refreshToken: p.refreshToken,
-                        organizationId: p.organizationId,
                     }),
                 );
                 break;

@@ -59,9 +59,14 @@ export function initDatabase(): void {
         // column already exists
     }
 
-    // Ensure organization_id column exists (e.g. Claude OAuth organization binding)
+    // Ensure token expiry tracking columns exist
     try {
-        db.exec("ALTER TABLE providers ADD COLUMN organization_id TEXT;");
+        db.exec("ALTER TABLE providers ADD COLUMN token_expires_at INTEGER;");
+    } catch {
+        // column already exists
+    }
+    try {
+        db.exec("ALTER TABLE providers ADD COLUMN last_refreshed_at INTEGER;");
     } catch {
         // column already exists
     }

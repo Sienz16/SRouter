@@ -1,11 +1,12 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
-import { authRoute, handleAntigravityOAuthCallback, handleClaudeOAuthCallback, handleOAuthCallback } from "@/routes/v1/auth.js";
+import { authRoute, handleAntigravityOAuthCallback, handleOAuthCallback } from "@/routes/v1/auth.js";
 import { chatRoute } from "@/routes/v1/chat.js";
 import { logsRoute } from "@/routes/v1/logs.js";
 import { modelsRoute } from "@/routes/v1/models.js";
 import { providersRoute } from "@/routes/v1/providers.js";
 import { quotaRoute } from "@/routes/v1/quota.js";
+import { startTokenRefreshSweeper } from "@/services/tokenRefresh.js";
 
 const app = new Hono();
 
@@ -64,8 +65,6 @@ oauthApp.get("/auth/callback", (c) => handleOAuthCallback(c));
 oauthApp.post("/auth/callback", (c) => handleOAuthCallback(c));
 oauthApp.get("/auth/antigravity/callback", (c) => handleAntigravityOAuthCallback(c));
 oauthApp.post("/auth/antigravity/callback", (c) => handleAntigravityOAuthCallback(c));
-oauthApp.get("/auth/claude/callback", (c) => handleClaudeOAuthCallback(c));
-oauthApp.post("/auth/claude/callback", (c) => handleClaudeOAuthCallback(c));
 
 const oauthPort = Number(process.env.OAUTH_PORT) || 1455;
 
@@ -82,5 +81,8 @@ try {
 } catch (err) {
     console.warn(`Could not start OAuth server on port ${oauthPort}:`, err);
 }
+
+// Start background OAuth token refresh sweeper
+startTokenRefreshSweeper();
 
 export default app;
