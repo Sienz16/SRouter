@@ -111,11 +111,18 @@ export class ProviderRegistry {
         return this.defaultProvider;
     }
 
-    async listAllModels(): Promise<ModelObject[]> {
+    async listAllModels(providerFilter?: string): Promise<ModelObject[]> {
         const allModels: ModelObject[] = [];
         const seenIds = new Set<string>();
 
+        const matchesFilter = (alias: string): boolean => {
+            if (!providerFilter) return true;
+            const filter = providerFilter.toLowerCase();
+            return alias.toLowerCase() === filter || alias.toLowerCase().startsWith(filter);
+        };
+
         const addModel = (model: ModelObject, alias: string, providerId: string): void => {
+            if (!matchesFilter(alias)) return;
             const bareId = stripModelPrefix(model.id, alias, providerId);
             const id = `${alias}/${bareId}`;
             if (!seenIds.has(id)) {
