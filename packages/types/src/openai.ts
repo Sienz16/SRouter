@@ -22,6 +22,17 @@ export interface ToolCall {
     };
 }
 
+// Streaming tool_call delta (OpenAI chunk shape): partial fields, index required.
+export interface ChatCompletionChunkDeltaToolCall {
+    index: number;
+    id?: string;
+    type?: "function";
+    function?: {
+        name?: string;
+        arguments?: string;
+    };
+}
+
 export interface ToolFunctionParameterProperty {
     type: string;
     description?: string;
@@ -72,6 +83,12 @@ export interface UsageInfo {
     prompt_tokens: number;
     completion_tokens: number;
     total_tokens: number;
+    prompt_tokens_details?: {
+        cached_tokens?: number;
+    };
+    completion_tokens_details?: {
+        reasoning_tokens?: number;
+    };
 }
 
 export interface ChatCompletionChoice {
@@ -93,7 +110,8 @@ export interface ChatCompletionResponse {
 export interface ChatCompletionChunkDelta {
     role?: ChatMessageRole;
     content?: string;
-    tool_calls?: ToolCall[];
+    reasoning_content?: string;
+    tool_calls?: ChatCompletionChunkDeltaToolCall[];
 }
 
 export interface ChatCompletionChunkChoice {
@@ -114,7 +132,7 @@ export interface ChatCompletionChunk {
 export interface ModelObject {
     id: string;
     object: "model";
-    created: number;
+    created?: number;
     owned_by: string;
 }
 
