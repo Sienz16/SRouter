@@ -29,14 +29,30 @@ SRouter is a high-performance multi-provider LLM gateway built with Hono, TypeSc
     - `apiKeys.ts`: Client API Key generation (`sr-live-xxxx`) & quota tracking.
     - `logs.ts`: Request token usage analytics & latency logging.
 
-### 3. `@srouter/providers` (`packages/providers`)
+### 3. `@srouter/translator` (`packages/translator`)
 
-- LLM Provider Drivers (`OpenAIProvider`, `AnthropicProvider`, `OpenRouterProvider`, `MockProvider`).
+- Pure format-translation layer, no network I/O.
 - `adapter.ts`: OpenAI <-> Anthropic protocol converter (bidirectional message translation & SSE chunk mapping).
-- `oauth.ts`: OpenAI Codex OAuth PKCE helper (`generatePKCE`, token exchange, auto-refresh).
-- `registry.ts`: Provider routing engine.
+- `commandcode.ts`: OpenAI <-> CommandCode (`/alpha/generate` NDJSON AI SDK v5) request/response translation + chunk accumulation.
+- `gemini.ts`: Antigravity native Gemini REST payload build/parse.
 
-### 4. `apps/api` (`apps/api`)
+### 4. `@srouter/executors` (`packages/executors`)
+
+- LLM Provider transport drivers (`OpenAIExecutor`, `AnthropicExecutor`, `AntigravityExecutor`, `CommandCodeExecutor`).
+- `base.ts`: shared SSE line streaming helpers (`streamLines`, `parseDataLine`).
+- Each executor implements `AIProvider` (`listModels`, `chatCompletion`, `chatCompletionStream`) and imports translation from `@srouter/translator`.
+
+### 5. `@srouter/pricing` (`packages/pricing`)
+
+- Model pricing tables (`MODEL_PRICING`, `PROVIDER_PRICING`, `PATTERN_PRICING`) — USD per 1M tokens.
+- `getPricingForModel`, `calculateCostFromTokens`, `formatCost` — estimated cost only, not actual billing.
+
+### 6. `@srouter/providers` (`packages/providers`)
+
+- `oauth.ts`: OpenAI Codex / Antigravity OAuth PKCE helpers (`generatePKCE`, token exchange, auto-refresh).
+- `registry.ts`: Provider routing engine (`ProviderRegistry`, `getProviderAlias`).
+
+### 7. `apps/api` (`apps/api`)
 
 - Hono web framework running on `@hono/node-server`.
 - Middleware:
