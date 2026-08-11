@@ -1,34 +1,43 @@
 import type { AIProvider, AnthropicMessageResponse, ChatCompletionChunk, ChatCompletionRequest, ChatCompletionResponse, ModelObject } from "@srouter/types";
-import { anthropicEventToOpenAIChunk, anthropicToOpenAIResponse, openAIToAnthropicRequest } from "./adapter.js";
+import { anthropicEventToOpenAIChunk, anthropicToOpenAIResponse, openAIToAnthropicRequest } from "@srouter/translator";
+import { parseDataLine, streamLines } from "./base.js";
 
-export interface AnthropicProviderOptions {
+export interface AnthropicExecutorOptions {
     id?: string;
     name?: string;
     baseUrl?: string;
     apiKey?: string;
+    accessToken?: string;
 }
 
-export class AnthropicProvider implements AIProvider {
+export class AnthropicExecutor implements AIProvider {
     id: string;
     name: string;
     category: "api_key" = "api_key";
     protocol: "anthropic" = "anthropic";
     private baseUrl: string;
     private apiKey: string;
+    private accessToken: string;
 
-    constructor(options: AnthropicProviderOptions = {}) {
+    constructor(options: AnthropicExecutorOptions = {}) {
         this.id = options.id ?? "anthropic";
         this.name = options.name ?? "Anthropic Provider";
         this.baseUrl = (options.baseUrl ?? "https://api.anthropic.com/v1").replace(/\/$/, "");
         this.apiKey = options.apiKey ?? process.env.ANTHROPIC_API_KEY ?? "";
+        this.accessToken = options.accessToken ?? process.env.ANTHROPIC_ACCESS_TOKEN ?? "";
     }
 
     private getHeaders(): Record<string, string> {
-        return {
+        const headers: Record<string, string> = {
             "Content-Type": "application/json",
-            "x-api-key": this.apiKey,
             "anthropic-version": "2023-06-01",
         };
+        const token = this.accessToken || this.apiKey;
+        if (token) {
+            headers["x-api-key"] = token;
+            headers["Authorization"] = `Bearer ${token}`;
+        }
+        return headers;
     }
 
     /**
@@ -125,41 +134,24 @@ export class AnthropicProvider implements AIProvider {
             throw new Error("No response body received from Anthropic");
         }
 
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder("utf-8");
-        let buffer = "";
+        let currentEventType = "";
 
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
+        for await (const line of streamLines(res.body)) {
+            if (line.startsWith("event: ")) {
+                currentEventType = line.slice(7);
+                continue;
+            }
 
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split("\n");
-            buffer = lines.pop() ?? "";
-
-            let currentEventType = "";
-
-            for (const line of lines) {
-                const trimmed = line.trim();
-                if (!trimmed) continue;
-
-                if (trimmed.startsWith("event: ")) {
-                    currentEventType = trimmed.slice(7);
-                    continue;
+            const jsonStr = parseDataLine(line);
+            if (jsonStr === null) continue;
+            try {
+                const parsedJson = JSON.parse(jsonStr);
+                const chunk = anthropicEventToOpenAIChunk(currentEventType, parsedJson, req.model);
+                if (chunk) {
+                    yield chunk;
                 }
-
-                if (trimmed.startsWith("data: ")) {
-                    const jsonStr = trimmed.slice(6);
-                    try {
-                        const parsedJson = JSON.parse(jsonStr);
-                        const chunk = anthropicEventToOpenAIChunk(currentEventType, parsedJson, req.model);
-                        if (chunk) {
-                            yield chunk;
-                        }
-                    } catch {
-                        // ignore malformed SSE line
-                    }
-                }
+            } catch {
+                // ignore malformed SSE line
             }
         }
     }

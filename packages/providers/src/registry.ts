@@ -1,4 +1,29 @@
 import type { AIProvider, ChatCompletionChunk, ChatCompletionRequest, ChatCompletionResponse, ModelObject, ProviderDefinition } from "@srouter/types";
+
+// Provider base id -> short alias used in model ids (e.g. openai/gpt-4o).
+// Multi-account ids (openai_1700000000) resolve to the same alias.
+const PROVIDER_ALIASES: Record<string, string> = {
+    openai: "openai",
+    anthropic: "anthropic",
+    antigravity: "antigravity",
+    openai_codex: "openai",
+    commandcode: "commandcode",
+    gemini: "gemini",
+    vertex: "vertex",
+};
+
+export function getProviderAlias(providerId: string): string {
+    const baseId = providerId.split("_")[0]?.split("-")[0] ?? providerId;
+    return PROVIDER_ALIASES[baseId] ?? baseId;
+}
+
+// Strip any {alias}/ or {providerId}/ prefix from a model id, returning the bare id.
+function stripModelPrefix(modelId: string, alias: string, providerId: string): string {
+    if (modelId.startsWith(`${alias}/`)) return modelId.slice(alias.length + 1);
+    if (modelId.startsWith(`${providerId}/`)) return modelId.slice(providerId.length + 1);
+    return modelId;
+}
+
 export class ProviderRegistry {
     private providers: Map<string, AIProvider> = new Map();
     private defaultProvider: AIProvider;
@@ -90,17 +115,25 @@ export class ProviderRegistry {
         const allModels: ModelObject[] = [];
         const seenIds = new Set<string>();
 
+        const addModel = (model: ModelObject, alias: string, providerId: string): void => {
+            const bareId = stripModelPrefix(model.id, alias, providerId);
+            const id = `${alias}/${bareId}`;
+            if (!seenIds.has(id)) {
+                seenIds.add(id);
+                allModels.push({ id, object: "model", owned_by: alias });
+            }
+        };
+
         // 1. Models from registered/connected providers ONLY
         for (const provider of this.providers.values()) {
             if (provider.id === "default") continue;
 
+            const alias = getProviderAlias(provider.id);
+
             // Fetch live models from provider endpoint using its accessToken / apiKey
             const liveModels = await provider.listModels();
             for (const model of liveModels) {
-                if (!seenIds.has(model.id)) {
-                    seenIds.add(model.id);
-                    allModels.push(model);
-                }
+                addModel(model, alias, provider.id);
             }
 
             // Include catalog models corresponding ONLY to connected providers
@@ -108,10 +141,7 @@ export class ProviderRegistry {
             const catItem = this.catalog.find((c) => c.id === provider.id || c.id === baseId);
             if (catItem) {
                 for (const model of catItem.models) {
-                    if (!seenIds.has(model.id)) {
-                        seenIds.add(model.id);
-                        allModels.push(model);
-                    }
+                    addModel(model, alias, provider.id);
                 }
             }
         }
@@ -120,11 +150,9 @@ export class ProviderRegistry {
         if (allModels.length === 0) {
             for (const cat of this.catalog) {
                 if (cat.status.state === "connected" || cat.status.state === "ready") {
+                    const alias = getProviderAlias(cat.id);
                     for (const model of cat.models) {
-                        if (!seenIds.has(model.id)) {
-                            seenIds.add(model.id);
-                            allModels.push(model);
-                        }
+                        addModel(model, alias, cat.id);
                     }
                 }
             }

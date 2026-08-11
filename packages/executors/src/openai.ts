@@ -1,6 +1,7 @@
 import type { AIProvider, ChatCompletionChunk, ChatCompletionRequest, ChatCompletionResponse, ModelListResponse, ModelObject } from "@srouter/types";
+import { parseDataLine, streamLines } from "./base.js";
 
-export interface OpenAIProviderOptions {
+export interface OpenAIExecutorOptions {
     id?: string;
     name?: string;
     baseUrl?: string;
@@ -8,14 +9,14 @@ export interface OpenAIProviderOptions {
     accessToken?: string;
 }
 
-export class OpenAIProvider implements AIProvider {
+export class OpenAIExecutor implements AIProvider {
     id: string;
     name: string;
     private baseUrl: string;
     private apiKey: string;
     private accessToken: string;
 
-    constructor(options: OpenAIProviderOptions = {}) {
+    constructor(options: OpenAIExecutorOptions = {}) {
         this.id = options.id ?? "openai";
         this.name = options.name ?? "OpenAI Provider";
         this.baseUrl = (options.baseUrl ?? "https://api.openai.com/v1").replace(/\/$/, "");
@@ -52,13 +53,11 @@ export class OpenAIProvider implements AIProvider {
                 if (data.data && Array.isArray(data.data)) {
                     const baseId = this.id.split("_")[0]?.split("-")[0] ?? this.id;
                     for (const m of data.data) {
-                        result.push(m);
-                        if (!m.id.startsWith(`${baseId}/`)) {
-                            result.push({
-                                ...m,
-                                id: `${baseId}/${m.id}`,
-                            });
-                        }
+                        result.push({
+                            id: `${baseId}/${m.id}`,
+                            object: "model",
+                            owned_by: baseId,
+                        });
                     }
                 }
             }
@@ -103,35 +102,14 @@ export class OpenAIProvider implements AIProvider {
             throw new Error("No response body received for streaming");
         }
 
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder("utf-8");
-        let buffer = "";
-
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split("\n");
-            buffer = lines.pop() ?? "";
-
-            for (const line of lines) {
-                const trimmed = line.trim();
-                if (!trimmed || trimmed.startsWith(":")) continue;
-
-                if (trimmed === "data: [DONE]") {
-                    return;
-                }
-
-                if (trimmed.startsWith("data: ")) {
-                    const jsonStr = trimmed.slice(6);
-                    try {
-                        const parsed = JSON.parse(jsonStr) as ChatCompletionChunk;
-                        yield parsed;
-                    } catch {
-                        // ignore malformed JSON chunk
-                    }
-                }
+        for await (const line of streamLines(res.body)) {
+            const jsonStr = parseDataLine(line);
+            if (jsonStr === null) continue;
+            try {
+                const parsed = JSON.parse(jsonStr) as ChatCompletionChunk;
+                yield parsed;
+            } catch {
+                // ignore malformed JSON chunk
             }
         }
     }
