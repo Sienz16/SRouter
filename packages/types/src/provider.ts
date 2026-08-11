@@ -40,7 +40,6 @@ export interface ProviderConfig {
     accessToken?: string;
     refreshToken?: string;
     accountId?: string;
-    organizationId?: string;
     customHeaders?: Record<string, string>;
     enabled: boolean;
     createdAt: number;
