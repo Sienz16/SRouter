@@ -76,31 +76,11 @@ export class AuthController {
                 });
             }
 
-            return c.html(`
-                <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <title>SRouter - OpenAI Login Success</title>
-                    <style>
-                        body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-                        .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 2.5rem; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); }
-                        .icon { font-size: 3rem; margin-bottom: 1rem; }
-                        h2 { margin-top: 0; color: #38bdf8; }
-                        p { color: #94a3b8; line-height: 1.6; }
-                        .badge { background: #059669; color: white; font-weight: 600; padding: 0.5rem 1rem; border-radius: 9999px; display: inline-block; margin-top: 1rem; }
-                    </style>
-                </head>
-                <body>
-                    <div class="card">
-                        <div class="icon">🎉</div>
-                        <h2>Login OpenAI Codex Berhasil!</h2>
-                        <p>Access token & Refresh token telah <strong>tersimpan secara otomatis ke database SQLite (srouter.db)</strong>.</p>
-                        <div class="badge">SRouter Ready</div>
-                    </div>
-                </body>
-                </html>
-            `);
+            return c.json({
+                success: true,
+                message: "Login OpenAI Codex Berhasil!",
+                provider: providerConfig,
+            });
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
             return err(c, errorMessage, 500);
@@ -197,31 +177,11 @@ export class AuthController {
                 });
             }
 
-            return c.html(`
-                <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <title>SRouter - Antigravity Login Success</title>
-                    <style>
-                        body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-                        .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 2.5rem; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); }
-                        .icon { font-size: 3rem; margin-bottom: 1rem; }
-                        h2 { margin-top: 0; color: #a855f7; }
-                        p { color: #94a3b8; line-height: 1.6; }
-                        .badge { background: #9333ea; color: white; font-weight: 600; padding: 0.5rem 1rem; border-radius: 9999px; display: inline-block; margin-top: 1rem; }
-                    </style>
-                </head>
-                <body>
-                    <div class="card">
-                        <div class="icon">🚀</div>
-                        <h2>Login Antigravity OAuth Berhasil!</h2>
-                        <p>Access token & Refresh token telah <strong>tersimpan secara otomatis ke database SQLite (srouter.db)</strong>.</p>
-                        <div class="badge">SRouter Antigravity Ready</div>
-                    </div>
-                </body>
-                </html>
-            `);
+            return c.json({
+                success: true,
+                message: "Login Antigravity OAuth Berhasil!",
+                provider: providerConfig,
+            });
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
             return err(c, errorMessage, 500);
