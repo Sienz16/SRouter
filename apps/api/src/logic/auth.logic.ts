@@ -1,15 +1,14 @@
-import { upsertProviderDB } from "@srouter/db";
+import {
+    cleanupExpiredOAuthSessionsDB,
+    deleteOAuthSessionDB,
+    getOAuthSessionDB,
+    saveOAuthSessionDB,
+    upsertProviderDB,
+} from "@srouter/db";
 import { AntigravityExecutor, AnthropicExecutor, CommandCodeExecutor, OpenAIExecutor } from "@srouter/executors";
 import { AntigravityOAuth, OpenAICodexOAuth, generatePKCE, type PKCEPair } from "@srouter/providers";
 import type { ProviderConfig } from "@srouter/types";
 import { registry } from "@/services/registry.js";
-
-export interface PKCESession {
-    codeVerifier: string;
-    clientId: string;
-    redirectUri: string;
-    createdAt: number;
-}
 
 export interface OAuthLoginParams {
     clientId?: string;
@@ -32,16 +31,10 @@ export interface TokenImportParams {
     name?: string;
 }
 
-const pkceSessions = new Map<string, PKCESession>();
+const PKCE_SESSION_MAX_AGE_MS = 15 * 60 * 1000;
 
 function cleanupExpiredSessions(): void {
-    const now = Date.now();
-    const maxAge = 15 * 60 * 1000;
-    for (const [state, session] of pkceSessions.entries()) {
-        if (now - session.createdAt > maxAge) {
-            pkceSessions.delete(state);
-        }
-    }
+    cleanupExpiredOAuthSessionsDB(PKCE_SESSION_MAX_AGE_MS);
 }
 
 export class AuthLogic {
@@ -58,7 +51,8 @@ export class AuthLogic {
         });
 
         const pkce: PKCEPair = generatePKCE();
-        pkceSessions.set(pkce.state, {
+        saveOAuthSessionDB({
+            state: pkce.state,
             codeVerifier: pkce.codeVerifier,
             clientId,
             redirectUri,
@@ -78,12 +72,12 @@ export class AuthLogic {
     public static async processOAuthCallback(code: string, state: string): Promise<ProviderConfig> {
         cleanupExpiredSessions();
 
-        const session = pkceSessions.get(state);
+        const session = getOAuthSessionDB(state);
         if (!session) {
             throw new Error("Invalid or expired OAuth state parameter");
         }
 
-        pkceSessions.delete(state);
+        deleteOAuthSessionDB(state);
 
         const oauthInstance = new OpenAICodexOAuth({
             clientId: session.clientId,
@@ -159,7 +153,8 @@ export class AuthLogic {
         });
 
         const pkce: PKCEPair = generatePKCE();
-        pkceSessions.set(pkce.state, {
+        saveOAuthSessionDB({
+            state: pkce.state,
             codeVerifier: pkce.codeVerifier,
             clientId,
             redirectUri,
@@ -179,12 +174,12 @@ export class AuthLogic {
     public static async processAntigravityOAuthCallback(code: string, state: string): Promise<ProviderConfig> {
         cleanupExpiredSessions();
 
-        const session = pkceSessions.get(state);
+        const session = getOAuthSessionDB(state);
         if (!session) {
             throw new Error("Invalid or expired OAuth state parameter");
         }
 
-        pkceSessions.delete(state);
+        deleteOAuthSessionDB(state);
 
         const oauthInstance = new AntigravityOAuth({
             clientId: session.clientId,

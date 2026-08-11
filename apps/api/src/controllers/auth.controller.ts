@@ -15,6 +15,44 @@ export interface TokenImportBody {
     name?: string;
 }
 
+function renderOAuthSuccessHTML(providerName: string): Response {
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Otorisasi Berhasil</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; background: #09090b; color: #f4f4f5; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
+    .card { background: #18181b; border: 1px solid #27272a; border-radius: 16px; padding: 32px 40px; max-width: 380px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); }
+    .icon { font-size: 40px; margin-bottom: 12px; }
+    h1 { font-size: 18px; margin: 0 0 8px; color: #10b981; font-weight: 700; }
+    p { font-size: 13px; color: #a1a1aa; margin: 0; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">✨</div>
+    <h1>Otorisasi Berhasil!</h1>
+    <p>Koneksi <strong>${providerName}</strong> telah berhasil ditambahkan ke SRouter. Jendela ini akan tertutup otomatis...</p>
+  </div>
+  <script>
+    try {
+      if (window.opener) {
+        window.opener.postMessage({ type: "SROUTER_OAUTH_SUCCESS" }, "*");
+      }
+    } catch (e) {}
+    setTimeout(function() {
+      window.close();
+    }, 1200);
+  </script>
+</body>
+</html>`;
+    return new Response(html, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+    });
+}
+
 export class AuthController {
     // Initiate OAuth PKCE Login Flow
     public static loginOpenAI(c: Context): Response {
@@ -76,11 +114,7 @@ export class AuthController {
                 });
             }
 
-            return c.json({
-                success: true,
-                message: "Login OpenAI Codex Berhasil!",
-                provider: providerConfig,
-            });
+            return renderOAuthSuccessHTML(providerConfig.name);
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
             return err(c, errorMessage, 500);
@@ -177,11 +211,7 @@ export class AuthController {
                 });
             }
 
-            return c.json({
-                success: true,
-                message: "Login Antigravity OAuth Berhasil!",
-                provider: providerConfig,
-            });
+            return renderOAuthSuccessHTML(providerConfig.name);
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
             return err(c, errorMessage, 500);

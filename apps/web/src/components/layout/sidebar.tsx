@@ -13,7 +13,6 @@ import {
     SidebarFooter,
     SidebarGroup,
     SidebarGroupContent,
-    SidebarGroupLabel,
     SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
@@ -31,32 +30,31 @@ const navItems = [
 
 export function AppSidebar() {
     return (
-        <Sidebar collapsible="icon">
-            <SidebarHeader>
+        <Sidebar collapsible="icon" className="border-r border-border/80 bg-sidebar">
+            <SidebarHeader className="h-14 border-b border-border/60 px-3 flex items-center">
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton
                             size="lg"
                             render={<Link to="/" />}
-                            className="hover:bg-transparent data-active:bg-transparent"
+                            className="hover:bg-sidebar-accent/60 transition-colors"
                         >
-                            <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-accent text-white">
-                                <Zap className="size-4" strokeWidth={2} />
+                            <div className="flex size-7 items-center justify-center rounded bg-primary text-primary-foreground font-bold">
+                                <Zap className="size-3.5 fill-current" strokeWidth={2.5} />
                             </div>
-                            <div className="grid flex-1 text-left text-sm leading-tight">
-                                <span className="truncate font-semibold">SRouter</span>
-                                <span className="truncate text-xs text-muted">Gateway</span>
+                            <div className="flex items-center justify-between flex-1 min-w-0">
+                                <span className="font-semibold tracking-tight text-sm text-foreground">SRouter</span>
+                                <span className="text-[10px] font-mono text-muted-foreground border border-border/60 px-1 py-0.2 rounded">v1.0</span>
                             </div>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>
 
-            <SidebarContent>
+            <SidebarContent className="px-2 py-3">
                 <SidebarGroup>
-                    <SidebarGroupLabel className="text-muted">Menu</SidebarGroupLabel>
                     <SidebarGroupContent>
-                        <SidebarMenu>
+                        <SidebarMenu className="space-y-0.5">
                             {navItems.map(({ to, label, icon: Icon }) => (
                                 <SidebarMenuItem key={to}>
                                     <SidebarMenuButton
@@ -65,14 +63,18 @@ export function AppSidebar() {
                                                 to={to}
                                                 activeOptions={{ exact: true }}
                                                 activeProps={{
-                                                    className: "bg-accent/10",
+                                                    className: "bg-sidebar-accent font-medium text-foreground",
+                                                }}
+                                                inactiveProps={{
+                                                    className: "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/40",
                                                 }}
                                             />
                                         }
                                         tooltip={label}
+                                        className="h-8 px-2.5 transition-colors"
                                     >
-                                        <Icon strokeWidth={1.75} />
-                                        <span>{label}</span>
+                                        <Icon strokeWidth={1.75} className="size-4 shrink-0" />
+                                        <span className="text-xs">{label}</span>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
                             ))}
@@ -81,18 +83,16 @@ export function AppSidebar() {
                 </SidebarGroup>
             </SidebarContent>
 
-            <SidebarFooter>
+            <SidebarFooter className="border-t border-border/60 p-3">
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" className="hover:bg-transparent">
-                            <div className="flex aspect-square size-8 shrink-0 items-center justify-center rounded-md bg-surface-2 text-sm font-semibold text-foreground">
-                                S
+                        <div className="flex items-center justify-between px-2 py-1 text-xs">
+                            <div className="flex items-center gap-2">
+                                <span className="size-2 rounded-full bg-emerald-500" />
+                                <span className="font-medium text-foreground text-xs">Gateway</span>
                             </div>
-                            <div className="grid flex-1 text-left text-sm leading-tight">
-                                <span className="truncate font-medium">Gateway</span>
-                                <span className="truncate text-xs text-muted">localhost:3000</span>
-                            </div>
-                        </SidebarMenuButton>
+                            <span className="font-mono text-[11px] text-muted-foreground">3000</span>
+                        </div>
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarFooter>
@@ -101,3 +101,6 @@ export function AppSidebar() {
         </Sidebar>
     );
 }
+
+
+

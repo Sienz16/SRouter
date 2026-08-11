@@ -13,7 +13,15 @@
       "Shell(ps:*)",
       "Shell(python3 -c import sys,json; d=json.load(sys.stdin); print('object:', d['object']); print('count:', len(d['data'])); [print(' ', m) for m in d['data'][:3]]; assert all('created' not in m for m in d['data']), 'created harus tidak ada'; assert all(m['owned_by']==m['id'].split('/')[0] for m in d['data']), 'owned_by harus = alias'; assert len({m['id'] for m in d['data']})==len(d['data']), 'id harus unik'; print('OK: format sesuai 9router'))",
       "Shell(curl -s -m 20 https://api.commandcode.ai/provider/v1/models)",
-      "Shell(curl -s -m 10 -X POST http://localhost:3000/v1/auth/commandcode/import-token -H Content-Type: application/json -d {\"accessToken\": \"\", \"name\": \"Command Code (E2E)\"})"
+      "Shell(curl -s -m 10 -X POST http://localhost:3000/v1/auth/commandcode/import-token -H Content-Type: application/json -d {\"accessToken\": \"\", \"name\": \"Command Code (E2E)\"})",
+      "Shell(sleep:*)",
+      "Shell(pgrep:*)",
+      "Shell(grep:*)",
+      "Shell(rm:*)",
+      "Shell(ls:*)",
+      "Shell(node --import tsx -e import('./node_modules/@srouter/db/dist/index.js').then(() => console.log('DB init OK')) 2 >& 1)",
+      "Shell(node -e const {DatabaseSync}=require('node:sqlite'); const db=new DatabaseSync('srouter.db'); const tables=db.prepare(\"SELECT name FROM sqlite_master WHERE type='table'\").all(); console.log('tables:', tables.map(t=>t.name).join(', ')); for (const t of ['providers','api_keys','request_logs']) console.log(t, '->', db.prepare('SELECT COUNT(*) c FROM '+t).get().c, 'rows');)",
+      "Shell(node --import tsx -e  import { AuthLogic } from './src/logic/auth.logic.ts'; const result = AuthLogic.initiateOAuthPKCE({}); console.log(result.authorizeUrl);  2 >& 1)"
     ],
     "deny": [
       "Shell(pnpm dev)",

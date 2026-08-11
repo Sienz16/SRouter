@@ -24,10 +24,117 @@ function stripModelPrefix(modelId: string, alias: string, providerId: string): s
     return modelId;
 }
 
+export const DEFAULT_CATALOG: ProviderDefinition[] = [
+    {
+        id: "openai_codex",
+        name: "OpenAI Codex / ChatGPT",
+        category: "oauth",
+        protocol: "openai",
+        description: "OpenAI OAuth driver with GPT-4o, o1, o3-mini & Codex integration.",
+        icon: "🤖",
+        requiresApiKey: false,
+        requiresOAuth: true,
+        status: { state: "disconnected", message: "OAuth token missing" },
+        models: [
+            { id: "gpt-4o", object: "model", owned_by: "openai" },
+            { id: "gpt-4o-mini", object: "model", owned_by: "openai" },
+            { id: "o1", object: "model", owned_by: "openai" },
+            { id: "o1-mini", object: "model", owned_by: "openai" },
+            { id: "o3-mini", object: "model", owned_by: "openai" },
+            { id: "gpt-4-turbo", object: "model", owned_by: "openai" },
+            { id: "chatgpt-4o-latest", object: "model", owned_by: "openai" },
+        ],
+    },
+    {
+        id: "anthropic",
+        name: "Anthropic Claude",
+        category: "oauth",
+        protocol: "anthropic",
+        description: "Anthropic Claude driver supporting Claude 3.5 Sonnet & Haiku.",
+        icon: "🧠",
+        requiresApiKey: false,
+        requiresOAuth: true,
+        status: { state: "disconnected", message: "OAuth token missing" },
+        models: [
+            { id: "claude-3-5-sonnet-20241022", object: "model", owned_by: "anthropic" },
+            { id: "claude-3-5-haiku-20241022", object: "model", owned_by: "anthropic" },
+        ],
+    },
+    {
+        id: "antigravity",
+        name: "Antigravity Cloud",
+        category: "oauth",
+        protocol: "openai",
+        description: "Google Antigravity LLM Routing Cloud with Gemini 2.0 & Claude 3.5.",
+        icon: "🚀",
+        requiresApiKey: false,
+        requiresOAuth: true,
+        status: { state: "disconnected", message: "Antigravity OAuth token missing" },
+        models: [
+            { id: "gemini-2.0-flash-exp", object: "model", owned_by: "antigravity" },
+            { id: "claude-3-5-sonnet-20241022", object: "model", owned_by: "antigravity" },
+        ],
+    },
+    {
+        id: "groq",
+        name: "Groq Cloud",
+        category: "free_tier",
+        protocol: "openai",
+        description: "Groq Llama 3 & DeepSeek R1 ultra-fast inference driver.",
+        icon: "⚡",
+        requiresApiKey: true,
+        status: { state: "ready" },
+        models: [
+            { id: "llama-3.3-70b-versatile", object: "model", owned_by: "groq" },
+            { id: "deepseek-r1-distill-llama-70b", object: "model", owned_by: "groq" },
+        ],
+    },
+    {
+        id: "openrouter",
+        name: "OpenRouter Free",
+        category: "free_tier",
+        protocol: "openai",
+        description: "OpenRouter free tier unified LLM routing driver.",
+        icon: "🌐",
+        requiresApiKey: true,
+        status: { state: "ready" },
+        models: [
+            { id: "meta-llama/llama-3.3-70b-instruct:free", object: "model", owned_by: "openrouter" },
+        ],
+    },
+    {
+        id: "openai_api_key",
+        name: "OpenAI Platform API Key",
+        category: "api_key",
+        protocol: "openai",
+        description: "Direct OpenAI platform API Key authentication.",
+        icon: "🔑",
+        requiresApiKey: true,
+        status: { state: "ready" },
+        models: [
+            { id: "gpt-4o", object: "model", owned_by: "openai" },
+            { id: "gpt-4o-mini", object: "model", owned_by: "openai" },
+        ],
+    },
+    {
+        id: "anthropic_api_key",
+        name: "Anthropic Platform API Key",
+        category: "api_key",
+        protocol: "anthropic",
+        description: "Direct Anthropic platform API Key authentication.",
+        icon: "🔑",
+        requiresApiKey: true,
+        status: { state: "ready" },
+        models: [
+            { id: "claude-3-5-sonnet-20241022", object: "model", owned_by: "anthropic" },
+        ],
+    },
+];
+
 export class ProviderRegistry {
     private providers: Map<string, AIProvider> = new Map();
     private defaultProvider: AIProvider;
-    private catalog: ProviderDefinition[] = [];
+    private catalog: ProviderDefinition[] = [...DEFAULT_CATALOG];
 
     constructor(defaultProvider?: AIProvider) {
         this.defaultProvider = defaultProvider ?? {
@@ -46,6 +153,7 @@ export class ProviderRegistry {
         this.registerProvider(this.defaultProvider);
     }
 
+
     registerProvider(provider: AIProvider): void {
         this.providers.set(provider.id, provider);
         // Update catalog status if matched (supports prefix for multi-account e.g. antigravity_1700000000)
@@ -59,6 +167,10 @@ export class ProviderRegistry {
 
     getProvider(providerId: string): AIProvider | undefined {
         return this.providers.get(providerId);
+    }
+
+    getAllProviders(): Map<string, AIProvider> {
+        return this.providers;
     }
 
     getCatalog(): ProviderDefinition[] {

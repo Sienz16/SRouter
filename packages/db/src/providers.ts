@@ -75,3 +75,26 @@ export function deleteProviderDB(id: string): boolean {
     const result = query.run(id);
     return (result.changes ?? 0) > 0;
 }
+
+export function getConnectionsByProviderIdDB(providerId: string): ProviderConfig[] {
+    const pId = providerId.toLowerCase();
+    const query = db.prepare(
+        "SELECT * FROM providers WHERE LOWER(provider_id) = ? OR LOWER(id) = ? ORDER BY created_at DESC"
+    );
+    const rows = query.all(pId, pId);
+
+    return rows.map((row) => ({
+        id: String(row.id ?? ""),
+        providerId: String(row.provider_id ?? ""),
+        name: String(row.name ?? ""),
+        category: row.category ? (String(row.category) as ProviderCategory) : undefined,
+        protocol: row.protocol ? (String(row.protocol) as ProviderProtocol) : undefined,
+        baseUrl: row.base_url ? String(row.base_url) : undefined,
+        apiKey: row.api_key ? String(row.api_key) : undefined,
+        accessToken: row.access_token ? String(row.access_token) : undefined,
+        refreshToken: row.refresh_token ? String(row.refresh_token) : undefined,
+        customHeaders: row.custom_headers ? JSON.parse(String(row.custom_headers)) : undefined,
+        enabled: Boolean(row.enabled),
+        createdAt: Number(row.created_at ?? 0),
+    }));
+}

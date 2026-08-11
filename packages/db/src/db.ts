@@ -82,6 +82,17 @@ export function initDatabase(): void {
         );
     `);
 
+    // 4. Table for OAuth PKCE sessions (survive server restarts)
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS oauth_sessions (
+            state TEXT PRIMARY KEY,
+            code_verifier TEXT NOT NULL,
+            client_id TEXT NOT NULL,
+            redirect_uri TEXT NOT NULL,
+            created_at INTEGER NOT NULL
+        );
+    `);
+
     // Ensure analytics columns exist if table was created previously
     const analyticsColumns: Array<{ name: string; definition: string }> = [
         { name: "cached_tokens", definition: "cached_tokens INTEGER NOT NULL DEFAULT 0" },

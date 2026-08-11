@@ -26,6 +26,7 @@ export interface ProviderDefinition {
     supportsCustomUrl?: boolean;
     status: ProviderStatus;
     models: ModelObject[];
+    connections?: ProviderConfig[];
 }
 
 export interface ProviderConfig {

@@ -9,6 +9,20 @@ import { quotaRoute } from "@/routes/v1/quota.js";
 
 const app = new Hono();
 
+// Global Error Handler
+app.onError((err, c) => {
+    console.error("🔥 API Route Exception:", err);
+    return c.json(
+        {
+            error: {
+                message: err.message || "Internal Server Error",
+                type: "internal_error",
+            },
+        },
+        500,
+    );
+});
+
 // Health check endpoint
 app.get("/", (c) => {
     return c.json({
@@ -22,6 +36,7 @@ app.get("/", (c) => {
 app.get("/health", (c) => {
     return c.json({ status: "ok" });
 });
+
 
 // Mount OpenAI & Anthropic v1 API routes
 app.route("/v1", modelsRoute);

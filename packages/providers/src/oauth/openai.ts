@@ -16,19 +16,22 @@ export class OpenAICodexOAuth {
     private authorizeUrl: string;
     private tokenUrl: string;
     private prompt?: string;
+    private originator: string;
 
     constructor(options: OpenAIOAuthOptions = {}) {
-        // Official OpenAI OAuth Public Client ID (from Context7 openai-oauth docs)
+        // Official OpenAI Codex OAuth public client ID (mirrors openai/codex auth URL)
         this.clientId = options.clientId ?? process.env.OPENAI_OAUTH_CLIENT_ID ?? "app_EMoamEEZ73f0CkXaXp7hrann";
         this.redirectUri = options.redirectUri ?? process.env.OPENAI_OAUTH_REDIRECT_URI ?? "http://localhost:1455/auth/callback";
-        this.scope = options.scope ?? "openid profile email offline_access";
+        // Mirrors the official Codex CLI scope set; the connector scopes are required for a valid consent
+        this.scope = options.scope ?? "openid profile email offline_access api.connectors.read api.connectors.invoke";
         this.authorizeUrl = options.authorizeUrl ?? "https://auth.openai.com/oauth/authorize";
         this.tokenUrl = options.tokenUrl ?? "https://auth.openai.com/oauth/token";
-        this.prompt = options.prompt ?? process.env.OPENAI_OAUTH_PROMPT ?? "login";
+        this.prompt = options.prompt ?? process.env.OPENAI_OAUTH_PROMPT;
+        this.originator = process.env.OPENAI_OAUTH_ORIGINATOR ?? "codex_cli_rs";
     }
 
     /**
-     * Generates PKCE parameters and returns authorization URL (Context7 OpenAI OAuth Compliant)
+     * Generates PKCE parameters and returns authorization URL (matches official Codex CLI)
      */
     getAuthorizationUrl(pkce: PKCEPair): string {
         const params: Record<string, string> = {
@@ -39,6 +42,10 @@ export class OpenAICodexOAuth {
             code_challenge: pkce.codeChallenge,
             code_challenge_method: "S256",
             state: pkce.state,
+            // Required by OpenAI's Codex OAuth flow for a valid consent session
+            id_token_add_organizations: "true",
+            codex_cli_simplified_flow: "true",
+            originator: this.originator,
         };
 
         if (this.prompt) {
