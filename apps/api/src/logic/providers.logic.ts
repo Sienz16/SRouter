@@ -21,6 +21,9 @@ export interface CreateProviderPayload {
     protocol: ProviderProtocol;
     baseUrl?: string;
     apiKey?: string;
+    accessToken?: string;
+    refreshToken?: string;
+    providerSpecificData?: Record<string, string>;
 }
 
 function isProviderCategory(value: string): value is ProviderCategory {
@@ -142,6 +145,9 @@ export class ProvidersLogic {
             protocol,
             baseUrl,
             apiKey,
+            accessToken: payload.accessToken,
+            refreshToken: payload.refreshToken,
+            providerSpecificData: payload.providerSpecificData,
             enabled: true,
             createdAt: Date.now(),
         };
@@ -154,7 +160,7 @@ export class ProvidersLogic {
             name: config.name,
             protocol: config.protocol,
             category: config.category,
-            requiresApiKey: Boolean(config.apiKey),
+            requiresApiKey: Boolean(apiKey),
             supportsCustomUrl: true,
             models: [],
             status: { state: "connected", connectedCount: 1 },

@@ -2,7 +2,7 @@ import type { Context } from "hono";
 import type { CreateProviderPayload } from "@/logic/providers.logic.js";
 import { ProvidersLogic } from "@/logic/providers.logic.js";
 import { deleteProviderDB } from "@srouter/db";
-import { loadSavedProvidersFromDB } from "@/services/registry.js";
+import { loadSavedProvidersFromDB, registry } from "@/services/registry.js";
 import { ok } from "@/utils/response.js";
 
 export class ProvidersController {
@@ -50,6 +50,7 @@ export class ProvidersController {
         if (!deleted) {
             return c.json({ error: { message: `Connection '${id}' not found` } }, 404);
         }
+        registry.unregisterProvider(id);
         loadSavedProvidersFromDB();
         return ok(c, { message: "Connection deleted" });
     }
