@@ -14,7 +14,10 @@ export interface UsageBreakdown {
  * Provider-aware: anthropic uses cache_read_input_tokens, openai-compatible
  * uses prompt_tokens_details.cached_tokens, etc.
  */
-export function extractUsageBreakdown(provider: string | undefined, usage: unknown): UsageBreakdown {
+export function extractUsageBreakdown(
+    provider: string | undefined,
+    usage: unknown,
+): UsageBreakdown {
     const empty: UsageBreakdown = {
         promptTokens: 0,
         completionTokens: 0,
@@ -42,7 +45,9 @@ export function extractUsageBreakdown(provider: string | undefined, usage: unkno
             completionTokens: output,
             cachedTokens: cached,
             cacheCreationTokens: cacheCreation,
-            reasoningTokens: n((u as { reasoning?: { reasoning_tokens?: unknown } }).reasoning?.reasoning_tokens),
+            reasoningTokens: n(
+                (u as { reasoning?: { reasoning_tokens?: unknown } }).reasoning?.reasoning_tokens,
+            ),
             totalTokens: input + output,
         };
     }
@@ -68,7 +73,11 @@ export function extractUsageBreakdown(provider: string | undefined, usage: unkno
  * Estimate the cost (USD) of a usage breakdown for a given model.
  * Estimated only — not actual billing.
  */
-export function estimateCostForUsage(provider: string | undefined, model: string, breakdown: UsageBreakdown): number {
+export function estimateCostForUsage(
+    provider: string | undefined,
+    model: string,
+    breakdown: UsageBreakdown,
+): number {
     const pricing = getPricingForModel(provider, model);
     return calculateCostFromTokens(
         {

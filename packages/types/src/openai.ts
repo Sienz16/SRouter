@@ -2,7 +2,8 @@ export type ChatMessageRole = "system" | "user" | "assistant" | "tool" | "functi
 
 export type FinishReason = "stop" | "length" | "tool_calls" | "content_filter" | null;
 
-export type ToolChoiceOption = "none" | "auto" | "required" | { type: "function"; function: { name: string } };
+export type ToolChoiceOption =
+    "none" | "auto" | "required" | { type: "function"; function: { name: string } };
 
 export interface ChatMessageContentPart {
     type: "text" | "image_url";

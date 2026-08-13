@@ -1,4 +1,8 @@
-import type { ChatCompletionChunk, ChatCompletionRequest, ChatCompletionResponse } from "@srouter/types";
+import type {
+    ChatCompletionChunk,
+    ChatCompletionRequest,
+    ChatCompletionResponse,
+} from "@srouter/types";
 import crypto from "node:crypto";
 
 export interface GeminiContentPart {
@@ -28,7 +32,11 @@ export interface GeminiNativePayload {
 
 export function parseGeminiModelName(rawModel: string): string {
     let model = rawModel.includes("/") ? (rawModel.split("/")[1] ?? rawModel) : rawModel;
-    if (model === "gemini-3.6-flash" || model === "gemini-3.5-flash" || model === "gemini-2.0-flash") {
+    if (
+        model === "gemini-3.6-flash" ||
+        model === "gemini-3.5-flash" ||
+        model === "gemini-2.0-flash"
+    ) {
         model = "gemini-2.5-flash";
     }
     return model;
@@ -42,7 +50,11 @@ export function buildGeminiContents(req: ChatCompletionRequest): GeminiContent[]
 }
 
 // CloudCode (ya29 OAuth) uses { model, request: { contents } }; Gemini native uses bare { contents }.
-export function buildGeminiBody(contents: GeminiContent[], modelName: string, token: string): CloudCodePayload | GeminiNativePayload {
+export function buildGeminiBody(
+    contents: GeminiContent[],
+    modelName: string,
+    token: string,
+): CloudCodePayload | GeminiNativePayload {
     if (token.startsWith("ya29.")) {
         return { model: modelName, request: { contents } };
     }
@@ -85,10 +97,18 @@ export interface GeminiRawResponse {
 }
 
 export function parseGeminiResponse(data: GeminiRawResponse): string {
-    return data.candidates?.[0]?.content?.parts?.[0]?.text ?? data.responses?.[0]?.candidates?.[0]?.content?.parts?.[0]?.text ?? data.response?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+    return (
+        data.candidates?.[0]?.content?.parts?.[0]?.text ??
+        data.responses?.[0]?.candidates?.[0]?.content?.parts?.[0]?.text ??
+        data.response?.candidates?.[0]?.content?.parts?.[0]?.text ??
+        ""
+    );
 }
 
-export function geminiToOpenAIResponse(data: GeminiRawResponse, requestedModel: string): ChatCompletionResponse {
+export function geminiToOpenAIResponse(
+    data: GeminiRawResponse,
+    requestedModel: string,
+): ChatCompletionResponse {
     const textResponse = parseGeminiResponse(data);
     return {
         id: `chatcmpl-${Date.now()}`,
@@ -112,7 +132,6 @@ export function geminiToOpenAIResponse(data: GeminiRawResponse, requestedModel: 
 
 // Official Antigravity IDE Desktop 2.1.1 fingerprint (macOS arm64)
 export const ANTIGRAVITY_IDE_VERSION = "2.1.1";
-export const ANTIGRAVITY_IDE_BASE_URL = "https://daily-cloudcode-pa.googleapis.com";
 export const ANTIGRAVITY_IDE_USER_AGENT = `antigravity/ide/${ANTIGRAVITY_IDE_VERSION} darwin/arm64`;
 
 const MAX_ANTIGRAVITY_OUTPUT_TOKENS = 64000;
@@ -130,7 +149,11 @@ export function generateSessionId(): string {
 }
 
 function uuidFromSeed(seed: string): string {
-    const bytes = crypto.createHash("sha256").update(String(seed || "antigravity")).digest().subarray(0, 16);
+    const bytes = crypto
+        .createHash("sha256")
+        .update(String(seed || "antigravity"))
+        .digest()
+        .subarray(0, 16);
     bytes[6] = (bytes[6] & 0x0f) | 0x50;
     bytes[8] = (bytes[8] & 0x3f) | 0x80;
     const hex = bytes.toString("hex");
@@ -151,7 +174,13 @@ export interface IdeRequestIdArgs {
  * Build an IDE-format requestId: agent/<conversation>/<timestamp>/<trajectory>/<step>.
  * Antigravity backend validates this format — requests without it may be rejected.
  */
-export function buildIdeRequestId({ body, request, sessionId, model, requestType }: IdeRequestIdArgs): string {
+export function buildIdeRequestId({
+    body,
+    request,
+    sessionId,
+    model,
+    requestType,
+}: IdeRequestIdArgs): string {
     if (body?.requestId && ANTIGRAVITY_IDE_REQUEST_ID_RE.test(body.requestId)) {
         return body.requestId;
     }
@@ -193,19 +222,58 @@ export function buildGeminiStreamUrl(baseUrl: string, modelName: string): string
 // ─── Gemini JSON Schema cleanup for Antigravity (port of 9router formats/gemini.js) ───
 
 const UNSUPPORTED_SCHEMA_CONSTRAINTS = [
-    "minLength", "maxLength", "exclusiveMinimum", "exclusiveMaximum",
-    "minItems", "maxItems", "format", "multipleOf",
-    "uniqueItems", "contains",
-    "unevaluatedProperties", "unevaluatedItems", "contentSchema",
-    "default", "examples",
-    "$schema", "$defs", "definitions", "const", "$ref", "$comment",
-    "deprecated", "readOnly", "writeOnly",
-    "additionalProperties", "propertyNames", "patternProperties", "enumDescriptions",
-    "anyOf", "oneOf", "allOf", "not",
-    "dependencies", "dependentSchemas", "dependentRequired",
-    "title", "optional", "if", "then", "else", "contentMediaType", "contentEncoding",
-    "cornerRadius", "fillColor", "fontFamily", "fontSize", "fontWeight",
-    "gap", "padding", "strokeColor", "strokeThickness", "textColor",
+    "minLength",
+    "maxLength",
+    "exclusiveMinimum",
+    "exclusiveMaximum",
+    "minItems",
+    "maxItems",
+    "format",
+    "multipleOf",
+    "uniqueItems",
+    "contains",
+    "unevaluatedProperties",
+    "unevaluatedItems",
+    "contentSchema",
+    "default",
+    "examples",
+    "$schema",
+    "$defs",
+    "definitions",
+    "const",
+    "$ref",
+    "$comment",
+    "deprecated",
+    "readOnly",
+    "writeOnly",
+    "additionalProperties",
+    "propertyNames",
+    "patternProperties",
+    "enumDescriptions",
+    "anyOf",
+    "oneOf",
+    "allOf",
+    "not",
+    "dependencies",
+    "dependentSchemas",
+    "dependentRequired",
+    "title",
+    "optional",
+    "if",
+    "then",
+    "else",
+    "contentMediaType",
+    "contentEncoding",
+    "cornerRadius",
+    "fillColor",
+    "fontFamily",
+    "fontSize",
+    "fontWeight",
+    "gap",
+    "padding",
+    "strokeColor",
+    "strokeThickness",
+    "textColor",
 ];
 
 function removeUnsupportedKeywords(obj: unknown, keywords: string[]): void {
@@ -261,13 +329,19 @@ function mergeAllOf(obj: unknown): void {
             if (item.required && Array.isArray(item.required)) {
                 if (!merged.required) merged.required = [];
                 for (const req of item.required as string[]) {
-                    if (!(merged.required as string[]).includes(req)) (merged.required as string[]).push(req);
+                    if (!(merged.required as string[]).includes(req))
+                        (merged.required as string[]).push(req);
                 }
             }
         }
         delete o.allOf;
-        if (merged.properties) o.properties = { ...(o.properties as Record<string, unknown>), ...(merged.properties as Record<string, unknown>) };
-        if (merged.required) o.required = [...((o.required as string[]) || []), ...(merged.required as string[])];
+        if (merged.properties)
+            o.properties = {
+                ...(o.properties as Record<string, unknown>),
+                ...(merged.properties as Record<string, unknown>),
+            };
+        if (merged.required)
+            o.required = [...((o.required as string[]) || []), ...(merged.required as string[])];
     }
     for (const value of Object.values(o)) {
         if (value && typeof value === "object") mergeAllOf(value);
@@ -296,7 +370,9 @@ function flattenAnyOfOneOf(obj: unknown): void {
     if (!obj || typeof obj !== "object") return;
     const o = obj as Record<string, unknown>;
     if (o.anyOf && Array.isArray(o.anyOf) && o.anyOf.length > 0) {
-        const nonNull = (o.anyOf as Array<Record<string, unknown>>).filter((s) => s && s.type !== "null");
+        const nonNull = (o.anyOf as Array<Record<string, unknown>>).filter(
+            (s) => s && s.type !== "null",
+        );
         if (nonNull.length > 0) {
             const selected = nonNull[selectBest(nonNull)];
             delete o.anyOf;
@@ -304,7 +380,9 @@ function flattenAnyOfOneOf(obj: unknown): void {
         }
     }
     if (o.oneOf && Array.isArray(o.oneOf) && o.oneOf.length > 0) {
-        const nonNull = (o.oneOf as Array<Record<string, unknown>>).filter((s) => s && s.type !== "null");
+        const nonNull = (o.oneOf as Array<Record<string, unknown>>).filter(
+            (s) => s && s.type !== "null",
+        );
         if (nonNull.length > 0) {
             const selected = nonNull[selectBest(nonNull)];
             delete o.oneOf;
@@ -340,7 +418,9 @@ function cleanupRequired(obj: unknown): void {
     const o = obj as Record<string, unknown>;
     if (o.required && Array.isArray(o.required) && o.properties) {
         const props = o.properties as Record<string, unknown>;
-        const valid = (o.required as string[]).filter((f) => Object.prototype.hasOwnProperty.call(props, f));
+        const valid = (o.required as string[]).filter((f) =>
+            Object.prototype.hasOwnProperty.call(props, f),
+        );
         if (valid.length === 0) delete o.required;
         else o.required = valid;
     }
@@ -354,13 +434,23 @@ function addPlaceholders(obj: unknown): void {
     const o = obj as Record<string, unknown>;
     if (Object.keys(o).length === 0) {
         o.type = "object";
-        o.properties = { reason: { type: "string", description: "Brief explanation of why you are calling this tool" } };
+        o.properties = {
+            reason: {
+                type: "string",
+                description: "Brief explanation of why you are calling this tool",
+            },
+        };
         o.required = ["reason"];
         return;
     }
     if (o.type === "object") {
         if (!o.properties || Object.keys(o.properties as Record<string, unknown>).length === 0) {
-            o.properties = { reason: { type: "string", description: "Brief explanation of why you are calling this tool" } };
+            o.properties = {
+                reason: {
+                    type: "string",
+                    description: "Brief explanation of why you are calling this tool",
+                },
+            };
             o.required = ["reason"];
         }
     }
@@ -410,15 +500,26 @@ export interface GeminiStreamState {
     toolNameMap?: Map<string, string> | null;
 }
 
-export function createGeminiStreamState(model: string, toolNameMap?: Map<string, string> | null): GeminiStreamState {
+export function createGeminiStreamState(
+    model: string,
+    toolNameMap?: Map<string, string> | null,
+): GeminiStreamState {
     return { model, functionIndex: 0, geminiToolCallCount: 0, toolNameMap };
 }
 
 function geminiChunkMeta(state: GeminiStreamState) {
-    return { id: `chatcmpl-${state.messageId || Date.now()}`, created: Math.floor(Date.now() / 1000), model: state.model };
+    return {
+        id: `chatcmpl-${state.messageId || Date.now()}`,
+        created: Math.floor(Date.now() / 1000),
+        model: state.model,
+    };
 }
 
-function buildGeminiChunk(state: GeminiStreamState, delta: Record<string, unknown>, finishReason: string | null): ChatCompletionChunk {
+function buildGeminiChunk(
+    state: GeminiStreamState,
+    delta: Record<string, unknown>,
+    finishReason: string | null,
+): ChatCompletionChunk {
     return {
         id: `chatcmpl-${state.messageId || Date.now()}`,
         object: "chat.completion.chunk",
@@ -434,27 +535,39 @@ function buildGeminiChunk(state: GeminiStreamState, delta: Record<string, unknow
     };
 }
 
-function emitGeminiFunctionCall(functionCall: { name: string; args?: Record<string, unknown> }, state: GeminiStreamState): ChatCompletionChunk {
+function emitGeminiFunctionCall(
+    functionCall: { name: string; args?: Record<string, unknown> },
+    state: GeminiStreamState,
+): ChatCompletionChunk {
     const rawName = functionCall.name;
     const fcName = state.toolNameMap?.get(rawName) || rawName;
     const fcArgs = functionCall.args || {};
     const toolCallIndex = state.functionIndex++;
     state.geminiToolCallCount++;
-    return buildGeminiChunk(state, {
-        tool_calls: [{
-            index: toolCallIndex,
-            id: `${fcName}-${Date.now()}-${toolCallIndex}`,
-            type: "function",
-            function: { name: fcName, arguments: JSON.stringify(fcArgs) },
-        }],
-    }, null);
+    return buildGeminiChunk(
+        state,
+        {
+            tool_calls: [
+                {
+                    index: toolCallIndex,
+                    id: `${fcName}-${Date.now()}-${toolCallIndex}`,
+                    type: "function",
+                    function: { name: fcName, arguments: JSON.stringify(fcArgs) },
+                },
+            ],
+        },
+        null,
+    );
 }
 
 /**
  * Convert a Gemini/Antigravity SSE chunk into OpenAI ChatCompletionChunk(s).
  * Returns null when the chunk produces no output.
  */
-export function geminiStreamToOpenAIChunks(chunk: Record<string, unknown>, state: GeminiStreamState): ChatCompletionChunk[] | null {
+export function geminiStreamToOpenAIChunks(
+    chunk: Record<string, unknown>,
+    state: GeminiStreamState,
+): ChatCompletionChunk[] | null {
     if (!chunk) return null;
 
     const response = (chunk.response as Record<string, unknown>) || chunk;
@@ -483,7 +596,13 @@ export function geminiStreamToOpenAIChunks(chunk: Record<string, unknown>, state
                 const hasTextContent = part.text !== undefined && part.text !== "";
                 const hasFunctionCall = !!part.functionCall;
                 if (hasTextContent) {
-                    results.push(buildGeminiChunk(state, isThought ? { reasoning_content: part.text } : { content: part.text }, null));
+                    results.push(
+                        buildGeminiChunk(
+                            state,
+                            isThought ? { reasoning_content: part.text } : { content: part.text },
+                            null,
+                        ),
+                    );
                 }
                 if (hasFunctionCall && part.functionCall) {
                     results.push(emitGeminiFunctionCall(part.functionCall, state));
@@ -492,36 +611,65 @@ export function geminiStreamToOpenAIChunks(chunk: Record<string, unknown>, state
             }
 
             if (part.text !== undefined && part.text !== "") {
-                results.push(buildGeminiChunk(state, isThought ? { reasoning_content: part.text } : { content: part.text }, null));
+                results.push(
+                    buildGeminiChunk(
+                        state,
+                        isThought ? { reasoning_content: part.text } : { content: part.text },
+                        null,
+                    ),
+                );
             }
 
             if (part.functionCall) {
                 results.push(emitGeminiFunctionCall(part.functionCall, state));
             }
 
-            const inlineData = part.inlineData || (part as unknown as Record<string, unknown>).inline_data;
+            const inlineData =
+                part.inlineData || (part as unknown as Record<string, unknown>).inline_data;
             if (inlineData && (inlineData as Record<string, unknown>).data) {
                 const id = inlineData as Record<string, unknown>;
                 const mimeType = id.mimeType || id.mime_type || "image/png";
-                results.push(buildGeminiChunk(state, {
-                    images: [{ type: "image_url", image_url: { url: `data:${mimeType};base64,${id.data}` } }],
-                }, null));
+                results.push(
+                    buildGeminiChunk(
+                        state,
+                        {
+                            images: [
+                                {
+                                    type: "image_url",
+                                    image_url: { url: `data:${mimeType};base64,${id.data}` },
+                                },
+                            ],
+                        },
+                        null,
+                    ),
+                );
             }
         }
     }
 
     // Usage metadata
-    const usageMeta = (response.usageMetadata as Record<string, unknown>) || (chunk.usageMetadata as Record<string, unknown>);
+    const usageMeta =
+        (response.usageMetadata as Record<string, unknown>) ||
+        (chunk.usageMetadata as Record<string, unknown>);
     if (usageMeta) {
         const promptTokens = Number(usageMeta.promptTokenCount ?? 0);
-        const completionTokens = Number(usageMeta.candidatesTokenCount ?? usageMeta.candidates_tokens_count ?? 0);
+        const completionTokens = Number(
+            usageMeta.candidatesTokenCount ?? usageMeta.candidates_tokens_count ?? 0,
+        );
         const total = promptTokens + completionTokens;
-        state.usage = { prompt_tokens: promptTokens, completion_tokens: completionTokens, total_tokens: total };
+        state.usage = {
+            prompt_tokens: promptTokens,
+            completion_tokens: completionTokens,
+            total_tokens: total,
+        };
     }
 
     // Finish reason
     if (candidate.finishReason) {
-        let finishReason = String(candidate.finishReason) === "STOP" ? "stop" : String(candidate.finishReason).toLowerCase();
+        let finishReason =
+            String(candidate.finishReason) === "STOP"
+                ? "stop"
+                : String(candidate.finishReason).toLowerCase();
         if (finishReason === "stop" && state.geminiToolCallCount > 0) finishReason = "tool_calls";
         const finalChunk = buildGeminiChunk(state, {}, finishReason);
         if (state.usage) finalChunk.usage = state.usage;

@@ -1,4 +1,12 @@
-import type { AnthropicContentBlock, AnthropicMessage, AnthropicMessageRequest, AnthropicMessageResponse, ChatCompletionChunk, ChatCompletionRequest, ChatCompletionResponse } from "@srouter/types";
+import type {
+    AnthropicContentBlock,
+    AnthropicMessage,
+    AnthropicMessageRequest,
+    AnthropicMessageResponse,
+    ChatCompletionChunk,
+    ChatCompletionRequest,
+    ChatCompletionResponse,
+} from "@srouter/types";
 
 /**
  * Converts OpenAI ChatCompletionRequest into Anthropic MessageRequest format
@@ -9,11 +17,15 @@ export function openAIToAnthropicRequest(req: ChatCompletionRequest): AnthropicM
 
     for (const msg of req.messages) {
         if (msg.role === "system") {
-            systemPrompt = typeof msg.content === "string" ? msg.content : JSON.stringify(msg.content);
+            systemPrompt =
+                typeof msg.content === "string" ? msg.content : JSON.stringify(msg.content);
         } else if (msg.role === "user" || msg.role === "assistant") {
             anthropicMessages.push({
                 role: msg.role,
-                content: (typeof msg.content === "string" ? msg.content : (msg.content as AnthropicContentBlock[])) ?? "",
+                content:
+                    (typeof msg.content === "string"
+                        ? msg.content
+                        : (msg.content as AnthropicContentBlock[])) ?? "",
             });
         }
     }
@@ -32,7 +44,10 @@ export function openAIToAnthropicRequest(req: ChatCompletionRequest): AnthropicM
 /**
  * Converts Anthropic MessageResponse into OpenAI ChatCompletionResponse format
  */
-export function anthropicToOpenAIResponse(res: AnthropicMessageResponse, requestedModel: string): ChatCompletionResponse {
+export function anthropicToOpenAIResponse(
+    res: AnthropicMessageResponse,
+    requestedModel: string,
+): ChatCompletionResponse {
     const textContent = res.content
         .filter((c) => c.type === "text")
         .map((c) => c.text ?? "")
@@ -70,7 +85,11 @@ interface AnthropicStreamEventData {
 /**
  * Converts an Anthropic stream SSE line or chunk into an OpenAI ChatCompletionChunk
  */
-export function anthropicEventToOpenAIChunk(event: string, dataJson: AnthropicStreamEventData, requestedModel: string): ChatCompletionChunk | null {
+export function anthropicEventToOpenAIChunk(
+    event: string,
+    dataJson: AnthropicStreamEventData,
+    requestedModel: string,
+): ChatCompletionChunk | null {
     const completionId = dataJson?.message?.id || `chatcmpl-${dataJson?.index ?? 0}`;
     const created = Math.floor(Date.now() / 1000);
 

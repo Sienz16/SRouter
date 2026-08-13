@@ -1,3 +1,12 @@
+import {
+    ANTIGRAVITY_OAUTH_AUTHORIZE_URL,
+    ANTIGRAVITY_OAUTH_CLIENT_ID,
+    ANTIGRAVITY_OAUTH_CLIENT_SECRET,
+    ANTIGRAVITY_OAUTH_PROMPT,
+    ANTIGRAVITY_OAUTH_REDIRECT_URI,
+    ANTIGRAVITY_OAUTH_SCOPE,
+    ANTIGRAVITY_OAUTH_TOKEN_URL,
+} from "@srouter/constants";
 import type { OAuthTokenResponse, PKCEPair } from "./base.js";
 
 export interface AntigravityOAuthOptions {
@@ -21,13 +30,13 @@ export class AntigravityOAuth {
 
     constructor(options: AntigravityOAuthOptions = {}) {
         // Official Antigravity Google OAuth Public Client ID & Secret (used by 9router, opencode, OpenClaw)
-        this.clientId = options.clientId ?? process.env.ANTIGRAVITY_OAUTH_CLIENT_ID ?? "1071006060591-tmhssin2h21lcre235vtolojh4g403ep.apps.googleusercontent.com";
-        this.clientSecret = options.clientSecret ?? process.env.ANTIGRAVITY_OAUTH_CLIENT_SECRET ?? "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";
-        this.redirectUri = options.redirectUri ?? process.env.ANTIGRAVITY_OAUTH_REDIRECT_URI ?? "http://localhost:1455/auth/antigravity/callback";
-        this.scope = options.scope ?? process.env.ANTIGRAVITY_OAUTH_SCOPE ?? "openid profile email https://www.googleapis.com/auth/cloud-platform";
-        this.authorizeUrl = options.authorizeUrl ?? process.env.ANTIGRAVITY_OAUTH_AUTHORIZE_URL ?? "https://accounts.google.com/o/oauth2/v2/auth";
-        this.tokenUrl = options.tokenUrl ?? process.env.ANTIGRAVITY_OAUTH_TOKEN_URL ?? "https://oauth2.googleapis.com/token";
-        this.prompt = options.prompt ?? process.env.ANTIGRAVITY_OAUTH_PROMPT ?? "consent";
+        this.clientId = options.clientId ?? ANTIGRAVITY_OAUTH_CLIENT_ID;
+        this.clientSecret = options.clientSecret ?? ANTIGRAVITY_OAUTH_CLIENT_SECRET;
+        this.redirectUri = options.redirectUri ?? ANTIGRAVITY_OAUTH_REDIRECT_URI;
+        this.scope = options.scope ?? ANTIGRAVITY_OAUTH_SCOPE;
+        this.authorizeUrl = options.authorizeUrl ?? ANTIGRAVITY_OAUTH_AUTHORIZE_URL;
+        this.tokenUrl = options.tokenUrl ?? ANTIGRAVITY_OAUTH_TOKEN_URL;
+        this.prompt = options.prompt ?? ANTIGRAVITY_OAUTH_PROMPT;
     }
 
     /**

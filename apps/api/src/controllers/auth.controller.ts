@@ -241,6 +241,10 @@ export class AuthController {
 
     // Anthropic Provider (API key)
     public static async importAnthropicToken(c: Context): Promise<Response> {
-        return importTokenFor(anthropicAuthHandler, (b) => AuthLogic.processAnthropicTokenImport(b), c);
+        return importTokenFor(
+            anthropicAuthHandler,
+            (b) => AuthLogic.processAnthropicTokenImport(b),
+            c,
+        );
     }
 }

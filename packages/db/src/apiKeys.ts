@@ -35,9 +35,15 @@ export function getAPIKeyByKeyDB(key: string): DBAPIKey | null {
     };
 }
 
-export function createAPIKeyDB(data: { name: string; rateLimit?: number; quotaLimit?: number }): DBAPIKey {
+export function createAPIKeyDB(data: {
+    name: string;
+    rateLimit?: number;
+    quotaLimit?: number;
+}): DBAPIKey {
     const id = `key_${Math.random().toString(36).substring(2, 11)}`;
-    const randomHex = Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
+    const randomHex = Array.from({ length: 16 }, () =>
+        Math.floor(Math.random() * 16).toString(16),
+    ).join("");
     const key = `sr-live-${randomHex}`;
     const createdAt = Date.now();
 

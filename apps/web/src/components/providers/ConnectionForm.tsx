@@ -1,3 +1,4 @@
+import { OPENAI_BASE_URL } from "@srouter/constants";
 import { useState } from "react";
 import {
     Sheet,
@@ -95,7 +96,7 @@ export function ConnectionForm({
                         <input
                             id="conn-url"
                             type="text"
-                            placeholder={defaultBaseUrl || "https://api.openai.com/v1"}
+                            placeholder={defaultBaseUrl || OPENAI_BASE_URL}
                             value={formBaseUrl}
                             onChange={(e) => setFormBaseUrl(e.target.value)}
                             className="w-full rounded border border-border/60 bg-secondary/30 px-3 py-1.5 text-xs font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"

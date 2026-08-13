@@ -1,4 +1,11 @@
-import type { AIProvider, ChatCompletionChunk, ChatCompletionRequest, ChatCompletionResponse, ModelObject, ProviderDefinition } from "@srouter/types";
+import type {
+    AIProvider,
+    ChatCompletionChunk,
+    ChatCompletionRequest,
+    ChatCompletionResponse,
+    ModelObject,
+    ProviderDefinition,
+} from "@srouter/types";
 
 // Provider base id -> short alias used in model ids (e.g. openai/gpt-4o).
 // Multi-account ids (openai_1700000000) resolve to the same alias.
@@ -25,152 +32,9 @@ function stripModelPrefix(modelId: string, alias: string, providerId: string): s
     return modelId;
 }
 
-export const DEFAULT_CATALOG: ProviderDefinition[] = [
-    {
-        id: "kiro",
-        name: "Kiro",
-        category: "api_key",
-        protocol: "custom",
-        description: "AWS Kiro / CodeWhisperer streaming provider.",
-        icon: "🟣",
-        requiresApiKey: true,
-        supportsCustomUrl: true,
-        status: { state: "disconnected", message: "Kiro credential missing" },
-        models: [
-            { id: "claude-sonnet-4.5", object: "model", owned_by: "kiro" },
-            { id: "claude-sonnet-4.5-thinking", object: "model", owned_by: "kiro" },
-            { id: "claude-opus-4.5", object: "model", owned_by: "kiro" },
-            { id: "deepseek-r1", object: "model", owned_by: "kiro" },
-            { id: "qwen3-coder-30b", object: "model", owned_by: "kiro" },
-            { id: "gpt-5.6-sol", object: "model", owned_by: "kiro" },
-            { id: "gpt-5.6-terra", object: "model", owned_by: "kiro" },
-            { id: "gpt-5.6-luna", object: "model", owned_by: "kiro" },
-            { id: "simple-task", object: "model", owned_by: "kiro" },
-        ],
-    },
-    {
-        id: "neosantara",
-        name: "Neosantara",
-        category: "api_key",
-        protocol: "openai",
-        description: "Neosantara unified OpenAI-compatible AI gateway.",
-        icon: "🌏",
-        defaultBaseUrl: "https://api.neosantara.xyz/v1",
-        requiresApiKey: true,
-        supportsCustomUrl: true,
-        status: { state: "disconnected", message: "Neosantara API key missing" },
-        models: [],
-    },
-    {
-        id: "openai_codex",
-        name: "OpenAI Codex / ChatGPT",
-        category: "oauth",
-        protocol: "openai",
-        description: "OpenAI OAuth driver with GPT-4o, o1, o3-mini & Codex integration.",
-        icon: "🤖",
-        requiresApiKey: false,
-        requiresOAuth: true,
-        status: { state: "disconnected", message: "OAuth token missing" },
-        models: [
-            { id: "gpt-4o", object: "model", owned_by: "openai" },
-            { id: "gpt-4o-mini", object: "model", owned_by: "openai" },
-            { id: "o1", object: "model", owned_by: "openai" },
-            { id: "o1-mini", object: "model", owned_by: "openai" },
-            { id: "o3-mini", object: "model", owned_by: "openai" },
-            { id: "gpt-4-turbo", object: "model", owned_by: "openai" },
-            { id: "chatgpt-4o-latest", object: "model", owned_by: "openai" },
-        ],
-    },
-    {
-        id: "anthropic",
-        name: "Anthropic Claude",
-        category: "oauth",
-        protocol: "anthropic",
-        description: "Anthropic Claude driver supporting Claude 3.5 Sonnet & Haiku.",
-        icon: "🧠",
-        requiresApiKey: false,
-        requiresOAuth: true,
-        status: { state: "disconnected", message: "OAuth token missing" },
-        models: [
-            { id: "claude-3-5-sonnet-20241022", object: "model", owned_by: "anthropic" },
-            { id: "claude-3-5-haiku-20241022", object: "model", owned_by: "anthropic" },
-        ],
-    },
-    {
-        id: "antigravity",
-        name: "Antigravity Cloud",
-        category: "oauth",
-        protocol: "openai",
-        description: "Google Antigravity LLM Routing Cloud with Gemini 2.0 & Claude 3.5.",
-        icon: "🚀",
-        requiresApiKey: false,
-        requiresOAuth: true,
-        status: { state: "disconnected", message: "Antigravity OAuth token missing" },
-        models: [
-            { id: "gemini-2.0-flash-exp", object: "model", owned_by: "antigravity" },
-            { id: "claude-3-5-sonnet-20241022", object: "model", owned_by: "antigravity" },
-        ],
-    },
-    {
-        id: "groq",
-        name: "Groq Cloud",
-        category: "free_tier",
-        protocol: "openai",
-        description: "Groq Llama 3 & DeepSeek R1 ultra-fast inference driver.",
-        icon: "⚡",
-        requiresApiKey: true,
-        status: { state: "ready" },
-        models: [
-            { id: "llama-3.3-70b-versatile", object: "model", owned_by: "groq" },
-            { id: "deepseek-r1-distill-llama-70b", object: "model", owned_by: "groq" },
-        ],
-    },
-    {
-        id: "openrouter",
-        name: "OpenRouter Free",
-        category: "free_tier",
-        protocol: "openai",
-        description: "OpenRouter free tier unified LLM routing driver.",
-        icon: "🌐",
-        requiresApiKey: true,
-        status: { state: "ready" },
-        models: [
-            { id: "meta-llama/llama-3.3-70b-instruct:free", object: "model", owned_by: "openrouter" },
-        ],
-    },
-    {
-        id: "openai_api_key",
-        name: "OpenAI Platform API Key",
-        category: "api_key",
-        protocol: "openai",
-        description: "Direct OpenAI platform API Key authentication.",
-        icon: "🔑",
-        requiresApiKey: true,
-        status: { state: "ready" },
-        models: [
-            { id: "gpt-4o", object: "model", owned_by: "openai" },
-            { id: "gpt-4o-mini", object: "model", owned_by: "openai" },
-        ],
-    },
-    {
-        id: "anthropic_api_key",
-        name: "Anthropic Platform API Key",
-        category: "api_key",
-        protocol: "anthropic",
-        description: "Direct Anthropic platform API Key authentication.",
-        icon: "🔑",
-        requiresApiKey: true,
-        status: { state: "ready" },
-        models: [
-            { id: "claude-3-5-sonnet-20241022", object: "model", owned_by: "anthropic" },
-        ],
-    },
-];
-
 export class ProviderRegistry {
     private providers: Map<string, AIProvider> = new Map();
     private defaultProvider: AIProvider;
-    private catalog: ProviderDefinition[] = [...DEFAULT_CATALOG];
 
     constructor(defaultProvider?: AIProvider) {
         this.defaultProvider = defaultProvider ?? {
@@ -182,40 +46,21 @@ export class ProviderRegistry {
             chatCompletion: async (req: ChatCompletionRequest) => {
                 throw new Error("No default provider set for chatCompletion");
             },
-            chatCompletionStream: async function* (req: ChatCompletionRequest): AsyncGenerator<ChatCompletionChunk, void, void> {
+            chatCompletionStream: async function* (
+                req: ChatCompletionRequest,
+            ): AsyncGenerator<ChatCompletionChunk, void, void> {
                 throw new Error("No default provider set for chatCompletionStream");
             },
         };
         this.registerProvider(this.defaultProvider);
     }
 
-
     registerProvider(provider: AIProvider): void {
         this.providers.set(provider.id, provider);
-        // Update catalog status if matched (supports prefix for multi-account e.g. antigravity_1700000000)
-        const baseId = provider.id.split("_")[0]?.split("-")[0] ?? provider.id;
-        const catItem = this.catalog.find((c) => c.id === provider.id || c.id === baseId);
-        if (catItem) {
-            const connectedCount = Array.from(this.providers.keys()).filter((k) => k === catItem.id || k.startsWith(`${catItem.id}_`) || k.startsWith(`${catItem.id}-`)).length;
-            catItem.status = { state: "connected", connectedCount };
-        }
     }
 
     unregisterProvider(providerId: string): boolean {
-        const removed = this.providers.delete(providerId);
-        if (!removed) return false;
-
-        const baseId = providerId.split("_")[0]?.split("-")[0] ?? providerId;
-        const catItem = this.catalog.find((c) => c.id === providerId || c.id === baseId);
-        if (catItem) {
-            const connectedCount = Array.from(this.providers.keys()).filter(
-                (key) => key === catItem.id || key.startsWith(`${catItem.id}_`) || key.startsWith(`${catItem.id}-`),
-            ).length;
-            catItem.status = connectedCount > 0
-                ? { state: "connected", connectedCount }
-                : { state: "disconnected", message: `${catItem.name} credential missing` };
-        }
-        return true;
+        return this.providers.delete(providerId);
     }
 
     getProvider(providerId: string): AIProvider | undefined {
@@ -226,8 +71,37 @@ export class ProviderRegistry {
         return this.providers;
     }
 
+    /**
+     * Live catalog derived from registered providers. One entry per base driver
+     * id, collapsing multi-account connections (e.g. openai_1700000000 → openai).
+     */
     getCatalog(): ProviderDefinition[] {
-        return this.catalog;
+        const seen = new Set<string>();
+        const catalog: ProviderDefinition[] = [];
+
+        for (const provider of this.providers.values()) {
+            if (provider.id === "default") continue;
+            const baseId = provider.id.split("_")[0]?.split("-")[0] ?? provider.id;
+            if (seen.has(baseId)) continue;
+            seen.add(baseId);
+
+            const connectedCount = Array.from(this.providers.keys()).filter(
+                (id) => id === baseId || id.startsWith(`${baseId}_`) || id.startsWith(`${baseId}-`),
+            ).length;
+
+            catalog.push({
+                id: baseId,
+                name: provider.name,
+                category: provider.category ?? "custom",
+                protocol: provider.protocol ?? "openai",
+                requiresApiKey: false,
+                supportsCustomUrl: true,
+                status: { state: "connected", connectedCount },
+                models: [],
+            });
+        }
+
+        return catalog;
     }
 
     async getProviderForModel(modelId: string): Promise<AIProvider> {
@@ -249,20 +123,6 @@ export class ProviderRegistry {
                 if (id === "default") continue;
                 if (id === prefix || id.startsWith(`${prefix}_`) || id.startsWith(`${prefix}-`)) {
                     candidates.push(provider);
-                }
-            }
-        }
-
-        // 3. Catalog matching across all registered accounts
-        if (candidates.length === 0) {
-            for (const cat of this.catalog) {
-                if (cat.models.some((m) => m.id === modelId)) {
-                    for (const [id, provider] of this.providers.entries()) {
-                        if (id === "default") continue;
-                        if (id === cat.id || id.startsWith(`${cat.id}_`) || id.startsWith(`${cat.id}-`)) {
-                            candidates.push(provider);
-                        }
-                    }
                 }
             }
         }
@@ -296,7 +156,7 @@ export class ProviderRegistry {
             }
         };
 
-        // 1. Models from registered/connected providers ONLY
+        // Models from registered/connected providers ONLY
         for (const provider of this.providers.values()) {
             if (provider.id === "default") continue;
 
@@ -306,27 +166,6 @@ export class ProviderRegistry {
             const liveModels = await provider.listModels();
             for (const model of liveModels) {
                 addModel(model, alias, provider.id);
-            }
-
-            // Include catalog models corresponding ONLY to connected providers
-            const baseId = provider.id.split("_")[0]?.split("-")[0] ?? provider.id;
-            const catItem = this.catalog.find((c) => c.id === provider.id || c.id === baseId);
-            if (catItem) {
-                for (const model of catItem.models) {
-                    addModel(model, alias, provider.id);
-                }
-            }
-        }
-
-        // 2. If no active providers connected, return catalog models of providers marked as connected/ready
-        if (allModels.length === 0) {
-            for (const cat of this.catalog) {
-                if (cat.status.state === "connected" || cat.status.state === "ready") {
-                    const alias = getProviderAlias(cat.id);
-                    for (const model of cat.models) {
-                        addModel(model, alias, cat.id);
-                    }
-                }
             }
         }
 
@@ -338,7 +177,9 @@ export class ProviderRegistry {
         return provider.chatCompletion(req);
     }
 
-    async *chatCompletionStream(req: ChatCompletionRequest): AsyncGenerator<ChatCompletionChunk, void, void> {
+    async *chatCompletionStream(
+        req: ChatCompletionRequest,
+    ): AsyncGenerator<ChatCompletionChunk, void, void> {
         const provider = await this.getProviderForModel(req.model);
         yield* provider.chatCompletionStream(req);
     }

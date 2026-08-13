@@ -1,7 +1,7 @@
+import { CATEGORY_DESCRIPTIONS, CATEGORY_LABELS } from "@srouter/constants";
 import { Search } from "lucide-react";
 import type { ProviderDefinition } from "@srouter/types";
 import { ProviderRow } from "./ProviderRow";
-import { categoryDescriptions, categoryLabels } from "@/utils/catalog.utils";
 
 interface CatalogGroup {
     category: string;
@@ -40,12 +40,12 @@ export function Catalog({ groups, search }: CatalogProps) {
                                 id={`category-${group.category}`}
                                 className="text-xs font-semibold text-foreground"
                             >
-                                {categoryLabels[group.category as keyof typeof categoryLabels] ??
+                                {CATEGORY_LABELS[group.category as keyof typeof CATEGORY_LABELS] ??
                                     group.category}
                             </h2>
                             <p className="mt-0.5 text-[11px] text-muted-foreground">
-                                {categoryDescriptions[
-                                    group.category as keyof typeof categoryDescriptions
+                                {CATEGORY_DESCRIPTIONS[
+                                    group.category as keyof typeof CATEGORY_DESCRIPTIONS
                                 ] ?? ""}
                             </p>
                         </div>

@@ -39,7 +39,13 @@ test("isDueForRefresh respects expiry lead time and stale missing expiry", () =>
     const now = 1_000_000;
     assert.equal(isDueForRefresh(oauthProvider({ tokenExpiresAt: now + 10 * 60_000 }), now), false);
     assert.equal(isDueForRefresh(oauthProvider({ tokenExpiresAt: now + 4 * 60_000 }), now), true);
-    assert.equal(isDueForRefresh(oauthProvider({ tokenExpiresAt: undefined, lastRefreshedAt: now - 13 * 60 * 60_000 }), now), true);
+    assert.equal(
+        isDueForRefresh(
+            oauthProvider({ tokenExpiresAt: undefined, lastRefreshedAt: now - 13 * 60 * 60_000 }),
+            now,
+        ),
+        true,
+    );
     assert.equal(isDueForRefresh(oauthProvider({ refreshToken: undefined }), now), false);
 });
 
@@ -49,7 +55,11 @@ test("refreshProviderToken deduplicates concurrent refreshes and updates DB plus
     const config = oauthProvider({ id, tokenExpiresAt: Date.now() - 1_000 });
     upsertProviderDB({ ...config, category: "oauth", protocol: "openai" });
 
-    const executor = new CodexExecutor({ id, accessToken: config.accessToken, refreshToken: config.refreshToken });
+    const executor = new CodexExecutor({
+        id,
+        accessToken: config.accessToken,
+        refreshToken: config.refreshToken,
+    });
     registry.registerProvider(executor);
 
     let refreshCalls = 0;
@@ -67,7 +77,12 @@ test("refreshProviderToken deduplicates concurrent refreshes and updates DB plus
         refreshCalls++;
         await new Promise((resolve) => setTimeout(resolve, 20));
         return new Response(
-            JSON.stringify({ access_token: "new-access", refresh_token: "new-refresh", expires_in: 3600, token_type: "Bearer" }),
+            JSON.stringify({
+                access_token: "new-access",
+                refresh_token: "new-refresh",
+                expires_in: 3600,
+                token_type: "Bearer",
+            }),
             { status: 200, headers: { "Content-Type": "application/json" } },
         );
     };

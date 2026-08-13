@@ -1,5 +1,17 @@
-import type { AIProvider, AnthropicMessageResponse, ChatCompletionChunk, ChatCompletionRequest, ChatCompletionResponse, ModelObject } from "@srouter/types";
-import { anthropicEventToOpenAIChunk, anthropicToOpenAIResponse, openAIToAnthropicRequest } from "@srouter/translator";
+import { ANTHROPIC_BASE_URL } from "@srouter/constants";
+import type {
+    AIProvider,
+    AnthropicMessageResponse,
+    ChatCompletionChunk,
+    ChatCompletionRequest,
+    ChatCompletionResponse,
+    ModelObject,
+} from "@srouter/types";
+import {
+    anthropicEventToOpenAIChunk,
+    anthropicToOpenAIResponse,
+    openAIToAnthropicRequest,
+} from "@srouter/translator";
 import { parseDataLine, streamLines } from "./base.js";
 
 export interface AnthropicExecutorOptions {
@@ -22,9 +34,9 @@ export class AnthropicExecutor implements AIProvider {
     constructor(options: AnthropicExecutorOptions = {}) {
         this.id = options.id ?? "anthropic";
         this.name = options.name ?? "Anthropic Provider";
-        this.baseUrl = (options.baseUrl ?? "https://api.anthropic.com/v1").replace(/\/$/, "");
-        this.apiKey = options.apiKey ?? process.env.ANTHROPIC_API_KEY ?? "";
-        this.accessToken = options.accessToken ?? process.env.ANTHROPIC_ACCESS_TOKEN ?? "";
+        this.baseUrl = (options.baseUrl ?? ANTHROPIC_BASE_URL).replace(/\/$/, "");
+        this.apiKey = options.apiKey ?? "";
+        this.accessToken = options.accessToken ?? "";
     }
 
     private getHeaders(): Record<string, string> {
@@ -66,7 +78,9 @@ export class AnthropicExecutor implements AIProvider {
                 return json.data.map((m) => ({
                     id: m.id,
                     object: "model",
-                    created: m.created_at ? Math.floor(new Date(m.created_at).getTime() / 1000) : Math.floor(Date.now() / 1000),
+                    created: m.created_at
+                        ? Math.floor(new Date(m.created_at).getTime() / 1000)
+                        : Math.floor(Date.now() / 1000),
                     owned_by: "anthropic",
                 }));
             }
@@ -96,7 +110,9 @@ export class AnthropicExecutor implements AIProvider {
         return anthropicToOpenAIResponse(data, req.model);
     }
 
-    async *chatCompletionStream(req: ChatCompletionRequest): AsyncGenerator<ChatCompletionChunk, void, void> {
+    async *chatCompletionStream(
+        req: ChatCompletionRequest,
+    ): AsyncGenerator<ChatCompletionChunk, void, void> {
         const anthropicReq = openAIToAnthropicRequest(req);
         anthropicReq.stream = true;
 

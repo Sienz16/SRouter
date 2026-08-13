@@ -45,7 +45,12 @@ const SERVER_ID_PATTERN = /^(rs|fc|resp|msg)_/;
 export interface ResponsesInputItem {
     type?: string;
     role?: string;
-    content?: Array<{ type: string; text?: string; image_url?: string | { url: string }; detail?: string }>;
+    content?: Array<{
+        type: string;
+        text?: string;
+        image_url?: string | { url: string };
+        detail?: string;
+    }>;
     id?: string;
     name?: string;
     call_id?: string;
@@ -73,12 +78,21 @@ export interface ResponsesStreamState {
     created: number;
     toolCallIndex: number;
     currentToolCallId: string | null;
-    usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number; prompt_tokens_details?: { cached_tokens?: number } };
+    usage?: {
+        prompt_tokens: number;
+        completion_tokens: number;
+        total_tokens: number;
+        prompt_tokens_details?: { cached_tokens?: number };
+    };
     finishReasonSent: boolean;
     model: string;
 }
 
-function buildChunk(model: string, delta: Record<string, unknown>, finishReason: FinishReason = null): ChatCompletionChunk {
+function buildChunk(
+    model: string,
+    delta: Record<string, unknown>,
+    finishReason: FinishReason = null,
+): ChatCompletionChunk {
     return {
         id: `chatcmpl-${Date.now()}`,
         object: "chat.completion.chunk",
@@ -103,7 +117,12 @@ function computeFinishReason(state: ResponsesStreamState): FinishReason {
     return "stop";
 }
 
-function buildUsage(promptTokens: number, completionTokens: number, totalTokens: number, cachedTokens?: number) {
+function buildUsage(
+    promptTokens: number,
+    completionTokens: number,
+    totalTokens: number,
+    cachedTokens?: number,
+) {
     return {
         prompt_tokens: promptTokens,
         completion_tokens: completionTokens,
@@ -119,7 +138,12 @@ function flattenText(content: unknown): string {
         const parts: string[] = [];
         for (const p of content) {
             if (typeof p === "string") parts.push(p);
-            else if (p && typeof p === "object" && typeof (p as { text?: unknown }).text === "string") parts.push((p as { text: string }).text);
+            else if (
+                p &&
+                typeof p === "object" &&
+                typeof (p as { text?: unknown }).text === "string"
+            )
+                parts.push((p as { text: string }).text);
         }
         return parts.join("\n");
     }
@@ -152,13 +176,18 @@ export function chatToResponsesBody(req: ChatCompletionRequest): ResponsesReques
         if (role === "user") {
             const parts = Array.isArray(msg.content)
                 ? msg.content.map((c) => {
-                    if (c.type === "image_url" && c.image_url) {
-                        const url = typeof c.image_url === "string" ? c.image_url : c.image_url.url;
-                        return { type: "input_image", image_url: url, detail: c.image_url?.detail ?? "auto" };
-                    }
-                    if (c.type === "text") return { type: "input_text", text: c.text ?? "" };
-                    return { type: "input_text", text: flattenText(c) };
-                })
+                      if (c.type === "image_url" && c.image_url) {
+                          const url =
+                              typeof c.image_url === "string" ? c.image_url : c.image_url.url;
+                          return {
+                              type: "input_image",
+                              image_url: url,
+                              detail: c.image_url?.detail ?? "auto",
+                          };
+                      }
+                      if (c.type === "text") return { type: "input_text", text: c.text ?? "" };
+                      return { type: "input_text", text: flattenText(c) };
+                  })
                 : [{ type: "input_text", text: flattenText(msg.content) }];
             input.push({ type: "message", role: "user", content: parts });
             continue;
@@ -214,7 +243,16 @@ export function chatToResponsesBody(req: ChatCompletionRequest): ResponsesReques
             if (!tool || typeof tool !== "object") continue;
             const type = (tool as { type?: string }).type ?? "";
             if (type === "function") {
-                const fn = (tool as { function?: { name?: string; description?: string; parameters?: unknown } }).function ?? {};
+                const fn =
+                    (
+                        tool as {
+                            function?: {
+                                name?: string;
+                                description?: string;
+                                parameters?: unknown;
+                            };
+                        }
+                    ).function ?? {};
                 const name = (fn.name || "").trim();
                 if (!name) continue;
                 validNames.add(name);
@@ -255,9 +293,18 @@ export function chatToResponsesBody(req: ChatCompletionRequest): ResponsesReques
     // some clients send it via extension or temperature=0 reasoning style)
     const reasoningEffort = (req as unknown as { reasoning_effort?: string }).reasoning_effort;
     if (reasoningEffort) {
-        body.reasoning = { effort: normalizeReasoningEffort(req.model, reasoningEffort), summary: "auto" };
+        body.reasoning = {
+            effort: normalizeReasoningEffort(req.model, reasoningEffort),
+            summary: "auto",
+        };
     } else if ((req as unknown as { reasoning?: { effort?: string } }).reasoning) {
-        body.reasoning = { effort: normalizeReasoningEffort(req.model, (req as unknown as { reasoning: { effort?: string } }).reasoning.effort), summary: "auto" };
+        body.reasoning = {
+            effort: normalizeReasoningEffort(
+                req.model,
+                (req as unknown as { reasoning: { effort?: string } }).reasoning.effort,
+            ),
+            summary: "auto",
+        };
     }
 
     return body;
@@ -314,7 +361,10 @@ export function responsesEventToChunk(
     }
 
     // Function call arguments delta
-    if (eventType === "response.function_call_arguments.delta" || eventType === "response.custom_tool_call_input.delta") {
+    if (
+        eventType === "response.function_call_arguments.delta" ||
+        eventType === "response.custom_tool_call_input.delta"
+    ) {
         const argsDelta = (data.delta as string) || "";
         if (!argsDelta) return null;
         return buildChunk(state.model, {
@@ -333,22 +383,30 @@ export function responsesEventToChunk(
 
     // Response completed — emit usage + finish
     if (eventType === "response.completed" || eventType === "response.done") {
-        const responseUsage = data.response as {
-            usage?: {
-                input_tokens?: number;
-                prompt_tokens?: number;
-                output_tokens?: number;
-                completion_tokens?: number;
-                input_tokens_details?: { cached_tokens?: number };
-                cache_read_input_tokens?: number;
-            };
-        } | undefined;
+        const responseUsage = data.response as
+            | {
+                  usage?: {
+                      input_tokens?: number;
+                      prompt_tokens?: number;
+                      output_tokens?: number;
+                      completion_tokens?: number;
+                      input_tokens_details?: { cached_tokens?: number };
+                      cache_read_input_tokens?: number;
+                  };
+              }
+            | undefined;
         if (responseUsage?.usage && typeof responseUsage.usage === "object") {
             const u = responseUsage.usage;
             const inputTokens = u.input_tokens || u.prompt_tokens || 0;
             const outputTokens = u.output_tokens || u.completion_tokens || 0;
-            const cachedTokens = u.input_tokens_details?.cached_tokens || u.cache_read_input_tokens || 0;
-            state.usage = buildUsage(inputTokens, outputTokens, inputTokens + outputTokens, cachedTokens);
+            const cachedTokens =
+                u.input_tokens_details?.cached_tokens || u.cache_read_input_tokens || 0;
+            state.usage = buildUsage(
+                inputTokens,
+                outputTokens,
+                inputTokens + outputTokens,
+                cachedTokens,
+            );
         }
 
         if (!state.finishReasonSent) {
@@ -377,7 +435,10 @@ export function createResponsesStreamState(model: string): ResponsesStreamState 
 }
 
 // Accumulate streamed OpenAI chunks into a single non-streaming ChatCompletionResponse.
-export function accumulateResponsesChunks(chunks: ChatCompletionChunk[], model: string): ChatCompletionResponse {
+export function accumulateResponsesChunks(
+    chunks: ChatCompletionChunk[],
+    model: string,
+): ChatCompletionResponse {
     let content = "";
     const toolCalls: ToolCall[] = [];
     const toolCallMap = new Map<number, { id: string; name: string; args: string }>();
@@ -436,14 +497,18 @@ export function accumulateResponsesChunks(chunks: ChatCompletionChunk[], model: 
  * Accepts string or array; returns array of message items.
  * Empty array → placeholder (providers reject empty input).
  */
-export function normalizeResponsesInput(input: string | ResponsesInputItem[] | undefined): ResponsesInputItem[] | null {
+export function normalizeResponsesInput(
+    input: string | ResponsesInputItem[] | undefined,
+): ResponsesInputItem[] | null {
     if (typeof input === "string") {
         const text = input.trim() === "" ? "..." : input;
         return [{ type: "message", role: "user", content: [{ type: "input_text", text }] }];
     }
     if (Array.isArray(input)) {
         if (input.length === 0) {
-            return [{ type: "message", role: "user", content: [{ type: "input_text", text: "..." }] }];
+            return [
+                { type: "message", role: "user", content: [{ type: "input_text", text: "..." }] },
+            ];
         }
         return input;
     }
@@ -482,15 +547,25 @@ export function convertResponsesApiFormat(body: ResponsesRequestBody): Record<st
 
             const content = Array.isArray(item.content)
                 ? item.content.map((c) => {
-                    if (c.type === "input_text" || c.type === "output_text") return { type: "text", text: c.text ?? "" };
-                    if (c.type === "input_image") {
-                        const url = typeof c.image_url === "string" ? c.image_url : c.image_url?.url || "";
-                        return { type: "image_url", image_url: { url, detail: c.detail || "auto" } };
-                    }
-                    return c;
-                })
+                      if (c.type === "input_text" || c.type === "output_text")
+                          return { type: "text", text: c.text ?? "" };
+                      if (c.type === "input_image") {
+                          const url =
+                              typeof c.image_url === "string"
+                                  ? c.image_url
+                                  : c.image_url?.url || "";
+                          return {
+                              type: "image_url",
+                              image_url: { url, detail: c.detail || "auto" },
+                          };
+                      }
+                      return c;
+                  })
                 : item.content;
-            messages.push({ role: (item.role as ChatMessage["role"]) || "user", content: content as ChatMessage["content"] });
+            messages.push({
+                role: (item.role as ChatMessage["role"]) || "user",
+                content: content as ChatMessage["content"],
+            });
         } else if (itemType === "function_call") {
             if (!currentAssistantMsg) {
                 currentAssistantMsg = { role: "assistant", content: null, tool_calls: [] };
@@ -501,7 +576,10 @@ export function convertResponsesApiFormat(body: ResponsesRequestBody): Record<st
                 type: "function",
                 function: {
                     name: item.name,
-                    arguments: typeof item.arguments === "string" ? item.arguments : JSON.stringify(item.arguments ?? ""),
+                    arguments:
+                        typeof item.arguments === "string"
+                            ? item.arguments
+                            : JSON.stringify(item.arguments ?? ""),
                 },
             });
         } else if (itemType === "function_call_output") {
@@ -512,7 +590,10 @@ export function convertResponsesApiFormat(body: ResponsesRequestBody): Record<st
             pendingToolResults.push({
                 role: "tool",
                 tool_call_id: item.call_id || "",
-                content: typeof item.output === "string" ? item.output : JSON.stringify(item.output ?? ""),
+                content:
+                    typeof item.output === "string"
+                        ? item.output
+                        : JSON.stringify(item.output ?? ""),
             });
         }
         // reasoning items skipped

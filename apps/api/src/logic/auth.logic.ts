@@ -42,7 +42,10 @@ function resolveRedirectUri(handler: AuthProviderHandler, params: OAuthLoginPara
 /**
  * Generate a stable, unique account id + human-friendly name for a newly saved provider.
  */
-function buildAccountIdentity(handler: AuthProviderHandler, now: number): { accountId: string; accountName: string } {
+function buildAccountIdentity(
+    handler: AuthProviderHandler,
+    now: number,
+): { accountId: string; accountName: string } {
     return {
         accountId: `${handler.idPrefix}_${now}`,
         accountName: `${handler.displayName} (Account #${now.toString().slice(-4)})`,
@@ -78,7 +81,11 @@ function initiatePKCEFor(handler: AuthProviderHandler, params: OAuthLoginParams)
     };
 }
 
-async function processOAuthCallbackFor(handler: AuthProviderHandler, code: string, state: string): Promise<ProviderConfig> {
+async function processOAuthCallbackFor(
+    handler: AuthProviderHandler,
+    code: string,
+    state: string,
+): Promise<ProviderConfig> {
     cleanupExpiredSessions();
 
     const session = getOAuthSessionDB(state);
@@ -134,10 +141,14 @@ async function processOAuthCallbackFor(handler: AuthProviderHandler, code: strin
     return providerConfig;
 }
 
-function processTokenImportFor(handler: AuthProviderHandler, params: TokenImportParams): ProviderConfig {
+function processTokenImportFor(
+    handler: AuthProviderHandler,
+    params: TokenImportParams,
+): ProviderConfig {
     const timestamp = Date.now();
     const accountId = params.id || `${handler.idPrefix}_${timestamp}`;
-    const providerName = params.name || `${handler.displayName} (Account #${timestamp.toString().slice(-4)})`;
+    const providerName =
+        params.name || `${handler.displayName} (Account #${timestamp.toString().slice(-4)})`;
     const mapping = handler.mapImportTokens?.(params) ?? {
         accessToken: params.accessToken,
         refreshToken: params.refreshToken,
@@ -195,7 +206,10 @@ export class AuthLogic {
         return initiatePKCEFor(antigravityAuthHandler, params);
     }
 
-    public static async processAntigravityOAuthCallback(code: string, state: string): Promise<ProviderConfig> {
+    public static async processAntigravityOAuthCallback(
+        code: string,
+        state: string,
+    ): Promise<ProviderConfig> {
         return processOAuthCallbackFor(antigravityAuthHandler, code, state);
     }
 

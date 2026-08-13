@@ -51,7 +51,9 @@ function responseFromFrames(frames: Uint8Array[]): Response {
 
 function streamResponse(frames: Uint8Array[]): { response: Response; release: () => void } {
     let release = (): void => {};
-    const wait = new Promise<void>((resolve) => { release = resolve; });
+    const wait = new Promise<void>((resolve) => {
+        release = resolve;
+    });
     const body = new ReadableStream<Uint8Array>({
         async start(controller) {
             controller.enqueue(frames[0]!);
@@ -64,7 +66,11 @@ function streamResponse(frames: Uint8Array[]): { response: Response; release: ()
 }
 
 test("Kiro API-key auth routes Amazon Q first and regionalizes AWS endpoints", () => {
-    const executor = new KiroExecutor({ accessToken: "key", authMethod: "api_key", region: "eu-west-1" });
+    const executor = new KiroExecutor({
+        accessToken: "key",
+        authMethod: "api_key",
+        region: "eu-west-1",
+    });
     assert.deepEqual(executor.getOrderedBaseUrls(), [
         "https://q.eu-west-1.amazonaws.com/generateAssistantResponse",
         "https://codewhisperer.eu-west-1.amazonaws.com/generateAssistantResponse",
@@ -80,13 +86,32 @@ test("Kiro request contains CodeWhisperer conversation state and API-key profile
             { role: "system", content: "Be concise" },
             { role: "user", content: "hello" },
         ],
-        tools: [{ type: "function", function: { name: "lookup", description: "Find it", parameters: { type: "object" } } }],
+        tools: [
+            {
+                type: "function",
+                function: {
+                    name: "lookup",
+                    description: "Find it",
+                    parameters: { type: "object" },
+                },
+            },
+        ],
     });
 
-    assert.equal(body.conversationState.currentMessage.userInputMessage.modelId, "claude-sonnet-4.5");
+    assert.equal(
+        body.conversationState.currentMessage.userInputMessage.modelId,
+        "claude-sonnet-4.5",
+    );
     assert.equal(body.conversationState.currentMessage.userInputMessage.content, "hello");
-    assert.equal(body.conversationState.history[0].userInputMessage.content, "<instructions>\nBe concise\n</instructions>");
-    assert.equal(body.conversationState.currentMessage.userInputMessage.userInputMessageContext.tools[0].toolSpecification.name, "lookup");
+    assert.equal(
+        body.conversationState.history[0].userInputMessage.content,
+        "<instructions>\nBe concise\n</instructions>",
+    );
+    assert.equal(
+        body.conversationState.currentMessage.userInputMessage.userInputMessageContext.tools[0]
+            .toolSpecification.name,
+        "lookup",
+    );
     assert.equal(body.profileArn, undefined);
 });
 
@@ -104,7 +129,9 @@ test("Kiro auth modes send the documented bearer and token-type headers", async 
             let captured = new Headers();
             globalThis.fetch = async (_input, init) => {
                 captured = new Headers(init?.headers);
-                return responseFromFrames([eventFrame("messageStopEvent", { stopReason: "END_TURN" })]);
+                return responseFromFrames([
+                    eventFrame("messageStopEvent", { stopReason: "END_TURN" }),
+                ]);
             };
             const executor = new KiroExecutor({
                 accessToken: "token",
@@ -114,7 +141,9 @@ test("Kiro auth modes send the documented bearer and token-type headers", async 
             for await (const _chunk of executor.chatCompletionStream({
                 model: "kiro/simple-task",
                 messages: [{ role: "user", content: "hi" }],
-            })) { /* drain */ }
+            })) {
+                /* drain */
+            }
             assert.equal(captured.get("Authorization"), "Bearer token", authMethod);
             assert.equal(captured.get("TokenType"), expectedTokenType, authMethod);
         }
@@ -134,7 +163,10 @@ test("Kiro EventStream becomes OpenAI chunks with text and stop reason", async (
 
     try {
         const chunks = [];
-        for await (const chunk of executor.chatCompletionStream({ model: "kiro/claude-sonnet-4.5", messages: [{ role: "user", content: "hi" }] })) {
+        for await (const chunk of executor.chatCompletionStream({
+            model: "kiro/claude-sonnet-4.5",
+            messages: [{ role: "user", content: "hi" }],
+        })) {
             chunks.push(chunk);
         }
         assert.equal(chunks[0]?.choices[0]?.delta.role, "assistant");
@@ -151,7 +183,10 @@ test("Kiro preserves the thinking model suffix", () => {
         model: "kiro/claude-sonnet-4.5-thinking",
         messages: [{ role: "user", content: "think" }],
     });
-    assert.equal(body.conversationState.currentMessage.userInputMessage.modelId, "claude-sonnet-4.5-thinking");
+    assert.equal(
+        body.conversationState.currentMessage.userInputMessage.modelId,
+        "claude-sonnet-4.5-thinking",
+    );
 });
 
 test("Kiro yields the first event before the upstream body closes", async () => {
@@ -168,11 +203,15 @@ test("Kiro yields the first event before the upstream body closes", async () => 
         });
         const first = await Promise.race([
             iterator.next(),
-            new Promise<never>((_, reject) => setTimeout(() => reject(new Error("first chunk waited for stream close")), 100)),
+            new Promise<never>((_, reject) =>
+                setTimeout(() => reject(new Error("first chunk waited for stream close")), 100),
+            ),
         ]);
         assert.equal(first.value?.choices[0]?.delta.content, "early");
         streamed.release();
-        while (!(await iterator.next()).done) { /* drain */ }
+        while (!(await iterator.next()).done) {
+            /* drain */
+        }
     } finally {
         streamed.release();
         globalThis.fetch = originalFetch;
@@ -181,20 +220,26 @@ test("Kiro yields the first event before the upstream body closes", async () => 
 
 test("Kiro combines fragmented tool input for one tool call", async () => {
     const originalFetch = globalThis.fetch;
-    globalThis.fetch = async () => responseFromFrames([
-        eventFrame("toolUseEvent", { toolUseId: "call_1", name: "weather", input: "{\"city\":\"" }),
-        eventFrame("toolUseEvent", { toolUseId: "call_1", input: "Paris\"}" }),
-        eventFrame("messageStopEvent", { stopReason: "TOOL_USE" }),
-    ]);
+    globalThis.fetch = async () =>
+        responseFromFrames([
+            eventFrame("toolUseEvent", {
+                toolUseId: "call_1",
+                name: "weather",
+                input: '{"city":"',
+            }),
+            eventFrame("toolUseEvent", { toolUseId: "call_1", input: 'Paris"}' }),
+            eventFrame("messageStopEvent", { stopReason: "TOOL_USE" }),
+        ]);
     try {
         const chunks = [];
         for await (const value of new KiroExecutor({ accessToken: "token" }).chatCompletionStream({
             model: "kiro/simple-task",
             messages: [{ role: "user", content: "weather" }],
-        })) chunks.push(value);
+        }))
+            chunks.push(value);
         const call = chunks.flatMap((value) => value.choices[0]?.delta.tool_calls ?? [])[0];
         assert.equal(call?.function?.name, "weather");
-        assert.equal(call?.function?.arguments, "{\"city\":\"Paris\"}");
+        assert.equal(call?.function?.arguments, '{"city":"Paris"}');
     } finally {
         globalThis.fetch = originalFetch;
     }

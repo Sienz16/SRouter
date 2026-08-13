@@ -1,13 +1,13 @@
 {
-    "name": "@srouter/translator",
+    "name": "@srouter/constants",
     "version": "1.0.0",
     "type": "module",
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
+    "main": "./src/index.ts",
+    "types": "./src/index.ts",
     "exports": {
         ".": {
-            "types": "./dist/index.d.ts",
-            "default": "./dist/index.js"
+            "types": "./src/index.ts",
+            "default": "./src/index.ts"
         }
     },
     "scripts": {
@@ -15,12 +15,9 @@
         "clean": "rm -rf dist"
     },
     "dependencies": {
-        "@srouter/constants": "workspace:*",
-        "@srouter/pricing": "workspace:*",
         "@srouter/types": "workspace:*"
     },
     "devDependencies": {
-        "@types/node": "^26.1.1",
         "typescript": "^5.0.0"
     }
 }

@@ -17,4 +17,3 @@ providersRoute.post("/providers", ProvidersController.addProvider);
 
 // DELETE /v1/providers/:id - Delete a saved provider connection
 providersRoute.delete("/providers/:id", ProvidersController.deleteProvider);
-

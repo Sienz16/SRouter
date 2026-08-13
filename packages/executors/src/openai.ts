@@ -1,4 +1,12 @@
-import type { AIProvider, ChatCompletionChunk, ChatCompletionRequest, ChatCompletionResponse, ModelListResponse, ModelObject } from "@srouter/types";
+import { OPENAI_BASE_URL } from "@srouter/constants";
+import type {
+    AIProvider,
+    ChatCompletionChunk,
+    ChatCompletionRequest,
+    ChatCompletionResponse,
+    ModelListResponse,
+    ModelObject,
+} from "@srouter/types";
 import { parseDataLine, streamLines } from "./base.js";
 
 function stripProviderPrefix(model: string): string {
@@ -24,9 +32,9 @@ export class OpenAIExecutor implements AIProvider {
     constructor(options: OpenAIExecutorOptions = {}) {
         this.id = options.id ?? "openai";
         this.name = options.name ?? "OpenAI Provider";
-        this.baseUrl = (options.baseUrl ?? "https://api.openai.com/v1").replace(/\/$/, "");
-        this.apiKey = options.apiKey ?? process.env.OPENAI_API_KEY ?? "";
-        this.accessToken = options.accessToken ?? process.env.OPENAI_ACCESS_TOKEN ?? "";
+        this.baseUrl = (options.baseUrl ?? OPENAI_BASE_URL).replace(/\/$/, "");
+        this.apiKey = options.apiKey ?? "";
+        this.accessToken = options.accessToken ?? "";
     }
 
     /**
@@ -94,7 +102,9 @@ export class OpenAIExecutor implements AIProvider {
         return (await res.json()) as ChatCompletionResponse;
     }
 
-    async *chatCompletionStream(req: ChatCompletionRequest): AsyncGenerator<ChatCompletionChunk, void, void> {
+    async *chatCompletionStream(
+        req: ChatCompletionRequest,
+    ): AsyncGenerator<ChatCompletionChunk, void, void> {
         const targetModel = stripProviderPrefix(req.model);
 
         const res = await fetch(`${this.baseUrl}/chat/completions`, {

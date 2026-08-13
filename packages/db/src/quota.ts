@@ -1,4 +1,9 @@
-import type { LiveModelQuotaItem, ProviderQuotaAccount, ProviderUsageMetric, QuotaResponse } from "@srouter/types";
+import type {
+    LiveModelQuotaItem,
+    ProviderQuotaAccount,
+    ProviderUsageMetric,
+    QuotaResponse,
+} from "@srouter/types";
 import { getProviderModelUsageDB } from "./logs.js";
 import { getAllProvidersDB } from "./providers.js";
 
@@ -33,7 +38,7 @@ export async function fetchAntigravityLiveQuota(
     providerId: string,
     accountName: string,
     accessToken: string,
-    enabled = true
+    enabled = true,
 ): Promise<ProviderQuotaAccount> {
     if (!accessToken || !(accessToken.startsWith("ya29.") || accessToken.length > 20)) {
         throw new Error("Antigravity quota requires a valid access token");
@@ -109,7 +114,12 @@ export async function getProviderQuotaAccount(p: {
     const token = p.accessToken || p.apiKey || "";
 
     if (isAntigravity) {
-        return await fetchAntigravityLiveQuota(p.id, p.name || "seaavey@gmail.com", token, p.enabled);
+        return await fetchAntigravityLiveQuota(
+            p.id,
+            p.name || "seaavey@gmail.com",
+            token,
+            p.enabled,
+        );
     }
 
     // For OpenAI Codex, OpenAI, Anthropic, or Custom Providers:

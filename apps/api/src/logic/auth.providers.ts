@@ -1,15 +1,20 @@
 import {
+    ANTIGRAVITY_IDE_BASE_URL,
+    ANTIGRAVITY_OAUTH_CLIENT_ID,
+    ANTIGRAVITY_OAUTH_REDIRECT_URI,
+    ANTHROPIC_BASE_URL,
+    CODEX_OAUTH_CLIENT_ID,
+    CODEX_OAUTH_REDIRECT_URI,
+    COMMANDCODE_BASE_URL,
+} from "@srouter/constants";
+import {
     AntigravityExecutor,
     AnthropicExecutor,
     CodexExecutor,
     CommandCodeExecutor,
 } from "@srouter/executors";
 import { AntigravityOAuth, OpenAICodexOAuth } from "@srouter/providers";
-import type {
-    AIProvider,
-    ProviderCategory,
-    ProviderProtocol,
-} from "@srouter/types";
+import type { AIProvider, ProviderCategory, ProviderProtocol } from "@srouter/types";
 
 export interface OAuthLoginParams {
     clientId?: string;
@@ -113,13 +118,6 @@ export interface AuthProviderHandler {
     oauthClass?: OAuthClientClass;
 }
 
-const CODEX_DEFAULT_CLIENT_ID = "app_EMoamEEZ73f0CkXaXp7hrann";
-const ANTIGRAVITY_DEFAULT_CLIENT_ID =
-    "1071006060591-tmhssin2h21lcre235vtolojh4g403ep.apps.googleusercontent.com";
-const ANTIGRAVITY_DEFAULT_BASE_URL = "https://daily-cloudcode-pa.googleapis.com";
-const COMMANDCODE_DEFAULT_BASE_URL = "https://api.commandcode.ai/alpha/generate";
-const ANTHROPIC_DEFAULT_BASE_URL = "https://api.anthropic.com/v1";
-
 export const openaiCodexAuthHandler: AuthProviderHandler = {
     providerId: "openai_codex",
     displayName: "OpenAI Codex",
@@ -127,10 +125,11 @@ export const openaiCodexAuthHandler: AuthProviderHandler = {
     protocol: "openai",
     idPrefix: "openai_codex",
     // Matches the original logic: Codex client id is hardcoded (the env var is only read by the OAuth class itself).
-    clientId: () => CODEX_DEFAULT_CLIENT_ID,
-    defaultRedirectUri: "http://localhost:1455/auth/callback",
+    clientId: () => CODEX_OAUTH_CLIENT_ID,
+    defaultRedirectUri: CODEX_OAUTH_REDIRECT_URI,
     oauthSuccessMessage: "Login OpenAI Codex Berhasil!",
-    tokenImportMessage: "OpenAI Codex Access Token registered and saved directly to SQLite database!",
+    tokenImportMessage:
+        "OpenAI Codex Access Token registered and saved directly to SQLite database!",
     oauthClass: OpenAICodexOAuth,
     mapOAuthTokens: (tokens) => ({
         accessToken: tokens.accessToken,
@@ -153,11 +152,12 @@ export const antigravityAuthHandler: AuthProviderHandler = {
     category: "oauth",
     protocol: "openai",
     idPrefix: "antigravity",
-    clientId: () => process.env.ANTIGRAVITY_OAUTH_CLIENT_ID ?? ANTIGRAVITY_DEFAULT_CLIENT_ID,
-    defaultRedirectUri: "http://localhost:1455/auth/antigravity/callback",
-    baseUrl: () => process.env.ANTIGRAVITY_BASE_URL ?? ANTIGRAVITY_DEFAULT_BASE_URL,
+    clientId: () => ANTIGRAVITY_OAUTH_CLIENT_ID,
+    defaultRedirectUri: ANTIGRAVITY_OAUTH_REDIRECT_URI,
+    baseUrl: () => ANTIGRAVITY_IDE_BASE_URL,
     oauthSuccessMessage: "Login Antigravity OAuth Berhasil!",
-    tokenImportMessage: "Antigravity Access Token registered and saved directly to SQLite database!",
+    tokenImportMessage:
+        "Antigravity Access Token registered and saved directly to SQLite database!",
     oauthClass: AntigravityOAuth,
     mapOAuthTokens: (tokens) => ({
         accessToken: tokens.accessToken,
@@ -179,7 +179,7 @@ export const commandCodeAuthHandler: AuthProviderHandler = {
     category: "api_key",
     protocol: "openai",
     idPrefix: "commandcode",
-    baseUrl: () => process.env.COMMANDCODE_BASE_URL ?? COMMANDCODE_DEFAULT_BASE_URL,
+    baseUrl: () => COMMANDCODE_BASE_URL,
     oauthSuccessMessage: "",
     tokenImportMessage: "Command Code API Key registered and saved directly to SQLite database!",
     mapImportTokens: (params) => ({
@@ -197,7 +197,7 @@ export const anthropicAuthHandler: AuthProviderHandler = {
     category: "api_key",
     protocol: "anthropic",
     idPrefix: "anthropic",
-    baseUrl: () => process.env.ANTHROPIC_BASE_URL ?? ANTHROPIC_DEFAULT_BASE_URL,
+    baseUrl: () => ANTHROPIC_BASE_URL,
     oauthSuccessMessage: "",
     tokenImportMessage: "Anthropic API Key registered and saved directly to SQLite database!",
     mapImportTokens: (params) => ({

@@ -1,6 +1,19 @@
 import { randomUUID } from "node:crypto";
-import type { AIProvider, ChatCompletionChunk, ChatCompletionRequest, ChatCompletionResponse, ModelObject } from "@srouter/types";
-import { accumulateChunks, buildRequestBody, commandCodeEventToOpenAIChunk, createCommandCodeStreamState, type CommandCodeEvent } from "@srouter/translator";
+import { COMMANDCODE_BASE_URL } from "@srouter/constants";
+import type {
+    AIProvider,
+    ChatCompletionChunk,
+    ChatCompletionRequest,
+    ChatCompletionResponse,
+    ModelObject,
+} from "@srouter/types";
+import {
+    accumulateChunks,
+    buildRequestBody,
+    commandCodeEventToOpenAIChunk,
+    createCommandCodeStreamState,
+    type CommandCodeEvent,
+} from "@srouter/translator";
 import { parseDataLine } from "./base.js";
 
 export interface CommandCodeExecutorOptions {
@@ -10,8 +23,6 @@ export interface CommandCodeExecutorOptions {
     apiKey?: string;
     accessToken?: string;
 }
-
-const DEFAULT_BASE_URL = "https://api.commandcode.ai/alpha/generate";
 
 export class CommandCodeExecutor implements AIProvider {
     id: string;
@@ -23,8 +34,8 @@ export class CommandCodeExecutor implements AIProvider {
     constructor(options: CommandCodeExecutorOptions = {}) {
         this.id = options.id ?? "commandcode";
         this.name = options.name ?? "Command Code Provider";
-        this.baseUrl = (options.baseUrl ?? process.env.COMMANDCODE_BASE_URL ?? DEFAULT_BASE_URL).replace(/\/$/, "");
-        this.apiKey = options.apiKey ?? process.env.COMMANDCODE_API_KEY ?? "";
+        this.baseUrl = (options.baseUrl ?? COMMANDCODE_BASE_URL).replace(/\/$/, "");
+        this.apiKey = options.apiKey ?? "";
         this.accessToken = options.accessToken ?? "";
     }
 
@@ -56,7 +67,9 @@ export class CommandCodeExecutor implements AIProvider {
         return accumulateChunks(chunks, req.model);
     }
 
-    async *chatCompletionStream(req: ChatCompletionRequest): AsyncGenerator<ChatCompletionChunk, void, void> {
+    async *chatCompletionStream(
+        req: ChatCompletionRequest,
+    ): AsyncGenerator<ChatCompletionChunk, void, void> {
         const body = buildRequestBody(req);
         const res = await fetch(this.baseUrl, {
             method: "POST",
@@ -93,7 +106,9 @@ export class CommandCodeExecutor implements AIProvider {
 
 // CommandCode upstream emits NDJSON (one JSON object per line, no "data:" prefix),
 // but tolerate "data:" framing if the wrapper inserts it.
-async function* streamCommandCodeLines(body: ReadableStream<Uint8Array>): AsyncGenerator<string, void, void> {
+async function* streamCommandCodeLines(
+    body: ReadableStream<Uint8Array>,
+): AsyncGenerator<string, void, void> {
     const reader = body.getReader();
     const decoder = new TextDecoder("utf-8");
     let buffer = "";

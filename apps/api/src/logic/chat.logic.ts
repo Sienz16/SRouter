@@ -1,11 +1,18 @@
 import { logRequestDB } from "@srouter/db";
 import { extractUsageBreakdown, estimateCostForUsage } from "@srouter/translator";
-import type { ChatCompletionChunk, ChatCompletionRequest, ChatCompletionResponse } from "@srouter/types";
+import type {
+    ChatCompletionChunk,
+    ChatCompletionRequest,
+    ChatCompletionResponse,
+} from "@srouter/types";
 import { registry } from "@/services/registry.js";
 import { ensureFreshToken } from "@/services/tokenRefresh.js";
 
 export class ChatLogic {
-    public static async processNonStreamingCompletion(body: ChatCompletionRequest, startTime: number): Promise<ChatCompletionResponse> {
+    public static async processNonStreamingCompletion(
+        body: ChatCompletionRequest,
+        startTime: number,
+    ): Promise<ChatCompletionResponse> {
         try {
             // Lazy token refresh: ensure the target provider's token is fresh before dispatch
             const providerId = body.model.split("/")[0] || "default";
@@ -45,7 +52,10 @@ export class ChatLogic {
         }
     }
 
-    public static async *processStreamingCompletion(body: ChatCompletionRequest, startTime: number): AsyncGenerator<ChatCompletionChunk, void, void> {
+    public static async *processStreamingCompletion(
+        body: ChatCompletionRequest,
+        startTime: number,
+    ): AsyncGenerator<ChatCompletionChunk, void, void> {
         const provider = body.model.split("/")[0] || "default";
         let usage: unknown = null;
         try {

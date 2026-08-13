@@ -1,3 +1,4 @@
+import { ANTIGRAVITY_BASE_URL, ANTIGRAVITY_IDE_BASE_URL } from "@srouter/constants";
 import type {
     AIProvider,
     ChatCompletionChunk,
@@ -6,7 +7,6 @@ import type {
     ModelObject,
 } from "@srouter/types";
 import {
-    ANTIGRAVITY_IDE_BASE_URL,
     ANTIGRAVITY_IDE_USER_AGENT,
     buildAntigravityEnvelope,
     buildGeminiContents,
@@ -110,16 +110,16 @@ export class AntigravityExecutor implements AIProvider {
     constructor(options: AntigravityExecutorOptions = {}) {
         this.id = options.id ?? "antigravity";
         this.name = options.name ?? "Antigravity Provider";
-        this.baseUrl = (options.baseUrl ?? process.env.ANTIGRAVITY_BASE_URL ?? ANTIGRAVITY_IDE_BASE_URL).replace(/\/$/, "");
-        this.apiKey = options.apiKey ?? process.env.ANTIGRAVITY_API_KEY ?? "";
-        this.accessToken = options.accessToken ?? process.env.ANTIGRAVITY_ACCESS_TOKEN ?? "";
+        this.baseUrl = (options.baseUrl ?? ANTIGRAVITY_IDE_BASE_URL).replace(/\/$/, "");
+        this.apiKey = options.apiKey ?? "";
+        this.accessToken = options.accessToken ?? "";
         this.refreshToken = options.refreshToken;
-        this.projectId = options.projectId ?? process.env.ANTIGRAVITY_PROJECT_ID ?? generateProjectId();
+        this.projectId = options.projectId ?? generateProjectId();
         this.sessionId = generateSessionId();
         this.openaiFallback = new OpenAIExecutor({
             id: this.id,
             name: this.name,
-            baseUrl: options.baseUrl || "https://generativelanguage.googleapis.com/v1beta/openai",
+            baseUrl: options.baseUrl || ANTIGRAVITY_BASE_URL,
             apiKey: options.apiKey,
             accessToken: this.accessToken,
         });
@@ -157,7 +157,10 @@ export class AntigravityExecutor implements AIProvider {
     }
 
     private isLocalProxy(): boolean {
-        return /^https?:\/\/127\.0\.0\.1(:\d+)?(\/|$)/.test(this.baseUrl) || /^https?:\/\/localhost(:\d+)?(\/|$)/.test(this.baseUrl);
+        return (
+            /^https?:\/\/127\.0\.0\.1(:\d+)?(\/|$)/.test(this.baseUrl) ||
+            /^https?:\/\/localhost(:\d+)?(\/|$)/.test(this.baseUrl)
+        );
     }
 
     private isApiKey(): boolean {
@@ -194,9 +197,19 @@ export class AntigravityExecutor implements AIProvider {
             const id = rawId.replace(/^models\//, "");
             if (seenIds.has(id)) return;
             seenIds.add(id);
-            models.push({ id, object: "model", created: Math.floor(Date.now() / 1000), owned_by: "antigravity" });
+            models.push({
+                id,
+                object: "model",
+                created: Math.floor(Date.now() / 1000),
+                owned_by: "antigravity",
+            });
             if (!id.startsWith(`${baseId}/`)) {
-                models.push({ id: `${baseId}/${id}`, object: "model", created: Math.floor(Date.now() / 1000), owned_by: "antigravity" });
+                models.push({
+                    id: `${baseId}/${id}`,
+                    object: "model",
+                    created: Math.floor(Date.now() / 1000),
+                    owned_by: "antigravity",
+                });
             }
         };
 
@@ -221,18 +234,23 @@ export class AntigravityExecutor implements AIProvider {
         // 3. ya29 OAuth token: CloudCode fetchAvailableModels
         if (token.startsWith("ya29.")) {
             try {
-                const res = await fetch("https://cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels", {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                        "User-Agent": ANTIGRAVITY_IDE_USER_AGENT,
-                        "x-goog-api-client": "gl-node/18.0.0 gd/1.0.0",
+                const res = await fetch(
+                    "https://cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels",
+                    {
+                        method: "POST",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                            "User-Agent": ANTIGRAVITY_IDE_USER_AGENT,
+                            "x-goog-api-client": "gl-node/18.0.0 gd/1.0.0",
+                        },
+                        body: JSON.stringify({}),
                     },
-                    body: JSON.stringify({}),
-                });
+                );
                 if (res.ok) {
-                    const data = (await res.json()) as { models?: Record<string, { displayName?: string }> };
+                    const data = (await res.json()) as {
+                        models?: Record<string, { displayName?: string }>;
+                    };
                     if (data.models && Object.keys(data.models).length > 0) {
                         for (const modelId of Object.keys(data.models)) {
                             pushModel(modelId);
@@ -258,7 +276,11 @@ export class AntigravityExecutor implements AIProvider {
      * Build the Antigravity request envelope + sanitized request body.
      * Port of 9router transformRequest (standard agent request path).
      */
-    private buildRequest(model: string, req: ChatCompletionRequest, stream: boolean): { url: string; body: Record<string, unknown> } {
+    private buildRequest(
+        model: string,
+        req: ChatCompletionRequest,
+        stream: boolean,
+    ): { url: string; body: Record<string, unknown> } {
         const cleanBaseUrl = this.baseUrl.replace(/\/openai$/, "");
         const modelName = this.parseModelName(model);
 
@@ -349,10 +371,23 @@ export class AntigravityExecutor implements AIProvider {
             } else if (m.role === "tool" && m.tool_call_id) {
                 parts.push({
                     text: "",
-                    functionResponse: { name: m.tool_call_id, response: { result: typeof m.content === "string" ? m.content : JSON.stringify(m.content) } },
+                    functionResponse: {
+                        name: m.tool_call_id,
+                        response: {
+                            result:
+                                typeof m.content === "string"
+                                    ? m.content
+                                    : JSON.stringify(m.content),
+                        },
+                    },
                 });
             } else {
-                const text = typeof m.content === "string" ? m.content : Array.isArray(m.content) ? m.content.map((c) => (c.type === "text" ? c.text || "" : "")).join("\n") : String(m.content ?? "");
+                const text =
+                    typeof m.content === "string"
+                        ? m.content
+                        : Array.isArray(m.content)
+                          ? m.content.map((c) => (c.type === "text" ? c.text || "" : "")).join("\n")
+                          : String(m.content ?? "");
                 if (text) parts.push({ text });
             }
 
@@ -376,7 +411,9 @@ export class AntigravityExecutor implements AIProvider {
             if (!tool || typeof tool !== "object") continue;
             const type = (tool as { type?: string }).type;
             if (type !== "function") continue;
-            const fn = (tool as { function?: { name?: string; description?: string; parameters?: unknown } }).function;
+            const fn = (
+                tool as { function?: { name?: string; description?: string; parameters?: unknown } }
+            ).function;
             if (!fn) continue;
             const name = sanitizeFunctionName(fn.name || "");
             if (seenNames.has(name)) continue;
@@ -384,7 +421,15 @@ export class AntigravityExecutor implements AIProvider {
             declarations.push({
                 name,
                 description: fn.description || "",
-                parameters: fn.parameters ? cleanJSONSchemaForAntigravity(structuredClone(fn.parameters)) : { type: "object", properties: { reason: { type: "string", description: "Brief explanation" } }, required: ["reason"] },
+                parameters: fn.parameters
+                    ? cleanJSONSchemaForAntigravity(structuredClone(fn.parameters))
+                    : {
+                          type: "object",
+                          properties: {
+                              reason: { type: "string", description: "Brief explanation" },
+                          },
+                          required: ["reason"],
+                      },
             });
         }
         return declarations.length > 0 ? [{ functionDeclarations: declarations }] : [];
@@ -393,8 +438,13 @@ export class AntigravityExecutor implements AIProvider {
     /**
      * Build the URL + body for the OpenAI-compatible fallback path (local proxy / AIzaSy).
      */
-    private buildFallbackRequest(req: ChatCompletionRequest, stream: boolean): { url: string; body: unknown } {
-        const targetModel = req.model.includes("/") ? (req.model.split("/")[1] ?? req.model) : req.model;
+    private buildFallbackRequest(
+        req: ChatCompletionRequest,
+        stream: boolean,
+    ): { url: string; body: unknown } {
+        const targetModel = req.model.includes("/")
+            ? (req.model.split("/")[1] ?? req.model)
+            : req.model;
         const body = { ...req, model: targetModel, stream };
         return { url: `${this.openaiFallback["baseUrl"]}/chat/completions`, body };
     }
@@ -417,7 +467,9 @@ export class AntigravityExecutor implements AIProvider {
         return accumulateChunksLocal(chunks, req.model);
     }
 
-    async *chatCompletionStream(req: ChatCompletionRequest): AsyncGenerator<ChatCompletionChunk, void, void> {
+    async *chatCompletionStream(
+        req: ChatCompletionRequest,
+    ): AsyncGenerator<ChatCompletionChunk, void, void> {
         const token = this.getToken();
         const isLocalProxy = this.isLocalProxy();
         const isApiKey = this.isApiKey();
@@ -529,7 +581,8 @@ export class AntigravityExecutor implements AIProvider {
         const err = errorJson as { error?: { message?: unknown }; message?: unknown } | null;
         if (err?.error?.message) parts.push(String(err.error.message));
         if (err?.message) parts.push(String(err.message));
-        if (err?.error) parts.push(typeof err.error === "string" ? err.error : JSON.stringify(err.error));
+        if (err?.error)
+            parts.push(typeof err.error === "string" ? err.error : JSON.stringify(err.error));
         if (bodyText) parts.push(bodyText);
         return parts.filter(Boolean).join("\n");
     }
@@ -561,13 +614,17 @@ export class AntigravityExecutor implements AIProvider {
 
         if (!this.isTransientAntigravityError(response.status, errorMessage)) return null;
 
-        const cap = response.status === 429 ? MAX_RETRY_AFTER_MS : ANTIGRAVITY_TRANSIENT_RETRY_MAX_MS;
-        return Math.min(1000 * (2 ** attempt), cap);
+        const cap =
+            response.status === 429 ? MAX_RETRY_AFTER_MS : ANTIGRAVITY_TRANSIENT_RETRY_MAX_MS;
+        return Math.min(1000 * 2 ** attempt, cap);
     }
 }
 
 // Accumulate streamed chunks into a non-streaming response
-function accumulateChunksLocal(chunks: ChatCompletionChunk[], model: string): ChatCompletionResponse {
+function accumulateChunksLocal(
+    chunks: ChatCompletionChunk[],
+    model: string,
+): ChatCompletionResponse {
     let content = "";
     const toolCallMap = new Map<number, { id: string; name: string; args: string }>();
 

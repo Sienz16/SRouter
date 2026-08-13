@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import type { ProviderDefinition } from "@srouter/types";
 import { Badge } from "@/components/ui/badge";
-import { ProviderIcon } from "@/components/ui/ProviderIcon";
+import { ProviderIcon } from "@/components/ProviderIcon";
 import { getConnectedCount } from "@/utils/provider.utils";
 
 const protocolLabels: Record<string, string> = {

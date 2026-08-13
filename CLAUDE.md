@@ -34,7 +34,7 @@ pnpm test                 # run all configured workspace tests
 pnpm clean                # remove generated dist/Turbo output
 ```
 
-The API uses environment variables for optional startup providers, including `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `ANTHROPIC_API_KEY`, `ANTHROPIC_BASE_URL`, `NEOSANTARA_API_KEY`, and `NEOSANTARA_BASE_URL`. Saved providers are loaded from SQLite when the API starts. Do not use the live database for tests that can mutate provider state; API tests run serially because they share database-backed state.
+Saved providers are loaded from SQLite when the API starts. Do not use the live database for tests that can mutate provider state; API tests run serially because they share database-backed state.
 
 ### Targeted tests
 

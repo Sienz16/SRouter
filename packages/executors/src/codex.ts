@@ -5,6 +5,7 @@ import type {
     ChatCompletionResponse,
     ModelObject,
 } from "@srouter/types";
+import { CODEX_BASE_URL, CODEX_MODELS_URL } from "@srouter/constants";
 import {
     chatToResponsesBody,
     createResponsesStreamState,
@@ -25,8 +26,6 @@ export interface CodexExecutorOptions {
     sessionId?: string;
 }
 
-const DEFAULT_BASE_URL = "https://chatgpt.com/backend-api/codex/responses";
-const DEFAULT_MODELS_URL = "https://chatgpt.com/backend-api/codex/models";
 const CODEX_CLIENT_VERSION = "0.136.0";
 
 // SSE error patterns inside 200-OK bodies. Some retry same account first; capacity rotates accounts.
@@ -90,8 +89,11 @@ export class CodexExecutor implements AIProvider {
     constructor(options: CodexExecutorOptions = {}) {
         this.id = options.id ?? "openai_codex";
         this.name = options.name ?? "OpenAI Codex / ChatGPT";
-        this.baseUrl = (options.baseUrl ?? process.env.CODEX_BASE_URL ?? DEFAULT_BASE_URL).replace(/\/$/, "");
-        this.modelsUrl = (process.env.CODEX_MODELS_URL ?? DEFAULT_MODELS_URL).replace(/\/$/, "");
+        this.baseUrl = (options.baseUrl ?? process.env.CODEX_BASE_URL ?? CODEX_BASE_URL).replace(
+            /\/$/,
+            "",
+        );
+        this.modelsUrl = (process.env.CODEX_MODELS_URL ?? CODEX_MODELS_URL).replace(/\/$/, "");
         this.apiKey = options.apiKey ?? process.env.CODEX_API_KEY ?? "";
         this.accessToken = options.accessToken ?? process.env.CODEX_ACCESS_TOKEN ?? "";
         this.refreshToken = options.refreshToken;
@@ -148,7 +150,11 @@ export class CodexExecutor implements AIProvider {
                 }>;
                 models?: Array<{ slug?: string; id?: string; display_name?: string }>;
             };
-            const rawModels = Array.isArray(json.data) ? json.data : Array.isArray(json.models) ? json.models : [];
+            const rawModels = Array.isArray(json.data)
+                ? json.data
+                : Array.isArray(json.models)
+                  ? json.models
+                  : [];
             return rawModels
                 .map((m) => ({
                     id: m.slug || m.id || "",
@@ -171,7 +177,9 @@ export class CodexExecutor implements AIProvider {
         return accumulateChunksLocal(chunks, req.model);
     }
 
-    async *chatCompletionStream(req: ChatCompletionRequest): AsyncGenerator<ChatCompletionChunk, void, void> {
+    async *chatCompletionStream(
+        req: ChatCompletionRequest,
+    ): AsyncGenerator<ChatCompletionChunk, void, void> {
         const body = this.transformRequest(req);
         this._currentSessionId = this.sessionId || body.prompt_cache_key || null;
 
@@ -214,7 +222,9 @@ export class CodexExecutor implements AIProvider {
             }
 
             if (peek.accountFallback) {
-                throw new Error(`Codex Provider Error (503): ${peek.message || MODEL_CAPACITY_MESSAGE}`);
+                throw new Error(
+                    `Codex Provider Error (503): ${peek.message || MODEL_CAPACITY_MESSAGE}`,
+                );
             }
 
             if (attempt >= maxAttempts) {
@@ -231,7 +241,9 @@ export class CodexExecutor implements AIProvider {
      */
     private transformRequest(req: ChatCompletionRequest): ResponsesRequestBody {
         let body = chatToResponsesBody(req);
-        const targetModel = req.model.includes("/") ? (req.model.split("/")[1] ?? req.model) : req.model;
+        const targetModel = req.model.includes("/")
+            ? (req.model.split("/")[1] ?? req.model)
+            : req.model;
 
         // model: strip suffix thinking levels (e.g. gpt-5.3-codex-high → gpt-5.3-codex)
         const effortLevels = ["none", "minimal", "low", "medium", "high", "xhigh"];
@@ -261,10 +273,16 @@ export class CodexExecutor implements AIProvider {
         // Reasoning effort — priority: explicit reasoning > model suffix > default (low)
         const reasoningEffort = (req as unknown as { reasoning_effort?: string }).reasoning_effort;
         if (!body.reasoning) {
-            const effort = normalizeReasoningEffortLocal(body.model, reasoningEffort || modelEffort || "low");
+            const effort = normalizeReasoningEffortLocal(
+                body.model,
+                reasoningEffort || modelEffort || "low",
+            );
             body.reasoning = { effort, summary: "auto" };
         } else {
-            body.reasoning.effort = normalizeReasoningEffortLocal(body.model, body.reasoning.effort);
+            body.reasoning.effort = normalizeReasoningEffortLocal(
+                body.model,
+                body.reasoning.effort,
+            );
             if (!body.reasoning.summary) body.reasoning.summary = "auto";
         }
 
@@ -297,8 +315,19 @@ export class CodexExecutor implements AIProvider {
 
         // Final allowlist filter
         const ALLOWLIST = new Set([
-            "model", "input", "instructions", "tools", "tool_choice", "stream", "store",
-            "reasoning", "service_tier", "include", "prompt_cache_key", "client_metadata", "text",
+            "model",
+            "input",
+            "instructions",
+            "tools",
+            "tool_choice",
+            "stream",
+            "store",
+            "reasoning",
+            "service_tier",
+            "include",
+            "prompt_cache_key",
+            "client_metadata",
+            "text",
         ]);
         for (const k of Object.keys(body)) {
             if (!ALLOWLIST.has(k)) delete (body as Record<string, unknown>)[k];
@@ -313,7 +342,12 @@ export class CodexExecutor implements AIProvider {
      */
     private async peekSseTransientError(
         response: Response,
-    ): Promise<{ matched: string | null; message: string | null; accountFallback: boolean; replacementBody: ReadableStream<Uint8Array> | null }> {
+    ): Promise<{
+        matched: string | null;
+        message: string | null;
+        accountFallback: boolean;
+        replacementBody: ReadableStream<Uint8Array> | null;
+    }> {
         if (!response || !response.ok || !response.body) {
             return { matched: null, message: null, accountFallback: false, replacementBody: null };
         }
@@ -358,7 +392,12 @@ export class CodexExecutor implements AIProvider {
             } catch {
                 /* noop */
             }
-            return { matched, message: extractSseErrorMessage(text, matched), accountFallback, replacementBody: null };
+            return {
+                matched,
+                message: extractSseErrorMessage(text, matched),
+                accountFallback,
+                replacementBody: null,
+            };
         }
 
         reader.releaseLock();
@@ -401,11 +440,19 @@ export class CodexExecutor implements AIProvider {
     /**
      * Parse 429 usage_limit_reached for precise resetsAtMs.
      */
-    private parseError(status: number, bodyText: string): { status: number; message: string; resetsAtMs?: number } | null {
+    private parseError(
+        status: number,
+        bodyText: string,
+    ): { status: number; message: string; resetsAtMs?: number } | null {
         if (status === 429 && bodyText) {
             try {
                 const json = JSON.parse(bodyText) as {
-                    error?: { type?: string; message?: string; resets_at?: number; resets_in_seconds?: number };
+                    error?: {
+                        type?: string;
+                        message?: string;
+                        resets_at?: number;
+                        resets_in_seconds?: number;
+                    };
                 };
                 const err = json?.error;
                 if (err?.type === "usage_limit_reached") {
@@ -415,7 +462,11 @@ export class CodexExecutor implements AIProvider {
                         const ms = err.resets_at * 1000;
                         if (ms > now) resetsAtMs = ms;
                     }
-                    if (!resetsAtMs && typeof err.resets_in_seconds === "number" && err.resets_in_seconds > 0) {
+                    if (
+                        !resetsAtMs &&
+                        typeof err.resets_in_seconds === "number" &&
+                        err.resets_in_seconds > 0
+                    ) {
                         resetsAtMs = now + err.resets_in_seconds * 1000;
                     }
                     if (resetsAtMs) {
@@ -432,7 +483,10 @@ export class CodexExecutor implements AIProvider {
     /**
      * Stream a Responses API SSE body, converting each event to a ChatCompletionChunk.
      */
-    private async *streamResponses(body: ReadableStream<Uint8Array>, requestedModel: string): AsyncGenerator<ChatCompletionChunk, void, void> {
+    private async *streamResponses(
+        body: ReadableStream<Uint8Array>,
+        requestedModel: string,
+    ): AsyncGenerator<ChatCompletionChunk, void, void> {
         const state = createResponsesStreamState(requestedModel);
         let pendingEvent = "";
 
@@ -443,7 +497,8 @@ export class CodexExecutor implements AIProvider {
                 if (jsonStr === null) continue;
                 try {
                     const parsed = JSON.parse(jsonStr) as Record<string, unknown>;
-                    const eventType = (parsed.type as string) || pendingEvent || "response.output_text.delta";
+                    const eventType =
+                        (parsed.type as string) || pendingEvent || "response.output_text.delta";
                     const chunk = responsesEventToChunk(eventType, parsed, state);
                     if (chunk) yield chunk;
                 } catch {
@@ -455,7 +510,8 @@ export class CodexExecutor implements AIProvider {
                 // Raw JSON line (no data: prefix)
                 try {
                     const parsed = JSON.parse(line) as Record<string, unknown>;
-                    const eventType = (parsed.type as string) || pendingEvent || "response.output_text.delta";
+                    const eventType =
+                        (parsed.type as string) || pendingEvent || "response.output_text.delta";
                     const chunk = responsesEventToChunk(eventType, parsed, state);
                     if (chunk) yield chunk;
                 } catch {
@@ -467,7 +523,9 @@ export class CodexExecutor implements AIProvider {
 }
 
 function extractSseErrorMessage(text: string, fallback: string): string {
-    const exact = text?.match(/Selected model is at capacity\. Please try a different model\./i)?.[0];
+    const exact = text?.match(
+        /Selected model is at capacity\. Please try a different model\./i,
+    )?.[0];
     if (exact) return exact;
 
     for (const line of String(text || "").split(/\r?\n/)) {
@@ -497,10 +555,16 @@ function findNestedMessage(value: unknown, depth = 0): string | null {
     if (typeof value !== "object") return null;
     const obj = value as Record<string, unknown>;
     if (typeof obj.message === "string" && obj.message.trim()) return obj.message;
-    if (typeof (obj.error as { message?: unknown })?.message === "string" && (obj.error as { message: string }).message.trim()) {
+    if (
+        typeof (obj.error as { message?: unknown })?.message === "string" &&
+        (obj.error as { message: string }).message.trim()
+    ) {
         return (obj.error as { message: string }).message;
     }
-    if (typeof (obj.response as { error?: { message?: unknown } })?.error?.message === "string" && (obj.response as { error: { message: string } }).error.message.trim()) {
+    if (
+        typeof (obj.response as { error?: { message?: unknown } })?.error?.message === "string" &&
+        (obj.response as { error: { message: string } }).error.message.trim()
+    ) {
         return (obj.response as { error: { message: string } }).error.message;
     }
     for (const child of Object.values(obj)) {
@@ -517,7 +581,10 @@ function normalizeReasoningEffortLocal(model: string, value?: string): string {
 }
 
 // Accumulate streamed chunks into a non-streaming response (local copy to avoid circular import)
-function accumulateChunksLocal(chunks: ChatCompletionChunk[], model: string): ChatCompletionResponse {
+function accumulateChunksLocal(
+    chunks: ChatCompletionChunk[],
+    model: string,
+): ChatCompletionResponse {
     let content = "";
     const toolCallMap = new Map<number, { id: string; name: string; args: string }>();
 

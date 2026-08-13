@@ -1,3 +1,4 @@
+import { CATEGORY_DESCRIPTIONS, CATEGORY_LABELS, CATEGORY_ORDER } from "@srouter/constants";
 import type { ProviderCategory, ProviderDefinition } from "@srouter/types";
 import { getConnectedCount } from "@/utils/provider.utils";
 
@@ -6,26 +7,10 @@ export interface CatalogSummary {
     categories: Record<ProviderCategory, ProviderDefinition[]>;
 }
 
-export const categoryOrder: ProviderCategory[] = ["oauth", "api_key", "free_tier", "custom"];
-
-export const categoryLabels: Record<ProviderCategory, string> = {
-    oauth: "OAuth session",
-    api_key: "API key",
-    free_tier: "Free tier",
-    custom: "Custom",
-};
-
-export const categoryDescriptions: Record<ProviderCategory, string> = {
-    oauth: "Signed in through a provider account rather than a key.",
-    api_key: "Authenticated with a platform key you supply.",
-    free_tier: "Free or rate-limited public endpoints.",
-    custom: "Endpoints you registered on this gateway.",
-};
-
 export type FilterValue = "all" | ProviderCategory;
 
 export function flattenCatalog(data: CatalogSummary): ProviderDefinition[] {
-    return categoryOrder.flatMap((category) => data.categories[category] ?? []);
+    return CATEGORY_ORDER.flatMap((category) => data.categories[category] ?? []);
 }
 
 export interface CatalogSummaryItems {
@@ -75,9 +60,9 @@ export function buildFilterOptions(
 ): { value: FilterValue; label: string; count: number }[] {
     return [
         { value: "all", label: "All", count: allProviders.length },
-        ...categoryOrder.map((category) => ({
+        ...CATEGORY_ORDER.map((category) => ({
             value: category as FilterValue,
-            label: categoryLabels[category],
+            label: CATEGORY_LABELS[category],
             count: (data.categories[category] ?? []).length,
         })),
     ];
@@ -102,12 +87,10 @@ export function buildGroups(
     filter: FilterValue,
 ): { category: ProviderCategory; providers: ProviderDefinition[] }[] {
     if (filter === "all") {
-        return categoryOrder
-            .map((category) => ({
-                category,
-                providers: providers.filter((provider) => provider.category === category),
-            }))
-            .filter((group) => group.providers.length > 0);
+        return CATEGORY_ORDER.map((category) => ({
+            category,
+            providers: providers.filter((provider) => provider.category === category),
+        })).filter((group) => group.providers.length > 0);
     }
     return [{ category: filter, providers }];
 }

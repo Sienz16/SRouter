@@ -19,7 +19,10 @@ export interface OpenAIErrorPayload {
 /**
  * Formats an OpenAI-compliant error payload object.
  */
-export function formatErrorPayload(message: string, options: ErrorResponseOptions = {}): OpenAIErrorPayload {
+export function formatErrorPayload(
+    message: string,
+    options: ErrorResponseOptions = {},
+): OpenAIErrorPayload {
     return {
         error: {
             message,
@@ -40,6 +43,11 @@ export function ok<T>(c: Context, data: T, status: ContentfulStatusCode = 200): 
 /**
  * Returns a Hono JSON Response in OpenAI-compliant error format.
  */
-export function err(c: Context, message: string, status: ContentfulStatusCode = 500, options: ErrorResponseOptions = {}): Response {
+export function err(
+    c: Context,
+    message: string,
+    status: ContentfulStatusCode = 500,
+    options: ErrorResponseOptions = {},
+): Response {
     return c.json(formatErrorPayload(message, options), status);
 }

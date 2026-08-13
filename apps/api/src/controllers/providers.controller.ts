@@ -55,4 +55,3 @@ export class ProvidersController {
         return ok(c, { message: "Connection deleted" });
     }
 }
-

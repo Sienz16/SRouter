@@ -71,7 +71,10 @@ test("generic logic (initiatePKCEFor) produces an authorizeUrl with expected sta
 
 test("auth provider handlers carry preserved per-provider messages", () => {
     assert.equal(openaiCodexAuthHandler.oauthSuccessMessage, "Login OpenAI Codex Berhasil!");
-    assert.equal(commandCodeAuthHandler.tokenImportMessage, "Command Code API Key registered and saved directly to SQLite database!");
+    assert.equal(
+        commandCodeAuthHandler.tokenImportMessage,
+        "Command Code API Key registered and saved directly to SQLite database!",
+    );
 });
 
 test("processTokenImportFor honors provided id and name", () => {

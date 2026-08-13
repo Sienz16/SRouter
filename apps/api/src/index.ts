@@ -1,6 +1,10 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
-import { authRoute, handleAntigravityOAuthCallback, handleOAuthCallback } from "@/routes/v1/auth.js";
+import {
+    authRoute,
+    handleAntigravityOAuthCallback,
+    handleOAuthCallback,
+} from "@/routes/v1/auth.js";
 import { chatRoute } from "@/routes/v1/chat.js";
 import { logsRoute } from "@/routes/v1/logs.js";
 import { modelsRoute } from "@/routes/v1/models.js";
@@ -38,7 +42,6 @@ app.get("/health", (c) => {
     return c.json({ status: "ok" });
 });
 
-
 // Mount OpenAI & Anthropic v1 API routes
 app.route("/v1", modelsRoute);
 app.route("/v1", chatRoute);
@@ -75,7 +78,9 @@ try {
             port: oauthPort,
         },
         (info) => {
-            console.log(`🔑 OAuth Callback Server running at http://localhost:${info.port}/auth/callback & /auth/antigravity/callback`);
+            console.log(
+                `🔑 OAuth Callback Server running at http://localhost:${info.port}/auth/callback & /auth/antigravity/callback`,
+            );
         },
     );
 } catch (err) {

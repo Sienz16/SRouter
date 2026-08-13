@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, AlertTriangle, ExternalLink, Search } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { ProviderIcon } from "@/components/ui/ProviderIcon";
+import { ProviderIcon } from "@/components/ProviderIcon";
 import { ConnectOAuthModal } from "@/components/ui/ConnectOAuthModal";
 import { useProvider, type AddConnectionPayload } from "@/hooks/useProvider";
 import { useCopy } from "@/hooks/useCopy";

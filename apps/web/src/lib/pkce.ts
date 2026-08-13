@@ -20,8 +20,5 @@ function base64UrlEncode(buffer: Uint8Array): string {
     for (let i = 0; i < buffer.length; i++) {
         str += String.fromCharCode(buffer[i]);
     }
-    return btoa(str)
-        .replace(/\+/g, "-")
-        .replace(/\//g, "_")
-        .replace(/=+$/, "");
+    return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }

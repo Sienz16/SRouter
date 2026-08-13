@@ -1,44 +1,45 @@
-import { getAllProvidersDB } from "@srouter/db";
-import { AntigravityExecutor, AnthropicExecutor, CodexExecutor, CommandCodeExecutor, KiroExecutor, OpenAIExecutor } from "@srouter/executors";
+import {
+    DEFAULT_PROVIDERS,
+    isSeedProvider,
+    NEOSANTARA_BASE_URL,
+    SEED_MARKER,
+} from "@srouter/constants";
+import { getAllProvidersDB, upsertProviderDB } from "@srouter/db";
+import {
+    AntigravityExecutor,
+    AnthropicExecutor,
+    CodexExecutor,
+    CommandCodeExecutor,
+    KiroExecutor,
+    OpenAIExecutor,
+} from "@srouter/executors";
 import { ProviderRegistry } from "@srouter/providers";
 
 // Create a global ProviderRegistry instance
 export const registry = new ProviderRegistry();
 
-// 1. Register env-configured OpenAI Provider if present
-if (process.env.OPENAI_API_KEY) {
-    registry.registerProvider(
-        new OpenAIExecutor({
-            id: "openai",
-            name: "OpenAI",
-            apiKey: process.env.OPENAI_API_KEY,
-            baseUrl: process.env.OPENAI_BASE_URL || "https://api.openai.com/v1",
-        }),
-    );
-}
+/**
+ * Seed built-in driver rows into the providers table on first startup, so the
+ * dashboard catalog is DB-driven but never empty. Rows are flagged with the
+ * seed marker so they are not treated as real connections.
+ */
+export function seedDefaultProviders(): void {
+    if (getAllProvidersDB().length > 0) return;
 
-// 2. Register env-configured Anthropic Provider if present
-if (process.env.ANTHROPIC_API_KEY) {
-    registry.registerProvider(
-        new AnthropicExecutor({
-            id: "anthropic",
-            name: "Anthropic",
-            apiKey: process.env.ANTHROPIC_API_KEY,
-            baseUrl: process.env.ANTHROPIC_BASE_URL || "https://api.anthropic.com/v1",
-        }),
-    );
-}
-
-// 3. Register env-configured Neosantara Provider if present
-if (process.env.NEOSANTARA_API_KEY) {
-    registry.registerProvider(
-        new OpenAIExecutor({
-            id: "neosantara",
-            name: "Neosantara",
-            apiKey: process.env.NEOSANTARA_API_KEY,
-            baseUrl: process.env.NEOSANTARA_BASE_URL || "https://api.neosantara.xyz/v1",
-        }),
-    );
+    const now = Date.now();
+    for (const seed of DEFAULT_PROVIDERS) {
+        upsertProviderDB({
+            id: seed.id,
+            providerId: seed.id,
+            name: seed.name,
+            category: seed.category,
+            protocol: seed.protocol,
+            baseUrl: seed.baseUrl,
+            enabled: true,
+            providerSpecificData: { [SEED_MARKER]: "true" },
+            createdAt: now,
+        });
+    }
 }
 
 /**
@@ -48,9 +49,11 @@ export function loadSavedProvidersFromDB(): void {
     const savedProviders = getAllProvidersDB();
     for (const p of savedProviders) {
         if (!p.enabled) continue;
+        // Seed rows describe drivers, not connections; they never get executors.
+        if (isSeedProvider(p)) continue;
 
         const providerType = p.providerId || p.id;
-        const baseUrl = p.baseUrl || (providerType === "antigravity" || p.id.startsWith("antigravity") ? process.env.ANTIGRAVITY_BASE_URL : undefined);
+        const baseUrl = p.baseUrl;
 
         switch (true) {
             case providerType === "kiro" || p.id.startsWith("kiro"):
@@ -107,13 +110,17 @@ export function loadSavedProvidersFromDB(): void {
                     new OpenAIExecutor({
                         id: p.id || p.providerId,
                         name: p.name,
-                        baseUrl: baseUrl || process.env.NEOSANTARA_BASE_URL || "https://api.neosantara.xyz/v1",
+                        baseUrl: baseUrl || NEOSANTARA_BASE_URL,
                         apiKey: p.apiKey,
                         accessToken: p.accessToken,
                     }),
                 );
                 break;
-            case p.protocol === "openai" || p.category === "oauth" || providerType === "openai_codex" || providerType === "openai" || providerType === "custom_openai":
+            case p.protocol === "openai" ||
+                p.category === "oauth" ||
+                providerType === "openai_codex" ||
+                providerType === "openai" ||
+                providerType === "custom_openai":
                 registry.registerProvider(
                     new OpenAIExecutor({
                         id: p.id || p.providerId,
@@ -124,7 +131,9 @@ export function loadSavedProvidersFromDB(): void {
                     }),
                 );
                 break;
-            case p.protocol === "anthropic" || providerType === "anthropic" || providerType === "custom_anthropic":
+            case p.protocol === "anthropic" ||
+                providerType === "anthropic" ||
+                providerType === "custom_anthropic":
                 registry.registerProvider(
                     new AnthropicExecutor({
                         id: p.id || p.providerId,
@@ -141,5 +150,6 @@ export function loadSavedProvidersFromDB(): void {
     }
 }
 
-// Auto load saved DB providers
+// Seed built-in driver rows, then auto load saved DB providers
+seedDefaultProviders();
 loadSavedProvidersFromDB();

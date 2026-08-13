@@ -1,5 +1,12 @@
 import { randomUUID } from "node:crypto";
-import type { ChatCompletionChunk, ChatCompletionChunkDelta, ChatCompletionRequest, ChatCompletionResponse, FinishReason, ToolCall } from "@srouter/types";
+import type {
+    ChatCompletionChunk,
+    ChatCompletionChunkDelta,
+    ChatCompletionRequest,
+    ChatCompletionResponse,
+    FinishReason,
+    ToolCall,
+} from "@srouter/types";
 
 const DEFAULT_MAX_TOKENS = 4096;
 
@@ -12,7 +19,12 @@ function flattenText(content: unknown): string {
         const parts: string[] = [];
         for (const p of content) {
             if (typeof p === "string") parts.push(p);
-            else if (p && typeof p === "object" && typeof (p as { text?: unknown }).text === "string") parts.push((p as { text: string }).text);
+            else if (
+                p &&
+                typeof p === "object" &&
+                typeof (p as { text?: unknown }).text === "string"
+            )
+                parts.push((p as { text: string }).text);
         }
         return parts.join("\n");
     }
@@ -55,7 +67,14 @@ function safeParseJson(s: unknown): unknown {
 
 export interface CommandCodeMessage {
     role: "user" | "assistant" | "tool";
-    content: Array<{ type: string; text?: string; toolCallId?: string; toolName?: string; input?: unknown; output?: unknown }>;
+    content: Array<{
+        type: string;
+        text?: string;
+        toolCallId?: string;
+        toolName?: string;
+        input?: unknown;
+        output?: unknown;
+    }>;
 }
 
 export interface CommandCodeRequestBody {
@@ -84,7 +103,10 @@ export interface CommandCodeRequestBody {
     };
 }
 
-function convertMessages(messages: ChatCompletionRequest["messages"]): { messages: CommandCodeMessage[]; system: string } {
+function convertMessages(messages: ChatCompletionRequest["messages"]): {
+    messages: CommandCodeMessage[];
+    system: string;
+} {
     const out: CommandCodeMessage[] = [];
     const systemTexts: string[] = [];
 
@@ -128,7 +150,10 @@ function convertMessages(messages: ChatCompletionRequest["messages"]): { message
                     });
                 }
             }
-            out.push({ role: "assistant", content: blocks.length ? blocks : [{ type: "text", text: "" }] });
+            out.push({
+                role: "assistant",
+                content: blocks.length ? blocks : [{ type: "text", text: "" }],
+            });
             continue;
         }
 
@@ -138,7 +163,9 @@ function convertMessages(messages: ChatCompletionRequest["messages"]): { message
     return { messages: out, system: systemTexts.join("\n\n") };
 }
 
-function convertTools(tools: ChatCompletionRequest["tools"]): Array<{ name: string; description?: string; input_schema: unknown }> | undefined {
+function convertTools(
+    tools: ChatCompletionRequest["tools"],
+): Array<{ name: string; description?: string; input_schema: unknown }> | undefined {
     if (!Array.isArray(tools) || tools.length === 0) return undefined;
     const result: Array<{ name: string; description?: string; input_schema: unknown }> = [];
     for (const t of tools) {
@@ -231,7 +258,11 @@ function ensureState(state: CommandCodeStreamState, model: string): void {
     }
 }
 
-function makeChunk(state: CommandCodeStreamState, delta: ChatCompletionChunkDelta, finishReason: FinishReason = null): ChatCompletionChunk {
+function makeChunk(
+    state: CommandCodeStreamState,
+    delta: ChatCompletionChunkDelta,
+    finishReason: FinishReason = null,
+): ChatCompletionChunk {
     return {
         id: state.responseId,
         object: "chat.completion.chunk",
@@ -280,7 +311,10 @@ export interface CommandCodeEvent {
     message?: unknown;
 }
 
-export function commandCodeEventToOpenAIChunk(event: CommandCodeEvent, state: CommandCodeStreamState): ChatCompletionChunk[] {
+export function commandCodeEventToOpenAIChunk(
+    event: CommandCodeEvent,
+    state: CommandCodeStreamState,
+): ChatCompletionChunk[] {
     if (!event || typeof event !== "object" || !event.type) return [];
 
     ensureState(state, event.model ?? "");
@@ -290,7 +324,8 @@ export function commandCodeEventToOpenAIChunk(event: CommandCodeEvent, state: Co
         case "text-delta": {
             const text = event.text || event.delta || "";
             if (!text) break;
-            const delta: ChatCompletionChunkDelta = state.chunkIndex === 0 ? { role: "assistant", content: text } : { content: text };
+            const delta: ChatCompletionChunkDelta =
+                state.chunkIndex === 0 ? { role: "assistant", content: text } : { content: text };
             state.chunkIndex++;
             out.push(makeChunk(state, delta));
             break;
@@ -298,7 +333,10 @@ export function commandCodeEventToOpenAIChunk(event: CommandCodeEvent, state: Co
         case "reasoning-delta": {
             const text = event.text || "";
             if (!text) break;
-            const delta: ChatCompletionChunkDelta = state.chunkIndex === 0 ? { role: "assistant", reasoning_content: text } : { reasoning_content: text };
+            const delta: ChatCompletionChunkDelta =
+                state.chunkIndex === 0
+                    ? { role: "assistant", reasoning_content: text }
+                    : { reasoning_content: text };
             state.chunkIndex++;
             out.push(makeChunk(state, delta));
             break;
@@ -347,7 +385,8 @@ export function commandCodeEventToOpenAIChunk(event: CommandCodeEvent, state: Co
             if (!id || state.toolIndexById.has(id)) break;
             const idx = state.toolIndex++;
             state.toolIndexById.set(id, idx);
-            const argsStr = typeof event.input === "string" ? event.input : JSON.stringify(event.input ?? {});
+            const argsStr =
+                typeof event.input === "string" ? event.input : JSON.stringify(event.input ?? {});
             const delta: ChatCompletionChunkDelta = {
                 ...(state.chunkIndex === 0 ? { role: "assistant" as const } : {}),
                 tool_calls: [
@@ -369,7 +408,8 @@ export function commandCodeEventToOpenAIChunk(event: CommandCodeEvent, state: Co
             break;
         }
         case "finish": {
-            const finishReason = state.finishReason || mapFinishReason(event.finishReason || "stop");
+            const finishReason =
+                state.finishReason || mapFinishReason(event.finishReason || "stop");
             const finalChunk = makeChunk(state, {}, finishReason);
             const totalUsage = event.totalUsage || state.usage;
             const usage = toOpenAIUsage(totalUsage);
@@ -408,7 +448,10 @@ function toOpenAIUsage(raw: unknown): UsageInfo | null {
 }
 
 // Accumulate streamed OpenAI chunks into a single non-streaming ChatCompletionResponse.
-export function accumulateChunks(chunks: ChatCompletionChunk[], model: string): ChatCompletionResponse {
+export function accumulateChunks(
+    chunks: ChatCompletionChunk[],
+    model: string,
+): ChatCompletionResponse {
     let content = "";
     const toolCalls: ToolCall[] = [];
     const toolCallMap = new Map<number, { id: string; name: string; args: string }>();

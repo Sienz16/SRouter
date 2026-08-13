@@ -8,190 +8,182 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as LogsRouteImport } from './routes/logs'
-import { Route as ModelsRouteImport } from './routes/models'
-import { Route as PlaygroundRouteImport } from './routes/playground'
-import { Route as ProvidersRouteImport } from './routes/providers'
-import { Route as ProvidersIndexRouteImport } from './routes/providers/index'
-import { Route as ProvidersProviderIdRouteImport } from './routes/providers/$providerId'
+import { Route as rootRouteImport } from "./routes/__root";
+import { Route as IndexRouteImport } from "./routes/index";
+import { Route as LogsRouteImport } from "./routes/logs";
+import { Route as ModelsRouteImport } from "./routes/models";
+import { Route as PlaygroundRouteImport } from "./routes/playground";
+import { Route as ProvidersRouteImport } from "./routes/providers";
+import { Route as ProvidersIndexRouteImport } from "./routes/providers/index";
+import { Route as ProvidersProviderIdRouteImport } from "./routes/providers/$providerId";
 
 const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
+    id: "/",
+    path: "/",
+    getParentRoute: () => rootRouteImport,
+} as any);
 const LogsRoute = LogsRouteImport.update({
-  id: '/logs',
-  path: '/logs',
-  getParentRoute: () => rootRouteImport,
-} as any)
+    id: "/logs",
+    path: "/logs",
+    getParentRoute: () => rootRouteImport,
+} as any);
 const ModelsRoute = ModelsRouteImport.update({
-  id: '/models',
-  path: '/models',
-  getParentRoute: () => rootRouteImport,
-} as any)
+    id: "/models",
+    path: "/models",
+    getParentRoute: () => rootRouteImport,
+} as any);
 const PlaygroundRoute = PlaygroundRouteImport.update({
-  id: '/playground',
-  path: '/playground',
-  getParentRoute: () => rootRouteImport,
-} as any)
+    id: "/playground",
+    path: "/playground",
+    getParentRoute: () => rootRouteImport,
+} as any);
 const ProvidersRoute = ProvidersRouteImport.update({
-  id: '/providers',
-  path: '/providers',
-  getParentRoute: () => rootRouteImport,
-} as any)
+    id: "/providers",
+    path: "/providers",
+    getParentRoute: () => rootRouteImport,
+} as any);
 const ProvidersIndexRoute = ProvidersIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => ProvidersRoute,
-} as any)
+    id: "/",
+    path: "/",
+    getParentRoute: () => ProvidersRoute,
+} as any);
 const ProvidersProviderIdRoute = ProvidersProviderIdRouteImport.update({
-  id: '/$providerId',
-  path: '/$providerId',
-  getParentRoute: () => ProvidersRoute,
-} as any)
+    id: "/$providerId",
+    path: "/$providerId",
+    getParentRoute: () => ProvidersRoute,
+} as any);
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/logs': typeof LogsRoute
-  '/models': typeof ModelsRoute
-  '/playground': typeof PlaygroundRoute
-  '/providers': typeof ProvidersRouteWithChildren
-  '/providers/$providerId': typeof ProvidersProviderIdRoute
-  '/providers/': typeof ProvidersIndexRoute
+    "/": typeof IndexRoute;
+    "/logs": typeof LogsRoute;
+    "/models": typeof ModelsRoute;
+    "/playground": typeof PlaygroundRoute;
+    "/providers": typeof ProvidersRouteWithChildren;
+    "/providers/$providerId": typeof ProvidersProviderIdRoute;
+    "/providers/": typeof ProvidersIndexRoute;
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/logs': typeof LogsRoute
-  '/models': typeof ModelsRoute
-  '/playground': typeof PlaygroundRoute
-  '/providers/$providerId': typeof ProvidersProviderIdRoute
-  '/providers': typeof ProvidersIndexRoute
+    "/": typeof IndexRoute;
+    "/logs": typeof LogsRoute;
+    "/models": typeof ModelsRoute;
+    "/playground": typeof PlaygroundRoute;
+    "/providers/$providerId": typeof ProvidersProviderIdRoute;
+    "/providers": typeof ProvidersIndexRoute;
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/logs': typeof LogsRoute
-  '/models': typeof ModelsRoute
-  '/playground': typeof PlaygroundRoute
-  '/providers': typeof ProvidersRouteWithChildren
-  '/providers/$providerId': typeof ProvidersProviderIdRoute
-  '/providers/': typeof ProvidersIndexRoute
+    __root__: typeof rootRouteImport;
+    "/": typeof IndexRoute;
+    "/logs": typeof LogsRoute;
+    "/models": typeof ModelsRoute;
+    "/playground": typeof PlaygroundRoute;
+    "/providers": typeof ProvidersRouteWithChildren;
+    "/providers/$providerId": typeof ProvidersProviderIdRoute;
+    "/providers/": typeof ProvidersIndexRoute;
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/logs'
-    | '/models'
-    | '/playground'
-    | '/providers'
-    | '/providers/$providerId'
-    | '/providers/'
-  fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/logs'
-    | '/models'
-    | '/playground'
-    | '/providers/$providerId'
-    | '/providers'
-  id:
-    | '__root__'
-    | '/'
-    | '/logs'
-    | '/models'
-    | '/playground'
-    | '/providers'
-    | '/providers/$providerId'
-    | '/providers/'
-  fileRoutesById: FileRoutesById
+    fileRoutesByFullPath: FileRoutesByFullPath;
+    fullPaths:
+        | "/"
+        | "/logs"
+        | "/models"
+        | "/playground"
+        | "/providers"
+        | "/providers/$providerId"
+        | "/providers/";
+    fileRoutesByTo: FileRoutesByTo;
+    to: "/" | "/logs" | "/models" | "/playground" | "/providers/$providerId" | "/providers";
+    id:
+        | "__root__"
+        | "/"
+        | "/logs"
+        | "/models"
+        | "/playground"
+        | "/providers"
+        | "/providers/$providerId"
+        | "/providers/";
+    fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  LogsRoute: typeof LogsRoute
-  ModelsRoute: typeof ModelsRoute
-  PlaygroundRoute: typeof PlaygroundRoute
-  ProvidersRoute: typeof ProvidersRouteWithChildren
+    IndexRoute: typeof IndexRoute;
+    LogsRoute: typeof LogsRoute;
+    ModelsRoute: typeof ModelsRoute;
+    PlaygroundRoute: typeof PlaygroundRoute;
+    ProvidersRoute: typeof ProvidersRouteWithChildren;
 }
 
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+declare module "@tanstack/react-router" {
+    interface FileRoutesByPath {
+        "/": {
+            id: "/";
+            path: "/";
+            fullPath: "/";
+            preLoaderRoute: typeof IndexRouteImport;
+            parentRoute: typeof rootRouteImport;
+        };
+        "/logs": {
+            id: "/logs";
+            path: "/logs";
+            fullPath: "/logs";
+            preLoaderRoute: typeof LogsRouteImport;
+            parentRoute: typeof rootRouteImport;
+        };
+        "/models": {
+            id: "/models";
+            path: "/models";
+            fullPath: "/models";
+            preLoaderRoute: typeof ModelsRouteImport;
+            parentRoute: typeof rootRouteImport;
+        };
+        "/playground": {
+            id: "/playground";
+            path: "/playground";
+            fullPath: "/playground";
+            preLoaderRoute: typeof PlaygroundRouteImport;
+            parentRoute: typeof rootRouteImport;
+        };
+        "/providers": {
+            id: "/providers";
+            path: "/providers";
+            fullPath: "/providers";
+            preLoaderRoute: typeof ProvidersRouteImport;
+            parentRoute: typeof rootRouteImport;
+        };
+        "/providers/": {
+            id: "/providers/";
+            path: "/";
+            fullPath: "/providers/";
+            preLoaderRoute: typeof ProvidersIndexRouteImport;
+            parentRoute: typeof ProvidersRoute;
+        };
+        "/providers/$providerId": {
+            id: "/providers/$providerId";
+            path: "/$providerId";
+            fullPath: "/providers/$providerId";
+            preLoaderRoute: typeof ProvidersProviderIdRouteImport;
+            parentRoute: typeof ProvidersRoute;
+        };
     }
-    '/logs': {
-      id: '/logs'
-      path: '/logs'
-      fullPath: '/logs'
-      preLoaderRoute: typeof LogsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/models': {
-      id: '/models'
-      path: '/models'
-      fullPath: '/models'
-      preLoaderRoute: typeof ModelsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/playground': {
-      id: '/playground'
-      path: '/playground'
-      fullPath: '/playground'
-      preLoaderRoute: typeof PlaygroundRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/providers': {
-      id: '/providers'
-      path: '/providers'
-      fullPath: '/providers'
-      preLoaderRoute: typeof ProvidersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/providers/': {
-      id: '/providers/'
-      path: '/'
-      fullPath: '/providers/'
-      preLoaderRoute: typeof ProvidersIndexRouteImport
-      parentRoute: typeof ProvidersRoute
-    }
-    '/providers/$providerId': {
-      id: '/providers/$providerId'
-      path: '/$providerId'
-      fullPath: '/providers/$providerId'
-      preLoaderRoute: typeof ProvidersProviderIdRouteImport
-      parentRoute: typeof ProvidersRoute
-    }
-  }
 }
 
 interface ProvidersRouteChildren {
-  ProvidersProviderIdRoute: typeof ProvidersProviderIdRoute
-  ProvidersIndexRoute: typeof ProvidersIndexRoute
+    ProvidersProviderIdRoute: typeof ProvidersProviderIdRoute;
+    ProvidersIndexRoute: typeof ProvidersIndexRoute;
 }
 
 const ProvidersRouteChildren: ProvidersRouteChildren = {
-  ProvidersProviderIdRoute: ProvidersProviderIdRoute,
-  ProvidersIndexRoute: ProvidersIndexRoute,
-}
+    ProvidersProviderIdRoute: ProvidersProviderIdRoute,
+    ProvidersIndexRoute: ProvidersIndexRoute,
+};
 
-const ProvidersRouteWithChildren = ProvidersRoute._addFileChildren(
-  ProvidersRouteChildren,
-)
+const ProvidersRouteWithChildren = ProvidersRoute._addFileChildren(ProvidersRouteChildren);
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  LogsRoute: LogsRoute,
-  ModelsRoute: ModelsRoute,
-  PlaygroundRoute: PlaygroundRoute,
-  ProvidersRoute: ProvidersRouteWithChildren,
-}
+    IndexRoute: IndexRoute,
+    LogsRoute: LogsRoute,
+    ModelsRoute: ModelsRoute,
+    PlaygroundRoute: PlaygroundRoute,
+    ProvidersRoute: ProvidersRouteWithChildren,
+};
 export const routeTree = rootRouteImport
-  ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+    ._addFileChildren(rootRouteChildren)
+    ._addFileTypes<FileRouteTypes>();

@@ -1,7 +1,15 @@
 import type { ComponentType } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Activity, Boxes, Coins, CircleDollarSign, Radio, RefreshCw, TriangleAlert } from "lucide-react";
+import {
+    Activity,
+    Boxes,
+    Coins,
+    CircleDollarSign,
+    Radio,
+    RefreshCw,
+    TriangleAlert,
+} from "lucide-react";
 import { api } from "@/lib/api";
 import type { UsageStats } from "@srouter/types";
 import { ModelUsageOverview } from "@/components/dashboard/ModelUsageOverview";
@@ -28,9 +36,13 @@ function StatCard({ label, value, detail, icon: Icon }: StatCardProps) {
         <article className="relative min-w-0 px-4 py-5 xl:[&:not(:first-child)]:border-l xl:[&:not(:first-child)]:border-border/70">
             <div className="flex items-center gap-2 text-muted-foreground">
                 <Icon className="size-3.5" strokeWidth={1.75} />
-                <span className="text-[10px] font-semibold uppercase tracking-[0.12em]">{label}</span>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.12em]">
+                    {label}
+                </span>
             </div>
-            <div className="mt-3 text-2xl font-semibold tracking-tight text-foreground">{value}</div>
+            <div className="mt-3 text-2xl font-semibold tracking-tight text-foreground">
+                {value}
+            </div>
             <p className="mt-1 truncate text-[11px] text-muted-foreground" title={detail}>
                 {detail}
             </p>
@@ -92,11 +104,21 @@ function DashboardPage() {
                     <div className="flex size-10 items-center justify-center rounded-full bg-destructive/10 text-destructive">
                         <TriangleAlert className="size-5" strokeWidth={1.75} />
                     </div>
-                    <h1 className="mt-4 text-base font-semibold text-foreground">Unable to load gateway statistics</h1>
+                    <h1 className="mt-4 text-base font-semibold text-foreground">
+                        Unable to load gateway statistics
+                    </h1>
                     <p className="mt-1 max-w-lg text-xs text-muted-foreground">
-                        {error instanceof Error ? error.message : "The gateway returned an unknown error."}
+                        {error instanceof Error
+                            ? error.message
+                            : "The gateway returned an unknown error."}
                     </p>
-                    <Button type="button" variant="outline" size="sm" className="mt-4" onClick={() => void refetch()}>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="mt-4"
+                        onClick={() => void refetch()}
+                    >
                         <RefreshCw />
                         Retry
                     </Button>
@@ -127,9 +149,12 @@ function DashboardPage() {
                     <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                         Ops cockpit
                     </p>
-                    <h1 className="mt-1.5 text-2xl font-bold tracking-tight text-foreground">Gateway operations</h1>
+                    <h1 className="mt-1.5 text-2xl font-bold tracking-tight text-foreground">
+                        Gateway operations
+                    </h1>
                     <p className="mt-1 max-w-2xl text-xs text-muted-foreground">
-                        Aggregate usage, model activity, and integration tools for your SRouter gateway.
+                        Aggregate usage, model activity, and integration tools for your SRouter
+                        gateway.
                     </p>
                 </div>
 
@@ -169,7 +194,9 @@ function DashboardPage() {
                 <StatCard
                     label="Estimated cost"
                     value={stats.costLabel}
-                    detail={stats.estimated ? "Estimated from recorded usage" : "Recorded usage cost"}
+                    detail={
+                        stats.estimated ? "Estimated from recorded usage" : "Recorded usage cost"
+                    }
                     icon={CircleDollarSign}
                 />
                 <StatCard

@@ -1,3 +1,11 @@
+import {
+    CODEX_OAUTH_AUTHORIZE_URL,
+    CODEX_OAUTH_CLIENT_ID,
+    CODEX_OAUTH_ORIGINATOR,
+    CODEX_OAUTH_REDIRECT_URI,
+    CODEX_OAUTH_SCOPE,
+    CODEX_OAUTH_TOKEN_URL,
+} from "@srouter/constants";
 import type { OAuthTokenResponse, PKCEPair } from "./base.js";
 
 export interface OpenAIOAuthOptions {
@@ -20,14 +28,14 @@ export class OpenAICodexOAuth {
 
     constructor(options: OpenAIOAuthOptions = {}) {
         // Official OpenAI Codex OAuth public client ID (mirrors openai/codex auth URL)
-        this.clientId = options.clientId ?? process.env.OPENAI_OAUTH_CLIENT_ID ?? "app_EMoamEEZ73f0CkXaXp7hrann";
-        this.redirectUri = options.redirectUri ?? process.env.OPENAI_OAUTH_REDIRECT_URI ?? "http://localhost:1455/auth/callback";
+        this.clientId = options.clientId ?? CODEX_OAUTH_CLIENT_ID;
+        this.redirectUri = options.redirectUri ?? CODEX_OAUTH_REDIRECT_URI;
         // Mirrors the official Codex CLI scope set; the connector scopes are required for a valid consent
-        this.scope = options.scope ?? "openid profile email offline_access api.connectors.read api.connectors.invoke";
-        this.authorizeUrl = options.authorizeUrl ?? "https://auth.openai.com/oauth/authorize";
-        this.tokenUrl = options.tokenUrl ?? "https://auth.openai.com/oauth/token";
+        this.scope = options.scope ?? CODEX_OAUTH_SCOPE;
+        this.authorizeUrl = options.authorizeUrl ?? CODEX_OAUTH_AUTHORIZE_URL;
+        this.tokenUrl = options.tokenUrl ?? CODEX_OAUTH_TOKEN_URL;
         this.prompt = options.prompt ?? process.env.OPENAI_OAUTH_PROMPT;
-        this.originator = process.env.OPENAI_OAUTH_ORIGINATOR ?? "codex_cli_rs";
+        this.originator = process.env.OPENAI_OAUTH_ORIGINATOR ?? CODEX_OAUTH_ORIGINATOR;
     }
 
     /**
@@ -98,7 +106,10 @@ export class OpenAICodexOAuth {
             idToken: data.id_token,
             expiresIn: data.expires_in,
             tokenType: data.token_type ?? "Bearer",
-            accountId: data.chatgpt_account_id || data.account_id || extractAccountIdFromIdToken(data.id_token),
+            accountId:
+                data.chatgpt_account_id ||
+                data.account_id ||
+                extractAccountIdFromIdToken(data.id_token),
         };
     }
 

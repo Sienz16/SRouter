@@ -17,7 +17,13 @@ export function saveOAuthSessionDB(session: OAuthSession): OAuthSession {
              client_id = excluded.client_id,
              redirect_uri = excluded.redirect_uri,
              created_at = excluded.created_at;`,
-    ).run(session.state, session.codeVerifier, session.clientId, session.redirectUri, session.createdAt);
+    ).run(
+        session.state,
+        session.codeVerifier,
+        session.clientId,
+        session.redirectUri,
+        session.createdAt,
+    );
 
     return session;
 }

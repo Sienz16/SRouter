@@ -19,7 +19,9 @@ export function getAllProvidersDB(): ProviderConfig[] {
         tokenExpiresAt: row.token_expires_at ? Number(row.token_expires_at) : undefined,
         lastRefreshedAt: row.last_refreshed_at ? Number(row.last_refreshed_at) : undefined,
         customHeaders: row.custom_headers ? JSON.parse(String(row.custom_headers)) : undefined,
-        providerSpecificData: row.provider_specific_data ? JSON.parse(String(row.provider_specific_data)) : undefined,
+        providerSpecificData: row.provider_specific_data
+            ? JSON.parse(String(row.provider_specific_data))
+            : undefined,
         enabled: Boolean(row.enabled),
         createdAt: Number(row.created_at ?? 0),
     }));
@@ -45,13 +47,17 @@ export function getProviderByIdDB(id: string): ProviderConfig | null {
         tokenExpiresAt: row.token_expires_at ? Number(row.token_expires_at) : undefined,
         lastRefreshedAt: row.last_refreshed_at ? Number(row.last_refreshed_at) : undefined,
         customHeaders: row.custom_headers ? JSON.parse(String(row.custom_headers)) : undefined,
-        providerSpecificData: row.provider_specific_data ? JSON.parse(String(row.provider_specific_data)) : undefined,
+        providerSpecificData: row.provider_specific_data
+            ? JSON.parse(String(row.provider_specific_data))
+            : undefined,
         enabled: Boolean(row.enabled),
         createdAt: Number(row.created_at ?? 0),
     };
 }
 
-export function upsertProviderDB(config: ProviderConfig & { category: string; protocol: string }): ProviderConfig {
+export function upsertProviderDB(
+    config: ProviderConfig & { category: string; protocol: string },
+): ProviderConfig {
     const query = db.prepare(`
         INSERT INTO providers (id, provider_id, name, category, protocol, base_url, api_key, access_token, refresh_token, account_id, token_expires_at, last_refreshed_at, custom_headers, provider_specific_data, enabled, created_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -73,12 +79,31 @@ export function upsertProviderDB(config: ProviderConfig & { category: string; pr
             created_at = excluded.created_at;
     `);
 
-    query.run(config.id, config.providerId, config.name, config.category, config.protocol, config.baseUrl ?? null, config.apiKey ?? null, config.accessToken ?? null, config.refreshToken ?? null, config.accountId ?? null, config.tokenExpiresAt ?? null, config.lastRefreshedAt ?? null, config.customHeaders ? JSON.stringify(config.customHeaders) : null, config.providerSpecificData ? JSON.stringify(config.providerSpecificData) : null, config.enabled ? 1 : 0, config.createdAt);
+    query.run(
+        config.id,
+        config.providerId,
+        config.name,
+        config.category,
+        config.protocol,
+        config.baseUrl ?? null,
+        config.apiKey ?? null,
+        config.accessToken ?? null,
+        config.refreshToken ?? null,
+        config.accountId ?? null,
+        config.tokenExpiresAt ?? null,
+        config.lastRefreshedAt ?? null,
+        config.customHeaders ? JSON.stringify(config.customHeaders) : null,
+        config.providerSpecificData ? JSON.stringify(config.providerSpecificData) : null,
+        config.enabled ? 1 : 0,
+        config.createdAt,
+    );
 
     return config;
 }
 
-export function createProviderDB(config: ProviderConfig & { category: string; protocol: string }): ProviderConfig {
+export function createProviderDB(
+    config: ProviderConfig & { category: string; protocol: string },
+): ProviderConfig {
     return upsertProviderDB(config);
 }
 
@@ -119,7 +144,7 @@ export function updateProviderTokensDB(input: UpdateProviderTokensInput): void {
 export function getConnectionsByProviderIdDB(providerId: string): ProviderConfig[] {
     const pId = providerId.toLowerCase();
     const query = db.prepare(
-        "SELECT * FROM providers WHERE LOWER(provider_id) = ? OR LOWER(id) = ? ORDER BY created_at DESC"
+        "SELECT * FROM providers WHERE LOWER(provider_id) = ? OR LOWER(id) = ? ORDER BY created_at DESC",
     );
     const rows = query.all(pId, pId);
 
@@ -137,7 +162,9 @@ export function getConnectionsByProviderIdDB(providerId: string): ProviderConfig
         tokenExpiresAt: row.token_expires_at ? Number(row.token_expires_at) : undefined,
         lastRefreshedAt: row.last_refreshed_at ? Number(row.last_refreshed_at) : undefined,
         customHeaders: row.custom_headers ? JSON.parse(String(row.custom_headers)) : undefined,
-        providerSpecificData: row.provider_specific_data ? JSON.parse(String(row.provider_specific_data)) : undefined,
+        providerSpecificData: row.provider_specific_data
+            ? JSON.parse(String(row.provider_specific_data))
+            : undefined,
         enabled: Boolean(row.enabled),
         createdAt: Number(row.created_at ?? 0),
     }));

@@ -25,7 +25,9 @@ export class ChatController {
                 } catch (error) {
                     const errorMessage = error instanceof Error ? error.message : String(error);
                     await stream.writeSSE({
-                        data: JSON.stringify(formatErrorPayload(errorMessage || "Error occurred during streaming")),
+                        data: JSON.stringify(
+                            formatErrorPayload(errorMessage || "Error occurred during streaming"),
+                        ),
                     });
                 }
             });

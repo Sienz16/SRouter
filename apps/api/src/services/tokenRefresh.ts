@@ -17,7 +17,9 @@ export interface RefreshResult {
 }
 
 type OAuthClient = {
-    refreshTokens(refreshToken: string): Promise<{ accessToken: string; refreshToken?: string; expiresIn?: number }>;
+    refreshTokens(
+        refreshToken: string,
+    ): Promise<{ accessToken: string; refreshToken?: string; expiresIn?: number }>;
 };
 
 /**
@@ -76,7 +78,10 @@ async function refreshProviderTokenOnce(providerId: string): Promise<RefreshResu
 
     const oauthClient = getOAuthClient(provider.providerId);
     if (!oauthClient) {
-        return { success: false, error: `No OAuth client for provider type ${provider.providerId}` };
+        return {
+            success: false,
+            error: `No OAuth client for provider type ${provider.providerId}`,
+        };
     }
 
     try {
@@ -93,7 +98,8 @@ async function refreshProviderTokenOnce(providerId: string): Promise<RefreshResu
             lastRefreshedAt: refreshedAt,
         });
 
-        const instance = registry.getProvider(providerId) as (AIProvider & { updateToken?: (at: string, rt?: string) => void }) | undefined;
+        const instance = registry.getProvider(providerId) as
+            (AIProvider & { updateToken?: (at: string, rt?: string) => void }) | undefined;
         instance?.updateToken?.(tokens.accessToken, nextRefreshToken);
 
         return { success: true, refreshedAt };
@@ -116,11 +122,15 @@ export async function sweepExpiredTokens(): Promise<RefreshResult[]> {
     for (const provider of providers) {
         if (!isDueForRefresh(provider)) continue;
         const result = await refreshProviderToken(provider.id);
-        results.push({ ...result, ...{ provider: provider.id } } as RefreshResult & { provider: string });
+        results.push({ ...result, ...{ provider: provider.id } } as RefreshResult & {
+            provider: string;
+        });
         if (result.success) {
             console.log(`[TokenRefresh] Refreshed ${provider.id} (${provider.providerId})`);
         } else {
-            console.warn(`[TokenRefresh] Refresh failed for ${provider.id} (${provider.providerId}): ${result.error}`);
+            console.warn(
+                `[TokenRefresh] Refresh failed for ${provider.id} (${provider.providerId}): ${result.error}`,
+            );
         }
     }
 
@@ -177,7 +187,8 @@ export async function ensureFreshToken(alias: string): Promise<void> {
     if (!providerType) return;
 
     const due = getAllProvidersDB().filter(
-        (provider) => provider.enabled && provider.providerId === providerType && isDueForRefresh(provider),
+        (provider) =>
+            provider.enabled && provider.providerId === providerType && isDueForRefresh(provider),
     );
     await Promise.all(due.map((provider) => refreshProviderToken(provider.id)));
 }
