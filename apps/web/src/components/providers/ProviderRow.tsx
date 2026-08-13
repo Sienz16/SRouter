@@ -3,7 +3,7 @@ import { ChevronRight } from "lucide-react";
 import type { ProviderDefinition } from "@srouter/types";
 import { Badge } from "@/components/ui/badge";
 import { ProviderIcon } from "@/components/ui/ProviderIcon";
-import { getConnectedCount } from "./provider-status";
+import { getConnectedCount } from "@/utils/provider.utils";
 
 const protocolLabels: Record<string, string> = {
     openai: "OpenAI",

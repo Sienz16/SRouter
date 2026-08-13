@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Database, Search } from "lucide-react";
-import type { UsageStats } from "@/lib/types";
+import type { UsageStats } from "@srouter/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {

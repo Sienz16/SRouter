@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import type { ModelObject } from "@srouter/types";
-import { providerFor } from "@/components/models/model-utils";
+import { providerFor } from "@/utils/model.utils";
 
 export function useModels(models: ModelObject[]) {
     const [searchQuery, setSearchQuery] = useState("");

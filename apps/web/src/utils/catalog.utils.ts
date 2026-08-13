@@ -1,5 +1,5 @@
 import type { ProviderCategory, ProviderDefinition } from "@srouter/types";
-import { getConnectedCount } from "./provider-status";
+import { getConnectedCount } from "@/utils/provider.utils";
 
 export interface CatalogSummary {
     total: number;

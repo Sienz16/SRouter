@@ -1,5 +1,5 @@
 import { CheckCircle2, AlertCircle, ChevronRight } from "lucide-react";
-import type { RequestLogEntry } from "@/lib/types";
+import type { RequestLogEntry } from "@srouter/types";
 import { Badge } from "@/components/ui/badge";
 import {
     Table,

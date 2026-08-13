@@ -1,21 +1,10 @@
+import type {
+    ModelUsageSummaryRow,
+    RequestLogEntry,
+    UsageByModelRow,
+    UsageSummary,
+} from "@srouter/types";
 import { db } from "./db.js";
-
-export interface RequestLogEntry {
-    id: string;
-    apiKeyId?: string;
-    providerId: string;
-    model: string;
-    promptTokens: number;
-    completionTokens: number;
-    totalTokens: number;
-    statusCode: number;
-    latencyMs: number;
-    cachedTokens?: number;
-    cacheCreationTokens?: number;
-    reasoningTokens?: number;
-    estimatedCost?: number;
-    createdAt: number;
-}
 
 export function logRequestDB(entry: Omit<RequestLogEntry, "id" | "createdAt">): RequestLogEntry {
     const id = `log_${Math.random().toString(36).substring(2, 11)}`;
@@ -70,20 +59,6 @@ export function getRecentLogsDB(limit = 50): RequestLogEntry[] {
         estimatedCost: Number(row.estimated_cost ?? 0),
         createdAt: Number(row.created_at ?? 0),
     }));
-}
-
-export interface UsageSummary {
-    totalRequests: number;
-    totalTokens: number;
-    totalPromptTokens: number;
-    totalCompletionTokens: number;
-    totalCachedTokens: number;
-    totalCacheCreationTokens: number;
-    totalReasoningTokens: number;
-    totalEstimatedCost: number;
-    // 9router-style aliases
-    totalInputTokens: number;
-    totalOutputTokens: number;
 }
 
 export function getUsageSummaryDB(): UsageSummary {
@@ -147,17 +122,6 @@ export function getProviderUsageSummaryDB(providerId: string): UsageSummary {
     };
 }
 
-export interface ModelUsageSummaryRow {
-    model: string;
-    totalRequests: number;
-    totalTokens: number;
-    promptTokens: number;
-    completionTokens: number;
-    cachedTokens: number;
-    estimatedCost: number;
-    lastUsedAt: number | null;
-}
-
 export function getProviderModelUsageDB(providerId: string): ModelUsageSummaryRow[] {
     const query = db.prepare(`
         SELECT 
@@ -187,15 +151,6 @@ export function getProviderModelUsageDB(providerId: string): ModelUsageSummaryRo
         estimatedCost: Number(row.estimatedCost ?? 0),
         lastUsedAt: row.lastUsedAt ? Number(row.lastUsedAt) : null,
     }));
-}
-
-export interface UsageByModelRow {
-    model: string;
-    totalRequests: number;
-    totalInputTokens: number;
-    totalOutputTokens: number;
-    totalCachedTokens: number;
-    estCost: number;
 }
 
 export function getUsageByModelDB(): UsageByModelRow[] {

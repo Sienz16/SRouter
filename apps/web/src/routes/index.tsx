@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Activity, Boxes, Coins, CircleDollarSign, Radio, RefreshCw, TriangleAlert } from "lucide-react";
 import { api } from "@/lib/api";
-import type { UsageStats } from "@/lib/types";
+import type { UsageStats } from "@srouter/types";
 import { ModelUsageOverview } from "@/components/dashboard/ModelUsageOverview";
 import { NetworkStatus } from "@/components/dashboard/NetworkStatus";
 import { UsageByModelTable } from "@/components/dashboard/UsageByModelTable";

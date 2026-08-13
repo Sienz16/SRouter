@@ -1,15 +1,5 @@
+import type { DBAPIKey } from "@srouter/types";
 import { db } from "./db.js";
-
-export interface DBAPIKey {
-    id: string;
-    key: string;
-    name: string;
-    enabled: boolean;
-    rateLimit: number;
-    quotaLimit: number;
-    usageTokens: number;
-    createdAt: number;
-}
 
 export function getAllAPIKeysDB(): DBAPIKey[] {
     const query = db.prepare("SELECT * FROM api_keys ORDER BY created_at DESC");

@@ -4,7 +4,7 @@ import type { ModelObject } from "@srouter/types";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useCopy } from "@/hooks/useCopy";
-import { getProviderBadgeColor, providerFor } from "./model-utils";
+import { getProviderBadgeColor, providerFor } from "@/utils/model.utils";
 
 export function ModelCard({ model }: { model: ModelObject }) {
     const { copied, copy } = useCopy();

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { RequestLogEntry } from "@/lib/types";
+import type { RequestLogEntry } from "@srouter/types";
 
 export type LogStatusFilter = "all" | "success" | "error";
 

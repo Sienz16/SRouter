@@ -1,7 +1,7 @@
 import { Plus, RefreshCw, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { CatalogSummaryItems, FilterValue } from "./catalog-utils";
+import type { CatalogSummaryItems, FilterValue } from "@/utils/catalog.utils";
 
 interface CatalogToolbarProps {
     isFetching: boolean;

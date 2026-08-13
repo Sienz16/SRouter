@@ -1,4 +1,4 @@
-import type { UsageStats } from "@/lib/types";
+import type { UsageStats } from "@srouter/types";
 
 type ModelUsageOverviewProps = {
     models: UsageStats["byModel"];

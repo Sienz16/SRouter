@@ -11,7 +11,7 @@ import {
     TableRow,
     TableCell,
 } from "@/components/ui/table";
-import { getProviderBadgeColor, providerFor } from "./model-utils";
+import { getProviderBadgeColor, providerFor } from "@/utils/model.utils";
 
 export function ModelTable({ models }: { models: ModelObject[] }) {
     return (

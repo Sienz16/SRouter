@@ -9,7 +9,7 @@ import {
     matchesProvider,
     type CatalogSummary,
     type FilterValue,
-} from "@/components/providers/catalog-utils";
+} from "@/utils/catalog.utils";
 
 export function useCatalog() {
     const [filter, setFilter] = useState<FilterValue>("all");
