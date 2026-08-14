@@ -1,21 +1,12 @@
 import type { ComponentType } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import {
-    Activity,
-    Boxes,
-    Coins,
-    CircleDollarSign,
-    Radio,
-    RefreshCw,
-    TriangleAlert,
-} from "lucide-react";
+import { Activity, Boxes, Coins, CircleDollarSign, RefreshCw, TriangleAlert } from "lucide-react";
 import { api } from "@/lib/api";
 import type { UsageStats } from "@srouter/types";
 import { ModelUsageOverview } from "@/components/dashboard/ModelUsageOverview";
 import { NetworkStatus } from "@/components/dashboard/NetworkStatus";
 import { UsageByModelTable } from "@/components/dashboard/UsageByModelTable";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -59,7 +50,6 @@ function DashboardSkeleton() {
                     <Skeleton className="mt-3 h-7 w-52" />
                     <Skeleton className="mt-2 h-4 w-80 max-w-full" />
                 </div>
-                <Skeleton className="h-6 w-36 rounded-full" />
             </div>
             <div className="grid grid-cols-1 border-y border-border/70 sm:grid-cols-2 xl:grid-cols-4">
                 {Array.from({ length: 4 }).map((_, index) => (
@@ -81,10 +71,7 @@ function DashboardPage() {
     const {
         data: stats,
         isPending,
-        isFetching,
-        isError,
         error,
-        dataUpdatedAt,
         refetch,
     } = useQuery({
         queryKey: ["stats"],
@@ -127,21 +114,6 @@ function DashboardPage() {
         );
     }
 
-    const updatedAt = dataUpdatedAt
-        ? new Intl.DateTimeFormat(undefined, {
-              hour: "2-digit",
-              minute: "2-digit",
-              second: "2-digit",
-          }).format(dataUpdatedAt)
-        : null;
-    const freshnessLabel = isFetching
-        ? "Refreshing"
-        : isError
-          ? "Refresh failed"
-          : updatedAt
-            ? `Live · Updated ${updatedAt}`
-            : "Live";
-
     return (
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-5">
             <header className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
@@ -157,22 +129,6 @@ function DashboardPage() {
                         gateway.
                     </p>
                 </div>
-
-                <Badge
-                    variant={isError ? "destructive" : "outline"}
-                    className="w-fit shrink-0 gap-1.5 font-mono text-[10px]"
-                    role="status"
-                    aria-live="polite"
-                >
-                    {isFetching ? (
-                        <RefreshCw className="size-3 animate-spin" />
-                    ) : isError ? (
-                        <TriangleAlert className="size-3" />
-                    ) : (
-                        <Radio className="size-3" />
-                    )}
-                    {freshnessLabel}
-                </Badge>
             </header>
 
             <section

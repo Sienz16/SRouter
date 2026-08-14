@@ -5,9 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-    --font-sans:
+    --font-sans: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    --font-heading:
         "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    --font-heading: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     --color-accent: var(--accent);
     --color-accent-2: var(--accent-2);
@@ -46,7 +46,8 @@ samp,
 
 @theme inline {
     --font-sans: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    --font-heading: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    --font-heading:
+        "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
@@ -111,6 +112,19 @@ samp,
     --sidebar-accent-foreground: oklch(0.13 0 0);
     --sidebar-border: oklch(0.92 0 0);
     --sidebar-ring: oklch(0.13 0 0);
+
+    /* Beautiful UI Tokens */
+    --canvas: oklch(0.985 0 0);
+    --field: oklch(0.95 0 0);
+    --line: oklch(0.9 0 0);
+    --line-strong: oklch(0.65 0 0);
+    --ink: oklch(0.13 0 0);
+    --ink-2: oklch(0.38 0 0);
+    --ink-3: oklch(0.55 0 0);
+    --hover: oklch(0.94 0 0);
+    --hover-2: oklch(0.91 0 0);
+    --green: #1f7a5f;
+    --green-tint: rgba(31, 122, 95, 0.12);
 }
 
 .dark {
@@ -143,6 +157,19 @@ samp,
     --sidebar-accent-foreground: oklch(0.94 0 0);
     --sidebar-border: oklch(0.2 0 0);
     --sidebar-ring: oklch(0.94 0 0);
+
+    /* Beautiful UI Dark Tokens */
+    --canvas: oklch(0.11 0 0);
+    --field: oklch(0.16 0 0);
+    --line: oklch(0.22 0 0);
+    --line-strong: oklch(0.42 0 0);
+    --ink: oklch(0.94 0 0);
+    --ink-2: oklch(0.72 0 0);
+    --ink-3: oklch(0.52 0 0);
+    --hover: oklch(0.18 0 0);
+    --hover-2: oklch(0.22 0 0);
+    --green: #2ecc71;
+    --green-tint: rgba(46, 204, 113, 0.15);
 }
 
 @layer base {
@@ -191,4 +218,78 @@ samp,
 }
 .dark::view-transition-new(root) {
     z-index: 1;
+}
+
+/* Beautiful UI inspired AI-native primitives */
+@keyframes shimmer-text {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+@keyframes pixel-on {
+    0%,
+    100% {
+        opacity: 0.15;
+    }
+    50% {
+        opacity: 0.95;
+    }
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-shimmer-text {
+    background-image: linear-gradient(
+        90deg,
+        var(--muted-foreground) 25%,
+        var(--foreground) 50%,
+        var(--muted-foreground) 75%
+    );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer-text 1.6s linear infinite;
+}
+
+@keyframes pop-in {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes eq-bounce {
+    0%,
+    100% {
+        transform: scaleY(0.25);
+    }
+    50% {
+        transform: scaleY(1);
+    }
 }

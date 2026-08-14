@@ -12,7 +12,7 @@ function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) 
             await navigator.clipboard.writeText(text);
             setCopied(true);
             toast.success("Base URL copied", {
-                description: "Paste it into any OpenAI-compatible client.",
+                description: "Compatible with OpenAI and Anthropic clients.",
             });
             setTimeout(() => setCopied(false), 1500);
         } catch {
@@ -54,13 +54,13 @@ export function NetworkStatus() {
                             >
                                 API integration
                             </h2>
-                            <p className="mt-0.5 text-[10px] text-muted-foreground">
-                                Connect any OpenAI-compatible client
+                            <p className="mt-0.5 truncate text-[10px] text-muted-foreground">
+                                OpenAI & Anthropic compatible
                             </p>
                         </div>
                     </div>
                     <span className="shrink-0 rounded-full border border-border/60 bg-secondary/30 px-2 py-1 font-mono text-[9px] text-muted-foreground">
-                        OpenAI
+                        OpenAI & Anthropic
                     </span>
                 </div>
 
@@ -110,7 +110,7 @@ export function NetworkStatus() {
                                 className="size-1 rounded-full bg-muted-foreground/50"
                                 aria-hidden="true"
                             />
-                            Off
+                            Coming soon
                         </span>
                     </div>
 
@@ -129,7 +129,7 @@ export function NetworkStatus() {
                                 className="size-1 rounded-full bg-muted-foreground/50"
                                 aria-hidden="true"
                             />
-                            Off
+                            Coming soon
                         </span>
                     </div>
                 </div>
