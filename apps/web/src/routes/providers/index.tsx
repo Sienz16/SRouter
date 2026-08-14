@@ -15,6 +15,7 @@ export const Route = createFileRoute("/providers/")({
 
 function ProvidersPage() {
     const [isAddOpen, setIsAddOpen] = useState(false);
+    const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
     const catalog = useCatalog();
     const { data, error, isPending, isFetching, refetch } = catalog;
 
@@ -68,9 +69,11 @@ function ProvidersPage() {
                 onFilterChange={catalog.setFilter}
                 search={catalog.search}
                 onSearchChange={catalog.setSearch}
+                viewMode={viewMode}
+                onViewModeChange={setViewMode}
             />
 
-            <Catalog groups={catalog.groups} search={catalog.search} />
+            <Catalog groups={catalog.groups} search={catalog.search} viewMode={viewMode} />
 
             <AddProviderSheet open={isAddOpen} onOpenChange={setIsAddOpen} />
         </div>

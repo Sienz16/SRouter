@@ -2,6 +2,7 @@ import { CATEGORY_DESCRIPTIONS, CATEGORY_LABELS } from "@srouter/constants";
 import { Search } from "lucide-react";
 import type { ProviderDefinition } from "@srouter/types";
 import { ProviderRow } from "./ProviderRow";
+import { ProviderCard } from "./ProviderCard";
 
 interface CatalogGroup {
     category: string;
@@ -11,12 +12,14 @@ interface CatalogGroup {
 interface CatalogProps {
     groups: CatalogGroup[];
     search: string;
+    viewMode?: "grid" | "list";
 }
 
-export function Catalog({ groups, search }: CatalogProps) {
+export function Catalog({ groups, search, viewMode = "grid" }: CatalogProps) {
     const normalizedSearch = search.trim();
+    const allProviders = groups.flatMap((g) => g.providers);
 
-    if (groups.length === 0) {
+    if (allProviders.length === 0) {
         return (
             <div className="flex min-h-56 flex-col items-center justify-center rounded-[12px] border border-[var(--line)] bg-[var(--surface)] px-6 py-12 text-center font-mono">
                 <div className="flex size-9 items-center justify-center rounded-full bg-[var(--field)] text-[var(--ink-3)] mb-3">
@@ -32,8 +35,43 @@ export function Catalog({ groups, search }: CatalogProps) {
         );
     }
 
+    if (viewMode === "grid") {
+        return (
+            <div className="space-y-6 font-mono">
+                {groups.map((group) => (
+                    <div key={group.category} className="space-y-3">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <h2 className="text-xs font-bold text-[var(--ink)] uppercase tracking-wider">
+                                    {CATEGORY_LABELS[
+                                        group.category as keyof typeof CATEGORY_LABELS
+                                    ] ?? group.category}
+                                </h2>
+                                <span className="text-[10px] text-[var(--ink-3)]">
+                                    ({group.providers.length})
+                                </span>
+                            </div>
+                            <p className="text-[10.5px] text-[var(--ink-3)] hidden sm:block">
+                                {CATEGORY_DESCRIPTIONS[
+                                    group.category as keyof typeof CATEGORY_DESCRIPTIONS
+                                ] ?? ""}
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {group.providers.map((provider) => (
+                                <ProviderCard key={provider.id} provider={provider} />
+                            ))}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
+    }
+
+    // List view
     return (
-        <div className="flex flex-col gap-6 font-mono">
+        <div className="space-y-6 font-mono">
             {groups.map((group) => (
                 <section
                     key={group.category}
@@ -41,8 +79,8 @@ export function Catalog({ groups, search }: CatalogProps) {
                     className="rounded-[12px] border border-[var(--line)] bg-[var(--surface)] overflow-hidden shadow-2xs"
                 >
                     {/* Category Header */}
-                    <header className="flex items-center justify-between gap-4 border-b border-[var(--line)] bg-[var(--field)]/40 px-4 py-3">
-                        <div className="min-w-0">
+                    <header className="flex items-center justify-between gap-4 border-b border-[var(--line)] bg-[var(--field)]/40 px-4 py-2.5">
+                        <div className="flex items-center gap-2">
                             <h2
                                 id={`category-${group.category}`}
                                 className="text-xs font-bold text-[var(--ink)]"
@@ -50,16 +88,16 @@ export function Catalog({ groups, search }: CatalogProps) {
                                 {CATEGORY_LABELS[group.category as keyof typeof CATEGORY_LABELS] ??
                                     group.category}
                             </h2>
-                            <p className="mt-0.5 text-[11px] text-[var(--ink-3)] truncate">
-                                {CATEGORY_DESCRIPTIONS[
-                                    group.category as keyof typeof CATEGORY_DESCRIPTIONS
-                                ] ?? ""}
-                            </p>
+                            <span className="text-[10.5px] text-[var(--ink-3)]">
+                                · {group.providers.length}{" "}
+                                {group.providers.length === 1 ? "driver" : "drivers"}
+                            </span>
                         </div>
-                        <span className="shrink-0 rounded-[4px] bg-[var(--line)] px-2 py-0.5 text-[10px] font-semibold tabular-nums text-[var(--ink-2)]">
-                            {group.providers.length}{" "}
-                            {group.providers.length === 1 ? "driver" : "drivers"}
-                        </span>
+                        <p className="text-[10.5px] text-[var(--ink-3)] hidden md:block">
+                            {CATEGORY_DESCRIPTIONS[
+                                group.category as keyof typeof CATEGORY_DESCRIPTIONS
+                            ] ?? ""}
+                        </p>
                     </header>
 
                     {/* Provider Rows */}

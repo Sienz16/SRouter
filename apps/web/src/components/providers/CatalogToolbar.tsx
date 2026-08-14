@@ -1,4 +1,4 @@
-import { Boxes, Plus, RefreshCw, Search, ShieldCheck, Sparkles, Zap } from "lucide-react";
+import { Boxes, LayoutGrid, List, Plus, RefreshCw, Search, ShieldCheck, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { CatalogSummaryItems, FilterValue } from "@/utils/catalog.utils";
@@ -13,6 +13,8 @@ interface CatalogToolbarProps {
     onFilterChange: (value: FilterValue) => void;
     search: string;
     onSearchChange: (value: string) => void;
+    viewMode: "grid" | "list";
+    onViewModeChange: (mode: "grid" | "list") => void;
 }
 
 export function CatalogToolbar({
@@ -25,6 +27,8 @@ export function CatalogToolbar({
     onFilterChange,
     search,
     onSearchChange,
+    viewMode,
+    onViewModeChange,
 }: CatalogToolbarProps) {
     return (
         <div className="space-y-6 font-mono">
@@ -76,37 +80,34 @@ export function CatalogToolbar({
 
             {/* Bento Summary Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {summaryItems.map((item, idx) => {
-                    const isConnectedCard = item.label.toLowerCase() === "connected";
-                    return (
-                        <div
-                            key={item.label}
-                            className="rounded-[10px] border border-[var(--line)] bg-[var(--surface)] p-3.5 flex flex-col justify-between"
-                        >
-                            <div className="flex items-center justify-between text-[11px] text-[var(--ink-3)]">
-                                <span>{item.label}</span>
-                                {idx === 0 && <Boxes className="size-3.5 text-[var(--ink-3)]" />}
-                                {idx === 1 && (
-                                    <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-                                )}
-                                {idx === 2 && <ShieldCheck className="size-3.5 text-amber-500" />}
-                                {idx === 3 && <Zap className="size-3.5 text-blue-500" />}
-                            </div>
-                            <div className="mt-2">
-                                <div className="text-2xl font-bold tabular-nums text-[var(--ink)]">
-                                    {item.value}
-                                </div>
-                                <p className="mt-0.5 text-[10.5px] text-[var(--ink-3)] truncate">
-                                    {item.detail}
-                                </p>
-                            </div>
+                {summaryItems.map((item, idx) => (
+                    <div
+                        key={item.label}
+                        className="rounded-[10px] border border-[var(--line)] bg-[var(--surface)] p-3.5 flex flex-col justify-between"
+                    >
+                        <div className="flex items-center justify-between text-[11px] text-[var(--ink-3)]">
+                            <span>{item.label}</span>
+                            {idx === 0 && <Boxes className="size-3.5 text-[var(--ink-3)]" />}
+                            {idx === 1 && (
+                                <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+                            )}
+                            {idx === 2 && <ShieldCheck className="size-3.5 text-amber-500" />}
+                            {idx === 3 && <Zap className="size-3.5 text-blue-500" />}
                         </div>
-                    );
-                })}
+                        <div className="mt-2">
+                            <div className="text-2xl font-bold tabular-nums text-[var(--ink)]">
+                                {item.value}
+                            </div>
+                            <p className="mt-0.5 text-[10.5px] text-[var(--ink-3)] truncate">
+                                {item.detail}
+                            </p>
+                        </div>
+                    </div>
+                ))}
             </div>
 
-            {/* Controls Bar: Segmented Tabs & Search */}
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-[var(--line)] pb-3">
+            {/* Controls Bar: Segmented Tabs, Search & Grid/List View Toggle */}
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between border-b border-[var(--line)] pb-3">
                 {/* Segmented Filter Pills */}
                 <div
                     role="tablist"
@@ -143,19 +144,49 @@ export function CatalogToolbar({
                     })}
                 </div>
 
-                {/* Search */}
-                <div className="relative w-full sm:w-64">
-                    <Search
-                        className="pointer-events-none absolute left-2.5 top-1/2 size-3 -translate-y-1/2 text-[var(--ink-3)]"
-                        strokeWidth={1.75}
-                    />
-                    <Input
-                        type="search"
-                        value={search}
-                        onChange={(e) => onSearchChange(e.target.value)}
-                        placeholder="Search driver, id, protocol..."
-                        className="h-7.5 pl-7 text-[11.5px] rounded-[6px] border-[var(--line)] bg-[var(--canvas)]"
-                    />
+                {/* Right controls: Search + View Mode Switcher */}
+                <div className="flex items-center gap-2">
+                    <div className="relative w-full sm:w-60">
+                        <Search
+                            className="pointer-events-none absolute left-2.5 top-1/2 size-3 -translate-y-1/2 text-[var(--ink-3)]"
+                            strokeWidth={1.75}
+                        />
+                        <Input
+                            type="search"
+                            value={search}
+                            onChange={(e) => onSearchChange(e.target.value)}
+                            placeholder="Filter drivers & protocols..."
+                            className="h-7.5 pl-7 text-[11.5px] rounded-[6px] border-[var(--line)] bg-[var(--canvas)]"
+                        />
+                    </div>
+
+                    {/* View Toggle */}
+                    <div className="flex items-center rounded-[6px] border border-[var(--line)] bg-[var(--field)] p-0.5">
+                        <button
+                            type="button"
+                            onClick={() => onViewModeChange("grid")}
+                            className={`flex size-6.5 items-center justify-center rounded-[4px] transition-colors cursor-pointer ${
+                                viewMode === "grid"
+                                    ? "bg-[var(--surface)] text-[var(--ink)] shadow-2xs font-bold"
+                                    : "text-[var(--ink-3)] hover:text-[var(--ink)]"
+                            }`}
+                            title="Grid view"
+                        >
+                            <LayoutGrid className="size-3.5" />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => onViewModeChange("list")}
+                            className={`flex size-6.5 items-center justify-center rounded-[4px] transition-colors cursor-pointer ${
+                                viewMode === "list"
+                                    ? "bg-[var(--surface)] text-[var(--ink)] shadow-2xs font-bold"
+                                    : "text-[var(--ink-3)] hover:text-[var(--ink)]"
+                            }`}
+                            title="List view"
+                        >
+                            <List className="size-3.5" />
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
