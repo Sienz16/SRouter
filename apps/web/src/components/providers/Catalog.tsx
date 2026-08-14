@@ -18,43 +18,52 @@ export function Catalog({ groups, search }: CatalogProps) {
 
     if (groups.length === 0) {
         return (
-            <div className="flex min-h-56 flex-col items-center justify-center border-y border-border/70 px-6 text-center">
-                <Search className="mb-3 size-5 text-muted-foreground" strokeWidth={1.5} />
-                <p className="text-sm font-medium text-foreground">No matching providers</p>
-                <p className="mt-1 max-w-sm text-muted-foreground text-xs">
+            <div className="flex min-h-56 flex-col items-center justify-center rounded-[12px] border border-[var(--line)] bg-[var(--surface)] px-6 py-12 text-center font-mono">
+                <div className="flex size-9 items-center justify-center rounded-full bg-[var(--field)] text-[var(--ink-3)] mb-3">
+                    <Search className="size-4" strokeWidth={1.75} />
+                </div>
+                <p className="text-sm font-semibold text-[var(--ink)]">No Matching Providers</p>
+                <p className="mt-1 max-w-sm text-xs text-[var(--ink-3)] leading-relaxed">
                     {normalizedSearch
-                        ? `Nothing matches “${normalizedSearch}” in this view. Try a different term or clear the filter.`
-                        : "This category has no drivers registered yet."}
+                        ? `Nothing matches “${normalizedSearch}”. Try a different search term or category filter.`
+                        : "No drivers registered in this category yet."}
                 </p>
             </div>
         );
     }
 
     return (
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 font-mono">
             {groups.map((group) => (
-                <section key={group.category} aria-labelledby={`category-${group.category}`}>
-                    <header className="flex items-baseline justify-between gap-4 border-b border-border/70 pb-2">
+                <section
+                    key={group.category}
+                    aria-labelledby={`category-${group.category}`}
+                    className="rounded-[12px] border border-[var(--line)] bg-[var(--surface)] overflow-hidden shadow-2xs"
+                >
+                    {/* Category Header */}
+                    <header className="flex items-center justify-between gap-4 border-b border-[var(--line)] bg-[var(--field)]/40 px-4 py-3">
                         <div className="min-w-0">
                             <h2
                                 id={`category-${group.category}`}
-                                className="text-xs font-semibold text-foreground"
+                                className="text-xs font-bold text-[var(--ink)]"
                             >
                                 {CATEGORY_LABELS[group.category as keyof typeof CATEGORY_LABELS] ??
                                     group.category}
                             </h2>
-                            <p className="mt-0.5 text-[11px] text-muted-foreground">
+                            <p className="mt-0.5 text-[11px] text-[var(--ink-3)] truncate">
                                 {CATEGORY_DESCRIPTIONS[
                                     group.category as keyof typeof CATEGORY_DESCRIPTIONS
                                 ] ?? ""}
                             </p>
                         </div>
-                        <span className="shrink-0 font-mono text-[10px] tabular-nums text-muted-foreground">
-                            {group.providers.length}
+                        <span className="shrink-0 rounded-[4px] bg-[var(--line)] px-2 py-0.5 text-[10px] font-semibold tabular-nums text-[var(--ink-2)]">
+                            {group.providers.length}{" "}
+                            {group.providers.length === 1 ? "driver" : "drivers"}
                         </span>
                     </header>
 
-                    <div className="divide-y divide-border/50">
+                    {/* Provider Rows */}
+                    <div className="p-1.5 divide-y divide-[var(--line)]/60">
                         {group.providers.map((provider) => (
                             <ProviderRow key={provider.id} provider={provider} />
                         ))}

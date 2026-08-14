@@ -19,33 +19,37 @@ function ProvidersPage() {
     const { data, error, isPending, isFetching, refetch } = catalog;
 
     if (isPending && !data) {
-        return <CatalogSkeleton />;
+        return (
+            <div className="mx-auto w-full max-w-6xl">
+                <CatalogSkeleton />
+            </div>
+        );
     }
 
     if (!data) {
         return (
-            <div className="mx-auto w-full max-w-7xl">
-                <div className="flex min-h-64 flex-col items-center justify-center rounded-xl border border-destructive/30 bg-destructive/5 px-6 text-center">
-                    <div className="flex size-10 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+            <div className="mx-auto w-full max-w-6xl font-mono">
+                <div className="flex min-h-64 flex-col items-center justify-center rounded-[12px] border border-destructive/30 bg-destructive/5 px-6 py-12 text-center">
+                    <div className="flex size-10 items-center justify-center rounded-full bg-destructive/10 text-destructive mb-3">
                         <TriangleAlert className="size-5" strokeWidth={1.75} />
                     </div>
-                    <h1 className="mt-4 text-base font-semibold text-foreground">
-                        Unable to load the provider catalog
+                    <h1 className="text-sm font-bold text-foreground">
+                        Unable to load provider catalog
                     </h1>
-                    <p className="mt-1 max-w-lg text-xs text-muted-foreground">
+                    <p className="mt-1 max-w-md text-xs text-muted-foreground leading-relaxed">
                         {error instanceof Error
                             ? error.message
-                            : "The gateway returned an unknown error."}
+                            : "The gateway returned an unexpected network response."}
                     </p>
                     <Button
                         type="button"
                         variant="outline"
                         size="sm"
-                        className="mt-4"
+                        className="mt-4 h-8 text-xs border-[var(--line)] cursor-pointer"
                         onClick={() => void refetch()}
                     >
-                        <RefreshCw />
-                        Retry
+                        <RefreshCw className="size-3 mr-1.5" />
+                        Retry Connection
                     </Button>
                 </div>
             </div>
@@ -53,7 +57,7 @@ function ProvidersPage() {
     }
 
     return (
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-5">
+        <div className="mx-auto w-full max-w-6xl space-y-6">
             <CatalogToolbar
                 isFetching={isFetching}
                 onRefresh={() => void refetch()}

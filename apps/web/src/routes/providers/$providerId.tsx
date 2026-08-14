@@ -67,27 +67,27 @@ function ProviderDetailPage() {
 
     if (isLoading) {
         return (
-            <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
-                <Skeleton className="h-6 w-36" />
-                <Skeleton className="h-40 rounded-xl" />
-                <Skeleton className="h-64 rounded-xl" />
+            <div className="mx-auto w-full max-w-6xl space-y-6 font-mono">
+                <Skeleton className="h-6 w-36 rounded-[6px]" />
+                <Skeleton className="h-32 rounded-[12px]" />
+                <Skeleton className="h-64 rounded-[12px]" />
             </div>
         );
     }
 
     if (error || !provider) {
         return (
-            <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-4">
+            <div className="mx-auto w-full max-w-6xl space-y-4 font-mono">
                 <Link
                     to="/providers"
-                    className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground font-mono"
+                    className="inline-flex items-center gap-1.5 text-xs text-[var(--ink-3)] hover:text-[var(--ink)] transition-colors"
                 >
                     <ArrowLeft className="size-3.5" />
                     <span>Back to Providers Catalog</span>
                 </Link>
-                <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-6 text-xs font-mono text-destructive space-y-2">
-                    <p className="font-semibold text-sm">Provider '{providerId}' not found.</p>
-                    <p className="text-muted-foreground">
+                <div className="rounded-[12px] border border-rose-500/30 bg-rose-500/10 p-6 text-xs text-rose-500 space-y-2">
+                    <p className="font-bold text-sm">Provider '{providerId}' not found.</p>
+                    <p className="text-[var(--ink-3)]">
                         {error instanceof Error
                             ? error.message
                             : "Provider definition missing in gateway registry."}
@@ -104,12 +104,12 @@ function ProviderDetailPage() {
     );
 
     return (
-        <div className="flex flex-col gap-6 max-w-7xl mx-auto p-4 md:p-6">
+        <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 font-mono">
             {/* Back Navigation */}
             <div>
                 <Link
                     to="/providers"
-                    className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground font-mono transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs text-[var(--ink-3)] hover:text-[var(--ink)] transition-colors"
                 >
                     <ArrowLeft className="size-3.5" />
                     <span>Back to Providers Catalog</span>
@@ -117,32 +117,40 @@ function ProviderDetailPage() {
             </div>
 
             {/* Header Section */}
-            <div className="flex items-center justify-between gap-4 border-b border-border/60 pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[var(--line)] pb-5">
                 <div className="flex items-center gap-3">
-                    <div className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-card p-2 shadow-2xs">
-                        <ProviderIcon providerId={provider.id} className="size-8 text-foreground" />
+                    <div className="flex size-11 shrink-0 items-center justify-center rounded-[8px] border border-[var(--line)] bg-[var(--surface)] p-2 shadow-2xs">
+                        <ProviderIcon
+                            providerId={provider.id}
+                            className="size-6 text-[var(--ink)]"
+                        />
                     </div>
                     <div>
-                        <div className="flex items-center gap-2">
-                            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <h1 className="text-xl font-bold tracking-tight text-[var(--ink)]">
                                 {provider.name}
                             </h1>
-                            <Badge
-                                variant={activeConnectionsCount > 0 ? "emerald" : "secondary"}
-                                className="font-mono text-[10px] uppercase px-2 py-0.5"
+                            <span
+                                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                                    activeConnectionsCount > 0
+                                        ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                                        : "border border-[var(--line)] bg-[var(--field)] text-[var(--ink-3)]"
+                                }`}
                             >
                                 <span
-                                    className={`size-1.5 rounded-full ${
+                                    className={`size-1 rounded-full ${
                                         activeConnectionsCount > 0
                                             ? "bg-emerald-500 animate-pulse"
-                                            : "bg-muted-foreground"
+                                            : "bg-[var(--ink-3)]"
                                     }`}
                                 />
-                                {activeConnectionsCount > 0 ? "Connected" : "No Connections"}
-                            </Badge>
+                                {activeConnectionsCount > 0 ? "Connected" : "No Active Connections"}
+                            </span>
                         </div>
-                        <p className="text-xs text-muted-foreground font-mono mt-0.5">
-                            {activeConnectionsCount} active connections in database
+                        <p className="text-xs text-[var(--ink-3)] mt-0.5">
+                            {activeConnectionsCount} active{" "}
+                            {activeConnectionsCount === 1 ? "credential" : "credentials"} stored in
+                            database
                         </p>
                     </div>
                 </div>
@@ -151,21 +159,20 @@ function ProviderDetailPage() {
                     href="https://antigravity.google.com"
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-xs font-mono text-orange-500 hover:text-orange-400 hover:underline"
+                    className="inline-flex items-center gap-1 text-xs text-amber-500 hover:text-amber-400 transition-colors"
                 >
                     <ExternalLink className="size-3.5" />
-                    <span>Sign up / Learn more</span>
+                    <span>Documentation & Docs</span>
                 </a>
             </div>
 
             {/* Risk Notice Alert Banner if OAuth */}
             {provider.requiresOAuth && (
-                <div className="flex items-start gap-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3.5 text-amber-500 text-xs font-mono leading-relaxed">
+                <div className="flex items-start gap-3 rounded-[10px] border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs leading-relaxed text-amber-600 dark:text-amber-400">
                     <AlertTriangle className="size-4 shrink-0 mt-0.5 text-amber-500" />
                     <div>
-                        <span className="font-semibold">Risk Notice:</span> This provider uses a
-                        subscription/OAuth session not officially licensed for proxy/router use.
-                        Account may be restricted or banned. Use at your own risk.
+                        <strong>Session Notice:</strong> This driver uses OAuth session tokens.
+                        SRouter automatically manages token refreshing in the background.
                     </div>
                 </div>
             )}
@@ -184,32 +191,31 @@ function ProviderDetailPage() {
 
             {/* Available Models Section */}
             <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/60 pb-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--line)] pb-3">
                     <div>
-                        <h2 className="text-base font-bold tracking-tight text-foreground">
+                        <h2 className="text-sm font-bold tracking-tight text-[var(--ink)]">
                             Available Models ({provider.models.length})
                         </h2>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                            Model LLM yang didukung oleh {provider.name} dan siap digunakan di
-                            Gateway.
+                        <p className="text-xs text-[var(--ink-3)] mt-0.5">
+                            Models exposed by {provider.name} and routed through this gateway.
                         </p>
                     </div>
 
                     <div className="relative w-full sm:w-64">
-                        <Search className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" />
+                        <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3 -translate-y-1/2 text-[var(--ink-3)]" />
                         <input
                             type="text"
                             placeholder="Filter model ID…"
                             value={modelSearch}
                             onChange={(e) => setModelSearch(e.target.value)}
-                            className="w-full rounded border border-border/60 bg-secondary/30 pl-8 pr-3 py-1 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring font-mono"
+                            className="w-full rounded-[6px] border border-[var(--line)] bg-[var(--canvas)] pl-7 pr-3 py-1 text-xs text-[var(--ink)] placeholder:text-[var(--ink-3)] focus:outline-none font-mono"
                         />
                     </div>
                 </div>
 
                 {filteredModels.length === 0 ? (
-                    <div className="rounded-xl border border-dashed border-border/60 p-12 text-center text-xs font-mono text-muted-foreground">
-                        Tidak ada model yang sesuai dengan pencarian "{modelSearch}".
+                    <div className="rounded-[10px] border border-[var(--line)] p-12 text-center text-xs text-[var(--ink-3)]">
+                        No models matched your search query "{modelSearch}".
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">

@@ -6,10 +6,12 @@ import {
     Code2,
     Copy,
     Database,
+    ExternalLink,
     KeyRound,
     Plus,
     Search,
     Shield,
+    Terminal,
     Trash2,
     Zap,
 } from "lucide-react";
@@ -38,7 +40,9 @@ function maskKey(key: string): string {
     return `${key.slice(0, 10)}••••••••${key.slice(-4)}`;
 }
 
-function KeysPage() {
+const PRESET_NAMES = ["Production Server", "Next.js App", "Cursor / VSCode", "Dev / Staging"];
+
+export function KeysPage() {
     const {
         keys,
         loading,
@@ -57,6 +61,7 @@ function KeysPage() {
     const [search, setSearch] = useState("");
     const [copiedKeyId, setCopiedKeyId] = useState<string | null>(null);
     const [copiedFullKey, setCopiedFullKey] = useState(false);
+    const [copiedEndpoint, setCopiedEndpoint] = useState(false);
     const [integrationTab, setIntegrationTab] = useState<"curl" | "typescript" | "python">("curl");
     const [keyToDelete, setKeyToDelete] = useState<DBAPIKey | null>(null);
 
@@ -88,6 +93,16 @@ function KeysPage() {
                 setCopiedFullKey(true);
                 setTimeout(() => setCopiedFullKey(false), 2000);
             }
+        } catch {
+            // fallback
+        }
+    };
+
+    const handleCopyEndpoint = async (text: string) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            setCopiedEndpoint(true);
+            setTimeout(() => setCopiedEndpoint(false), 2000);
         } catch {
             // fallback
         }
@@ -149,163 +164,201 @@ print(response.choices[0].message.content)`,
 
     if (loading) {
         return (
-            <div className="space-y-6 p-4 sm:p-6 max-w-6xl mx-auto">
+            <div className="mx-auto w-full max-w-6xl space-y-6 font-mono">
                 <div className="flex items-center justify-between">
                     <Skeleton className="h-8 w-48" />
-                    <Skeleton className="h-9 w-32 rounded-lg" />
+                    <Skeleton className="h-8.5 w-32 rounded-[8px]" />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <Skeleton className="h-24 rounded-xl" />
-                    <Skeleton className="h-24 rounded-xl" />
-                    <Skeleton className="h-24 rounded-xl" />
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                    <Skeleton className="h-20 rounded-[10px]" />
+                    <Skeleton className="h-20 rounded-[10px]" />
+                    <Skeleton className="h-20 rounded-[10px]" />
+                    <Skeleton className="h-20 rounded-[10px]" />
                 </div>
-                <Skeleton className="h-96 rounded-xl" />
+                <Skeleton className="h-80 rounded-[12px]" />
             </div>
         );
     }
 
     return (
-        <div className="space-y-6 p-4 sm:p-6 max-w-6xl mx-auto">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[var(--line)] pb-5">
-                <div className="space-y-1">
+        <div className="mx-auto w-full max-w-6xl space-y-6 font-mono">
+            {/* ── Editorial Header ────────────────────────────────────────── */}
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 border-b border-[var(--line)] pb-5">
+                <div className="space-y-1.5">
                     <div className="flex items-center gap-2">
-                        <div className="flex size-8 items-center justify-center rounded-lg bg-[var(--field)] text-[var(--ink)]">
-                            <KeyRound className="size-4" />
+                        <div className="flex size-7 items-center justify-center rounded-[6px] bg-[var(--field)] text-[var(--ink)]">
+                            <KeyRound className="size-3.5" />
                         </div>
-                        <h1 className="text-xl font-bold tracking-tight text-[var(--ink)]">
-                            API Keys
+                        <h1 className="text-lg font-bold tracking-tight text-[var(--ink)]">
+                            API Keys & Access
                         </h1>
+                        <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                            Live Gateway
+                        </span>
                     </div>
-                    <p className="text-xs text-[var(--ink-3)] max-w-xl">
-                        Manage client authentication tokens for your applications, automated
-                        scripts, and client SDKs.
+                    <p className="text-xs text-[var(--ink-3)] max-w-2xl leading-relaxed">
+                        Virtual bearer tokens for client SDKs, downstream applications, and
+                        automated pipelines.
                     </p>
                 </div>
 
                 <Button
                     onClick={() => setIsCreateOpen(true)}
-                    className="flex items-center gap-1.5 h-8.5 rounded-[8px] bg-[var(--ink)] px-3.5 font-mono text-xs text-[var(--canvas)] hover:opacity-90 cursor-pointer shadow-xs"
+                    className="flex items-center gap-1.5 h-8 rounded-[8px] bg-[var(--ink)] px-3.5 text-xs text-[var(--canvas)] hover:opacity-90 cursor-pointer shadow-xs transition-transform active:scale-[0.98]"
                 >
                     <Plus className="size-3.5" />
                     <span>Create Key</span>
                 </Button>
             </div>
 
-            {/* Metric KPI Overview */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="rounded-[12px] border border-[var(--line)] bg-[var(--surface)] p-3.5">
-                    <div className="flex items-center justify-between text-xs text-[var(--ink-3)] font-mono">
+            {/* ── Bento Stat Metrics ─────────────────────────────────────── */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {/* 1. Active Keys */}
+                <div className="rounded-[10px] border border-[var(--line)] bg-[var(--surface)] p-3.5 flex flex-col justify-between">
+                    <div className="flex items-center justify-between text-[11px] text-[var(--ink-3)]">
                         <span>Active Keys</span>
                         <Shield className="size-3.5 text-emerald-500" />
                     </div>
-                    <div className="mt-1.5 flex items-baseline gap-2">
-                        <span className="text-2xl font-bold font-mono text-[var(--ink)]">
+                    <div className="mt-2 flex items-baseline gap-1.5">
+                        <span className="text-2xl font-bold tabular-nums text-[var(--ink)]">
                             {activeKeysCount}
                         </span>
-                        <span className="text-[11px] text-[var(--ink-3)] font-mono">
+                        <span className="text-[11px] text-[var(--ink-3)]">
                             / {keys.length} total
                         </span>
                     </div>
                 </div>
 
-                <div className="rounded-[12px] border border-[var(--line)] bg-[var(--surface)] p-3.5">
-                    <div className="flex items-center justify-between text-xs text-[var(--ink-3)] font-mono">
-                        <span>Total Tokens Routed</span>
+                {/* 2. Token Volume */}
+                <div className="rounded-[10px] border border-[var(--line)] bg-[var(--surface)] p-3.5 flex flex-col justify-between">
+                    <div className="flex items-center justify-between text-[11px] text-[var(--ink-3)]">
+                        <span>Token Throughput</span>
                         <Zap className="size-3.5 text-amber-500" />
                     </div>
-                    <div className="mt-1.5 flex items-baseline gap-2">
-                        <span className="text-2xl font-bold font-mono text-[var(--ink)]">
+                    <div className="mt-2 flex items-baseline gap-1.5">
+                        <span className="text-2xl font-bold tabular-nums text-[var(--ink)]">
                             {totalUsage.toLocaleString()}
                         </span>
-                        <span className="text-[11px] text-[var(--ink-3)] font-mono">tokens</span>
+                        <span className="text-[11px] text-[var(--ink-3)]">tok</span>
                     </div>
                 </div>
 
-                <div className="rounded-[12px] border border-[var(--line)] bg-[var(--surface)] p-3.5">
-                    <div className="flex items-center justify-between text-xs text-[var(--ink-3)] font-mono">
-                        <span>Gateway Status</span>
+                {/* 3. Auth Protocol */}
+                <div className="rounded-[10px] border border-[var(--line)] bg-[var(--surface)] p-3.5 flex flex-col justify-between">
+                    <div className="flex items-center justify-between text-[11px] text-[var(--ink-3)]">
+                        <span>Auth Protocol</span>
                         <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
                     </div>
-                    <div className="mt-1.5 flex items-baseline gap-2">
-                        <span className="text-lg font-bold font-mono text-emerald-500">
-                            Authenticated
-                        </span>
-                        <span className="text-[11px] text-[var(--ink-3)] font-mono">
-                            Bearer active
+                    <div className="mt-2 flex items-baseline gap-1.5">
+                        <span className="text-sm font-bold text-[var(--ink)]">Bearer API Key</span>
+                        <span className="text-[10px] text-emerald-500">v1 standard</span>
+                    </div>
+                </div>
+
+                {/* 4. Gateway Endpoint */}
+                <div className="rounded-[10px] border border-[var(--line)] bg-[var(--surface)] p-3.5 flex flex-col justify-between">
+                    <div className="flex items-center justify-between text-[11px] text-[var(--ink-3)]">
+                        <span>Gateway Base URL</span>
+                        <button
+                            type="button"
+                            onClick={() => handleCopyEndpoint(apiBase)}
+                            className="text-[10px] text-[var(--ink-3)] hover:text-[var(--ink)] transition-colors cursor-pointer flex items-center gap-1"
+                            title="Copy base URL"
+                        >
+                            {copiedEndpoint ? (
+                                <Check className="size-2.5 text-emerald-500" />
+                            ) : (
+                                <Copy className="size-2.5" />
+                            )}
+                            <span>{copiedEndpoint ? "Copied" : "Copy"}</span>
+                        </button>
+                    </div>
+                    <div className="mt-2 flex items-baseline">
+                        <span
+                            className="truncate text-xs font-semibold text-[var(--ink)] select-all"
+                            title={apiBase}
+                        >
+                            {apiBase}
                         </span>
                     </div>
                 </div>
             </div>
 
-            {/* Keys Table Container */}
-            <div className="rounded-[14px] border border-[var(--line)] bg-[var(--surface)] overflow-hidden shadow-xs">
-                {/* Search & Actions Bar */}
+            {/* ── Key Table Container ────────────────────────────────────── */}
+            <div className="rounded-[12px] border border-[var(--line)] bg-[var(--surface)] overflow-hidden shadow-xs">
+                {/* Search & Counter Bar */}
                 <div className="flex items-center justify-between gap-3 border-b border-[var(--line)] p-3 sm:px-4">
                     <div className="relative flex-1 max-w-sm">
-                        <Search className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-[var(--ink-3)]" />
+                        <Search className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 size-3 text-[var(--ink-3)]" />
                         <Input
                             type="text"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Filter keys by name or ID..."
-                            className="h-8 pl-8 font-mono text-xs rounded-[8px] border-[var(--line)] bg-[var(--canvas)]"
+                            placeholder="Search keys by name, ID, or secret..."
+                            className="h-7.5 pl-7 text-[11.5px] rounded-[6px] border-[var(--line)] bg-[var(--canvas)]"
                         />
                     </div>
-                    <span className="font-mono text-[11px] text-[var(--ink-3)]">
+                    <span className="text-[11px] text-[var(--ink-3)]">
                         {filteredKeys.length} {filteredKeys.length === 1 ? "key" : "keys"}
                     </span>
                 </div>
 
                 {filteredKeys.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-                        <div className="flex size-10 items-center justify-center rounded-full bg-[var(--field)] text-[var(--ink-3)] mb-3">
-                            <KeyRound className="size-5" />
+                    <div className="flex flex-col items-center justify-center py-14 px-4 text-center">
+                        <div className="flex size-9 items-center justify-center rounded-full bg-[var(--field)] text-[var(--ink-3)] mb-3">
+                            <KeyRound className="size-4" />
                         </div>
-                        <p className="font-mono text-sm font-semibold text-[var(--ink)]">
-                            {keys.length === 0
-                                ? "No API Keys Created Yet"
-                                : "No Matching Keys Found"}
+                        <p className="text-sm font-semibold text-[var(--ink)]">
+                            {keys.length === 0 ? "No API Keys Created" : "No Matching Keys"}
                         </p>
-                        <p className="mt-1 font-mono text-xs text-[var(--ink-3)] max-w-sm">
+                        <p className="mt-1 text-xs text-[var(--ink-3)] max-w-sm leading-relaxed">
                             {keys.length === 0
-                                ? "Create your first virtual API key to authenticate requests against SRouter from your code."
-                                : "Try clearing your search query to see all available keys."}
+                                ? "Generate an API key to authenticate requests against SRouter from your client code."
+                                : "No keys matched your search filter. Try clearing the query."}
                         </p>
                         {keys.length === 0 && (
                             <Button
                                 onClick={() => setIsCreateOpen(true)}
-                                className="mt-4 h-8 rounded-[8px] bg-[var(--ink)] px-3 font-mono text-xs text-[var(--canvas)] cursor-pointer"
+                                className="mt-4 h-7.5 rounded-[6px] bg-[var(--ink)] px-3 text-xs text-[var(--canvas)] cursor-pointer"
                             >
-                                <Plus className="size-3.5 mr-1" />
+                                <Plus className="size-3 mr-1" />
                                 Create First Key
                             </Button>
                         )}
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left font-mono text-xs">
-                            <thead className="border-b border-[var(--line)] bg-[var(--field)]/60 text-[10px] uppercase tracking-wider text-[var(--ink-3)]">
+                        <table className="w-full text-left text-xs">
+                            <thead className="border-b border-[var(--line)] bg-[var(--field)]/40 text-[10px] uppercase tracking-wider text-[var(--ink-3)]">
                                 <tr>
                                     <th className="py-2.5 px-4">Name & ID</th>
-                                    <th className="py-2.5 px-4">Key Secret</th>
+                                    <th className="py-2.5 px-4">Secret Key</th>
                                     <th className="py-2.5 px-4 text-right">Rate Limit</th>
-                                    <th className="py-2.5 px-4 text-right">Quota</th>
+                                    <th className="py-2.5 px-4 text-right">Token Quota</th>
                                     <th className="py-2.5 px-4 text-right">Usage</th>
                                     <th className="py-2.5 px-4 text-center">Status</th>
                                     <th className="py-2.5 px-4 text-right">Created</th>
-                                    <th className="py-2.5 px-4 text-right">Actions</th>
+                                    <th className="py-2.5 px-4 text-right">Action</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-[var(--line)]">
                                 {filteredKeys.map((k) => {
                                     const isCopied = copiedKeyId === k.id;
                                     const isDeleting = deletingId === k.id;
+                                    const quotaPercent =
+                                        k.quotaLimit > 0
+                                            ? Math.min(
+                                                  100,
+                                                  Math.round(
+                                                      ((k.usageTokens || 0) / k.quotaLimit) * 100,
+                                                  ),
+                                              )
+                                            : null;
 
                                     return (
                                         <tr
                                             key={k.id}
-                                            className="hover:bg-[var(--hover)]/50 transition-colors"
+                                            className="hover:bg-[var(--hover)]/40 transition-colors"
                                         >
                                             {/* Name & ID */}
                                             <td className="py-3 px-4">
@@ -320,14 +373,14 @@ print(response.choices[0].message.content)`,
                                             {/* Key Secret Mask */}
                                             <td className="py-3 px-4">
                                                 <div className="flex items-center gap-1.5">
-                                                    <code className="rounded bg-[var(--field)] px-1.5 py-0.5 text-[11px] text-[var(--ink-2)] font-mono">
+                                                    <code className="rounded-[4px] bg-[var(--field)] px-1.5 py-0.5 text-[11px] text-[var(--ink-2)]">
                                                         {maskKey(k.key)}
                                                     </code>
                                                     <button
                                                         type="button"
                                                         onClick={() => handleCopy(k.key, k.id)}
                                                         className="flex size-6 items-center justify-center rounded-[4px] text-[var(--ink-3)] hover:bg-[var(--hover)] hover:text-[var(--ink)] transition-colors cursor-pointer"
-                                                        title="Copy API key"
+                                                        title="Copy full key"
                                                     >
                                                         {isCopied ? (
                                                             <Check className="size-3 text-emerald-500" />
@@ -353,18 +406,37 @@ print(response.choices[0].message.content)`,
                                             </td>
 
                                             {/* Usage */}
-                                            <td className="py-3 px-4 text-right tabular-nums font-semibold text-[var(--ink)]">
-                                                {(k.usageTokens || 0).toLocaleString()} tok
+                                            <td className="py-3 px-4 text-right tabular-nums">
+                                                <div className="font-semibold text-[var(--ink)]">
+                                                    {(k.usageTokens || 0).toLocaleString()} tok
+                                                </div>
+                                                {quotaPercent !== null && (
+                                                    <div className="mt-1 flex items-center justify-end gap-1.5 text-[9.5px] text-[var(--ink-3)]">
+                                                        <div className="w-12 h-1 rounded-full bg-[var(--line)] overflow-hidden">
+                                                            <div
+                                                                className={`h-full ${
+                                                                    quotaPercent > 90
+                                                                        ? "bg-rose-500"
+                                                                        : quotaPercent > 70
+                                                                          ? "bg-amber-500"
+                                                                          : "bg-emerald-500"
+                                                                }`}
+                                                                style={{
+                                                                    width: `${quotaPercent}%`,
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        <span>{quotaPercent}%</span>
+                                                    </div>
+                                                )}
                                             </td>
 
                                             {/* Status */}
                                             <td className="py-3 px-4 text-center">
-                                                <Badge
-                                                    variant="outline"
-                                                    className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono text-[10px]"
-                                                >
+                                                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                                                    <span className="size-1 rounded-full bg-emerald-500" />
                                                     Active
-                                                </Badge>
+                                                </span>
                                             </td>
 
                                             {/* Created Date */}
@@ -378,8 +450,8 @@ print(response.choices[0].message.content)`,
                                                     type="button"
                                                     disabled={isDeleting}
                                                     onClick={() => setKeyToDelete(k)}
-                                                    className="flex size-7 items-center justify-center rounded-[6px] text-[var(--ink-3)] hover:bg-destructive/10 hover:text-destructive transition-colors disabled:opacity-40 cursor-pointer ml-auto"
-                                                    title="Revoke & delete key"
+                                                    className="flex size-7 items-center justify-center rounded-[6px] text-[var(--ink-3)] hover:bg-rose-500/10 hover:text-rose-500 transition-colors disabled:opacity-40 cursor-pointer ml-auto"
+                                                    title="Revoke and delete key"
                                                 >
                                                     <Trash2 className="size-3.5" />
                                                 </button>
@@ -393,13 +465,13 @@ print(response.choices[0].message.content)`,
                 )}
             </div>
 
-            {/* Quick Integration Guide */}
-            <div className="rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-4 space-y-3">
+            {/* ── Quick Integration Guide ─────────────────────────────────── */}
+            <div className="rounded-[12px] border border-[var(--line)] bg-[var(--surface)] p-4 space-y-3">
                 <div className="flex items-center justify-between border-b border-[var(--line)] pb-3">
                     <div className="flex items-center gap-2">
-                        <Code2 className="size-4 text-[var(--ink)]" />
-                        <span className="font-mono text-xs font-bold text-[var(--ink)]">
-                            Quick Integration Examples
+                        <Code2 className="size-3.5 text-[var(--ink)]" />
+                        <span className="text-xs font-bold text-[var(--ink)]">
+                            Quick Integration Guide
                         </span>
                     </div>
 
@@ -410,9 +482,9 @@ print(response.choices[0].message.content)`,
                                 key={tab}
                                 type="button"
                                 onClick={() => setIntegrationTab(tab)}
-                                className={`rounded-[6px] px-2.5 py-1 font-mono text-[10.5px] transition-colors cursor-pointer ${
+                                className={`rounded-[6px] px-2.5 py-1 text-[10.5px] transition-colors cursor-pointer ${
                                     integrationTab === tab
-                                        ? "bg-[var(--ink)] text-[var(--canvas)] font-bold"
+                                        ? "bg-[var(--ink)] text-[var(--canvas)] font-bold shadow-xs"
                                         : "bg-[var(--field)] text-[var(--ink-3)] hover:text-[var(--ink)]"
                                 }`}
                             >
@@ -427,14 +499,14 @@ print(response.choices[0].message.content)`,
                 </div>
 
                 <div className="relative">
-                    <pre className="overflow-x-auto rounded-[10px] border border-[var(--line)] bg-[var(--canvas)] p-3 font-mono text-[11.5px] leading-relaxed text-[var(--ink)]">
+                    <pre className="overflow-x-auto rounded-[8px] border border-[var(--line)] bg-[var(--canvas)] p-3 text-[11px] leading-relaxed text-[var(--ink)]">
                         <code>{codeSnippets[integrationTab]}</code>
                     </pre>
 
                     <button
                         type="button"
                         onClick={() => handleCopy(codeSnippets[integrationTab])}
-                        className="absolute right-2.5 top-2.5 flex items-center gap-1 rounded-[6px] border border-[var(--line)] bg-[var(--surface)] px-2 py-1 font-mono text-[10.5px] text-[var(--ink-2)] hover:text-[var(--ink)] transition-colors cursor-pointer shadow-xs"
+                        className="absolute right-2.5 top-2.5 flex items-center gap-1 rounded-[6px] border border-[var(--line)] bg-[var(--surface)] px-2 py-1 text-[10px] text-[var(--ink-2)] hover:text-[var(--ink)] transition-colors cursor-pointer shadow-xs"
                     >
                         {copiedFullKey ? (
                             <>
@@ -453,36 +525,55 @@ print(response.choices[0].message.content)`,
 
             {/* ── Dialog: Create Key ────────────────────────────────────────── */}
             <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-                <DialogContent className="sm:max-w-md bg-[var(--surface)] border-[var(--line)]">
+                <DialogContent className="sm:max-w-md bg-[var(--surface)] border-[var(--line)] p-5">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 font-mono text-sm">
+                        <DialogTitle className="flex items-center gap-2 text-sm font-bold text-[var(--ink)]">
                             <KeyRound className="size-4" />
-                            <span>Create New API Key</span>
+                            <span>Create Virtual API Key</span>
                         </DialogTitle>
-                        <DialogDescription className="font-mono text-xs text-[var(--ink-3)]">
-                            Generate an authenticated API key for downstream client access.
+                        <DialogDescription className="text-xs text-[var(--ink-3)]">
+                            Create a token to authenticate downstream client SDKs and backend
+                            services.
                         </DialogDescription>
                     </DialogHeader>
 
-                    <form onSubmit={handleCreate} className="space-y-3.5 py-2">
+                    <form onSubmit={handleCreate} className="space-y-4 py-2">
+                        {/* Name Input */}
                         <div className="space-y-1.5">
-                            <label className="font-mono text-xs font-semibold text-[var(--ink)]">
-                                Key Name <span className="text-destructive">*</span>
+                            <label className="text-xs font-semibold text-[var(--ink)]">
+                                Key Label / Name <span className="text-rose-500">*</span>
                             </label>
                             <Input
                                 type="text"
                                 required
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                placeholder="e.g. Next.js App, Production Server, Cursor IDE"
-                                className="font-mono text-xs rounded-[8px] bg-[var(--canvas)]"
+                                placeholder="e.g. Production Server, Cursor IDE, Next.js App"
+                                className="text-xs rounded-[6px] bg-[var(--canvas)] border-[var(--line)]"
                             />
+                            {/* Preset pills */}
+                            <div className="flex flex-wrap gap-1 pt-1">
+                                {PRESET_NAMES.map((preset) => (
+                                    <button
+                                        key={preset}
+                                        type="button"
+                                        onClick={() => setName(preset)}
+                                        className="rounded-[4px] border border-[var(--line)] bg-[var(--field)] px-1.5 py-0.5 text-[9.5px] text-[var(--ink-2)] hover:text-[var(--ink)] hover:border-[var(--line-strong)] transition-colors cursor-pointer"
+                                    >
+                                        {preset}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
 
+                        {/* Optional Limits */}
                         <div className="grid grid-cols-2 gap-3">
                             <div className="space-y-1.5">
-                                <label className="font-mono text-xs font-semibold text-[var(--ink)]">
-                                    Rate Limit (req/min)
+                                <label className="text-xs font-semibold text-[var(--ink)]">
+                                    Rate Limit{" "}
+                                    <span className="text-[10px] text-[var(--ink-3)]">
+                                        (req/min)
+                                    </span>
                                 </label>
                                 <Input
                                     type="number"
@@ -490,13 +581,16 @@ print(response.choices[0].message.content)`,
                                     value={rateLimit}
                                     onChange={(e) => setRateLimit(e.target.value)}
                                     placeholder="0 for unlimited"
-                                    className="font-mono text-xs rounded-[8px] bg-[var(--canvas)]"
+                                    className="text-xs rounded-[6px] bg-[var(--canvas)] border-[var(--line)]"
                                 />
                             </div>
 
                             <div className="space-y-1.5">
-                                <label className="font-mono text-xs font-semibold text-[var(--ink)]">
-                                    Token Quota Limit
+                                <label className="text-xs font-semibold text-[var(--ink)]">
+                                    Token Quota{" "}
+                                    <span className="text-[10px] text-[var(--ink-3)]">
+                                        (tokens)
+                                    </span>
                                 </label>
                                 <Input
                                     type="number"
@@ -504,7 +598,7 @@ print(response.choices[0].message.content)`,
                                     value={quotaLimit}
                                     onChange={(e) => setQuotaLimit(e.target.value)}
                                     placeholder="0 for unlimited"
-                                    className="font-mono text-xs rounded-[8px] bg-[var(--canvas)]"
+                                    className="text-xs rounded-[6px] bg-[var(--canvas)] border-[var(--line)]"
                                 />
                             </div>
                         </div>
@@ -514,16 +608,16 @@ print(response.choices[0].message.content)`,
                                 type="button"
                                 variant="outline"
                                 onClick={() => setIsCreateOpen(false)}
-                                className="h-8 font-mono text-xs"
+                                className="h-8 text-xs border-[var(--line)] cursor-pointer"
                             >
                                 Cancel
                             </Button>
                             <Button
                                 type="submit"
                                 disabled={creating || !name.trim()}
-                                className="h-8 font-mono text-xs bg-[var(--ink)] text-[var(--canvas)]"
+                                className="h-8 text-xs bg-[var(--ink)] text-[var(--canvas)] hover:opacity-90 cursor-pointer shadow-xs"
                             >
-                                {creating ? "Creating..." : "Generate Key"}
+                                {creating ? "Generating..." : "Generate Key"}
                             </Button>
                         </DialogFooter>
                     </form>
@@ -537,31 +631,31 @@ print(response.choices[0].message.content)`,
                     if (!open) setNewlyCreatedKey(null);
                 }}
             >
-                <DialogContent className="sm:max-w-lg bg-[var(--surface)] border-[var(--line)]">
+                <DialogContent className="sm:max-w-lg bg-[var(--surface)] border-[var(--line)] p-5">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 font-mono text-sm text-emerald-600 dark:text-emerald-400">
+                        <DialogTitle className="flex items-center gap-2 text-sm font-bold text-emerald-600 dark:text-emerald-400">
                             <Check className="size-4" />
                             <span>API Key Created Successfully</span>
                         </DialogTitle>
-                        <DialogDescription className="font-mono text-xs text-[var(--ink-3)]">
-                            Please save your API key secret immediately. For security reasons, you
-                            will not be able to view it again.
+                        <DialogDescription className="text-xs text-[var(--ink-3)]">
+                            Copy your API key now. For your security, the secret token will not be
+                            displayed again.
                         </DialogDescription>
                     </DialogHeader>
 
                     {newlyCreatedKey && (
                         <div className="space-y-3 py-2">
-                            <div className="rounded-[10px] border border-amber-500/30 bg-amber-500/10 p-3 flex items-start gap-2.5">
+                            <div className="rounded-[8px] border border-amber-500/30 bg-amber-500/10 p-3 flex items-start gap-2.5">
                                 <AlertTriangle className="size-4 text-amber-500 shrink-0 mt-0.5" />
-                                <div className="font-mono text-xs text-amber-600 dark:text-amber-400 leading-relaxed">
-                                    <strong>Important:</strong> Copy and store this secret key in a
-                                    safe place. Once you close this modal, the full secret will be
-                                    masked.
+                                <div className="text-[11.5px] text-amber-600 dark:text-amber-400 leading-relaxed">
+                                    <strong>Save Secret:</strong> Store this key in your environment
+                                    variables (e.g. <code>SROUTER_API_KEY</code>). Once dismissed,
+                                    the key will be permanently masked.
                                 </div>
                             </div>
 
                             <div className="space-y-1.5">
-                                <span className="font-mono text-xs font-semibold text-[var(--ink)]">
+                                <span className="text-xs font-semibold text-[var(--ink)]">
                                     {newlyCreatedKey.name}
                                 </span>
                                 <div className="flex items-center gap-2">
@@ -569,12 +663,12 @@ print(response.choices[0].message.content)`,
                                         type="text"
                                         readOnly
                                         value={newlyCreatedKey.key}
-                                        className="w-full rounded-[8px] border border-[var(--line)] bg-[var(--canvas)] px-3 py-2 font-mono text-xs text-[var(--ink)] select-all focus:outline-none"
+                                        className="w-full rounded-[6px] border border-[var(--line)] bg-[var(--canvas)] px-3 py-2 text-xs text-[var(--ink)] select-all focus:outline-none"
                                     />
                                     <Button
                                         type="button"
                                         onClick={() => handleCopy(newlyCreatedKey.key)}
-                                        className="h-8.5 px-3.5 font-mono text-xs bg-[var(--ink)] text-[var(--canvas)] shrink-0"
+                                        className="h-8.5 px-3.5 text-xs bg-[var(--ink)] text-[var(--canvas)] shrink-0 cursor-pointer shadow-xs"
                                     >
                                         {copiedFullKey ? (
                                             <>
@@ -597,7 +691,7 @@ print(response.choices[0].message.content)`,
                         <Button
                             type="button"
                             onClick={() => setNewlyCreatedKey(null)}
-                            className="h-8 font-mono text-xs bg-[var(--ink)] text-[var(--canvas)] w-full"
+                            className="h-8 text-xs bg-[var(--ink)] text-[var(--canvas)] w-full cursor-pointer shadow-xs"
                         >
                             Done & Saved
                         </Button>
@@ -612,32 +706,31 @@ print(response.choices[0].message.content)`,
                     if (!open) setKeyToDelete(null);
                 }}
             >
-                <DialogContent className="sm:max-w-md bg-[var(--surface)] border-[var(--line)]">
+                <DialogContent className="sm:max-w-md bg-[var(--surface)] border-[var(--line)] p-5">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 font-mono text-sm text-destructive">
+                        <DialogTitle className="flex items-center gap-2 text-sm font-bold text-rose-500">
                             <Trash2 className="size-4" />
                             <span>Revoke API Key</span>
                         </DialogTitle>
-                        <DialogDescription className="font-mono text-xs text-[var(--ink-3)]">
-                            Are you sure you want to revoke and delete this API key? Any
-                            applications using this key will immediately receive HTTP 401
-                            Unauthorized errors.
+                        <DialogDescription className="text-xs text-[var(--ink-3)] leading-relaxed">
+                            Are you sure you want to permanently revoke this key? Downstream
+                            requests using this token will fail immediately with HTTP 401.
                         </DialogDescription>
                     </DialogHeader>
 
                     {keyToDelete && (
-                        <div className="rounded-[8px] border border-[var(--line)] bg-[var(--field)] p-2.5 font-mono text-xs text-[var(--ink)]">
+                        <div className="rounded-[6px] border border-[var(--line)] bg-[var(--field)] p-2.5 text-xs text-[var(--ink)]">
                             <strong>{keyToDelete.name}</strong> (
                             <code>{maskKey(keyToDelete.key)}</code>)
                         </div>
                     )}
 
-                    <DialogFooter>
+                    <DialogFooter className="pt-2">
                         <Button
                             type="button"
                             variant="outline"
                             onClick={() => setKeyToDelete(null)}
-                            className="h-8 font-mono text-xs"
+                            className="h-8 text-xs border-[var(--line)] cursor-pointer"
                         >
                             Cancel
                         </Button>
@@ -650,7 +743,7 @@ print(response.choices[0].message.content)`,
                                     setKeyToDelete(null);
                                 }
                             }}
-                            className="h-8 font-mono text-xs"
+                            className="h-8 text-xs cursor-pointer shadow-xs"
                         >
                             Revoke Key
                         </Button>

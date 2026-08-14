@@ -1,4 +1,4 @@
-import { Plus, RefreshCw, Search } from "lucide-react";
+import { Boxes, Plus, RefreshCw, Search, ShieldCheck, Sparkles, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { CatalogSummaryItems, FilterValue } from "@/utils/catalog.utils";
@@ -27,70 +27,91 @@ export function CatalogToolbar({
     onSearchChange,
 }: CatalogToolbarProps) {
     return (
-        <>
-            <header className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
-                <div className="min-w-0">
-                    <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                        Integrations
-                    </p>
-                    <h1 className="mt-1.5 text-2xl font-bold tracking-tight text-foreground">
-                        Provider catalog
-                    </h1>
-                    <p className="mt-1 max-w-2xl text-xs text-muted-foreground">
-                        Every driver this gateway can route to, and which of them currently hold
-                        live credentials.
+        <div className="space-y-6 font-mono">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 border-b border-[var(--line)] pb-5">
+                <div className="space-y-1.5">
+                    <div className="flex items-center gap-2">
+                        <div className="flex size-7 items-center justify-center rounded-[6px] bg-[var(--field)] text-[var(--ink)]">
+                            <Boxes className="size-3.5" />
+                        </div>
+                        <h1 className="text-lg font-bold tracking-tight text-[var(--ink)]">
+                            Provider Catalog
+                        </h1>
+                        <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                            Multi-Driver Gateway
+                        </span>
+                    </div>
+                    <p className="text-xs text-[var(--ink-3)] max-w-2xl leading-relaxed">
+                        Registered upstream LLM drivers, inference backends, and live connected
+                        endpoints.
                     </p>
                 </div>
 
-                <div className="flex shrink-0 items-center gap-1.5">
+                <div className="flex shrink-0 items-center gap-2">
                     <Button
                         type="button"
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
                         onClick={onRefresh}
                         disabled={isFetching}
-                        className="text-muted-foreground hover:text-foreground"
+                        className="h-8 text-xs border-[var(--line)] text-[var(--ink-2)] hover:text-[var(--ink)] cursor-pointer"
                     >
-                        <RefreshCw className={isFetching ? "animate-spin" : undefined} />
-                        {isFetching ? "Refreshing" : "Refresh"}
+                        <RefreshCw
+                            className={`size-3 mr-1.5 ${isFetching ? "animate-spin" : ""}`}
+                        />
+                        <span>{isFetching ? "Refreshing" : "Refresh"}</span>
                     </Button>
-                    <Button type="button" size="sm" onClick={onAddProvider}>
-                        <Plus />
-                        Add provider
+                    <Button
+                        type="button"
+                        size="sm"
+                        onClick={onAddProvider}
+                        className="h-8 text-xs bg-[var(--ink)] text-[var(--canvas)] hover:opacity-90 cursor-pointer shadow-xs transition-transform active:scale-[0.98]"
+                    >
+                        <Plus className="size-3.5 mr-1" />
+                        <span>Add Provider</span>
                     </Button>
                 </div>
-            </header>
+            </div>
 
-            <section
-                aria-label="Catalog summary"
-                className="grid grid-cols-1 border-y border-border/70 sm:grid-cols-2 sm:[&>article:nth-child(n+3)]:border-t xl:grid-cols-4 xl:[&>article:nth-child(n+3)]:border-t-0"
-            >
-                {summaryItems.map((item) => (
-                    <article
-                        key={item.label}
-                        className="relative min-w-0 px-4 py-5 xl:[&:not(:first-child)]:border-l xl:[&:not(:first-child)]:border-border/70"
-                    >
-                        <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                            {item.label}
-                        </span>
-                        <div className="mt-2 text-2xl font-semibold tracking-tight tabular-nums text-foreground">
-                            {item.value}
-                        </div>
-                        <p
-                            className="mt-1 truncate text-[11px] text-muted-foreground"
-                            title={item.detail}
+            {/* Bento Summary Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {summaryItems.map((item, idx) => {
+                    const isConnectedCard = item.label.toLowerCase() === "connected";
+                    return (
+                        <div
+                            key={item.label}
+                            className="rounded-[10px] border border-[var(--line)] bg-[var(--surface)] p-3.5 flex flex-col justify-between"
                         >
-                            {item.detail}
-                        </p>
-                    </article>
-                ))}
-            </section>
+                            <div className="flex items-center justify-between text-[11px] text-[var(--ink-3)]">
+                                <span>{item.label}</span>
+                                {idx === 0 && <Boxes className="size-3.5 text-[var(--ink-3)]" />}
+                                {idx === 1 && (
+                                    <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+                                )}
+                                {idx === 2 && <ShieldCheck className="size-3.5 text-amber-500" />}
+                                {idx === 3 && <Zap className="size-3.5 text-blue-500" />}
+                            </div>
+                            <div className="mt-2">
+                                <div className="text-2xl font-bold tabular-nums text-[var(--ink)]">
+                                    {item.value}
+                                </div>
+                                <p className="mt-0.5 text-[10.5px] text-[var(--ink-3)] truncate">
+                                    {item.detail}
+                                </p>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
 
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            {/* Controls Bar: Segmented Tabs & Search */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-[var(--line)] pb-3">
+                {/* Segmented Filter Pills */}
                 <div
                     role="tablist"
                     aria-label="Filter providers by category"
-                    className="-mx-1 flex items-center gap-1 overflow-x-auto px-1 pb-1 lg:mx-0 lg:px-0 lg:pb-0"
+                    className="flex flex-wrap items-center gap-1.5"
                 >
                     {filterOptions.map((option) => {
                         const isActive = filter === option.value;
@@ -101,14 +122,20 @@ export function CatalogToolbar({
                                 role="tab"
                                 aria-selected={isActive}
                                 onClick={() => onFilterChange(option.value)}
-                                className={`shrink-0 border-b-2 px-2 pb-1.5 text-xs transition-colors ${
+                                className={`rounded-[6px] px-2.5 py-1 text-[11px] transition-colors cursor-pointer flex items-center gap-1.5 ${
                                     isActive
-                                        ? "border-foreground font-semibold text-foreground"
-                                        : "border-transparent font-medium text-muted-foreground hover:text-foreground"
+                                        ? "bg-[var(--ink)] text-[var(--canvas)] font-bold shadow-xs"
+                                        : "bg-[var(--field)] text-[var(--ink-3)] hover:text-[var(--ink)]"
                                 }`}
                             >
-                                {option.label}
-                                <span className="ml-1 font-mono text-[10px] tabular-nums text-muted-foreground">
+                                <span>{option.label}</span>
+                                <span
+                                    className={`rounded-[3px] px-1 py-0.2 text-[9.5px] tabular-nums ${
+                                        isActive
+                                            ? "bg-[var(--canvas)]/20 text-[var(--canvas)]"
+                                            : "bg-[var(--line)] text-[var(--ink-3)]"
+                                    }`}
+                                >
                                     {option.count}
                                 </span>
                             </button>
@@ -116,21 +143,21 @@ export function CatalogToolbar({
                     })}
                 </div>
 
-                <label className="relative w-full lg:w-64">
-                    <span className="sr-only">Search providers</span>
+                {/* Search */}
+                <div className="relative w-full sm:w-64">
                     <Search
-                        className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
+                        className="pointer-events-none absolute left-2.5 top-1/2 size-3 -translate-y-1/2 text-[var(--ink-3)]"
                         strokeWidth={1.75}
                     />
                     <Input
                         type="search"
                         value={search}
-                        onChange={(event) => onSearchChange(event.target.value)}
-                        placeholder="Search name, id, protocol…"
-                        className="pl-8 font-mono text-xs"
+                        onChange={(e) => onSearchChange(e.target.value)}
+                        placeholder="Search driver, id, protocol..."
+                        className="h-7.5 pl-7 text-[11.5px] rounded-[6px] border-[var(--line)] bg-[var(--canvas)]"
                     />
-                </label>
+                </div>
             </div>
-        </>
+        </div>
     );
 }
