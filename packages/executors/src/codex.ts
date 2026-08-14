@@ -7,13 +7,16 @@ import type {
 } from "@srouter/types";
 import { CODEX_BASE_URL, CODEX_MODELS_URL } from "@srouter/constants";
 import {
+    accumulateChunks,
     chatToResponsesBody,
     createResponsesStreamState,
+    normalizeReasoningEffort,
     normalizeResponsesInput,
     responsesEventToChunk,
     type ResponsesRequestBody,
 } from "@srouter/translator";
 import { parseDataLine, streamLines } from "./base.js";
+import { extractSseErrorMessage, MODEL_CAPACITY_MESSAGE } from "./sse.js";
 
 export interface CodexExecutorOptions {
     id?: string;
@@ -38,7 +41,6 @@ const SSE_USER_OUTPUT_PATTERNS = [
     '"type":"response.function_call_arguments.delta"',
 ];
 const SSE_PEEK_BYTES = 256 * 1024;
-const MODEL_CAPACITY_MESSAGE = "Selected model is at capacity. Please try a different model.";
 
 // Default Codex instructions injected when the request has none (port of 9router codexInstructions.js)
 const CODEX_DEFAULT_INSTRUCTIONS = `You are Codex, based on GPT-5. You are running as a coding agent in the Codex CLI on a user's computer.
@@ -174,7 +176,7 @@ export class CodexExecutor implements AIProvider {
         for await (const chunk of this.chatCompletionStream(req)) {
             chunks.push(chunk);
         }
-        return accumulateChunksLocal(chunks, req.model);
+        return accumulateChunks(chunks, req.model);
     }
 
     async *chatCompletionStream(
@@ -273,16 +275,10 @@ export class CodexExecutor implements AIProvider {
         // Reasoning effort — priority: explicit reasoning > model suffix > default (low)
         const reasoningEffort = (req as unknown as { reasoning_effort?: string }).reasoning_effort;
         if (!body.reasoning) {
-            const effort = normalizeReasoningEffortLocal(
-                body.model,
-                reasoningEffort || modelEffort || "low",
-            );
+            const effort = normalizeReasoningEffort(reasoningEffort || modelEffort || "low");
             body.reasoning = { effort, summary: "auto" };
         } else {
-            body.reasoning.effort = normalizeReasoningEffortLocal(
-                body.model,
-                body.reasoning.effort,
-            );
+            body.reasoning.effort = normalizeReasoningEffort(body.reasoning.effort);
             if (!body.reasoning.summary) body.reasoning.summary = "auto";
         }
 
@@ -340,9 +336,7 @@ export class CodexExecutor implements AIProvider {
      * Peek first N bytes of SSE body to detect transient upstream errors.
      * Returns { matched, message, accountFallback, replacementBody }.
      */
-    private async peekSseTransientError(
-        response: Response,
-    ): Promise<{
+    private async peekSseTransientError(response: Response): Promise<{
         matched: string | null;
         message: string | null;
         accountFallback: boolean;
@@ -520,115 +514,4 @@ export class CodexExecutor implements AIProvider {
             }
         }
     }
-}
-
-function extractSseErrorMessage(text: string, fallback: string): string {
-    const exact = text?.match(
-        /Selected model is at capacity\. Please try a different model\./i,
-    )?.[0];
-    if (exact) return exact;
-
-    for (const line of String(text || "").split(/\r?\n/)) {
-        if (!line.startsWith("data:")) continue;
-        const data = line.slice(5).trim();
-        if (!data || data === "[DONE]") continue;
-        try {
-            const message = findNestedMessage(JSON.parse(data));
-            if (message) return message;
-        } catch {
-            // ignore
-        }
-    }
-
-    return fallback || MODEL_CAPACITY_MESSAGE;
-}
-
-function findNestedMessage(value: unknown, depth = 0): string | null {
-    if (!value || depth > 6 || typeof value === "string") return null;
-    if (Array.isArray(value)) {
-        for (const item of value) {
-            const found = findNestedMessage(item, depth + 1);
-            if (found) return found;
-        }
-        return null;
-    }
-    if (typeof value !== "object") return null;
-    const obj = value as Record<string, unknown>;
-    if (typeof obj.message === "string" && obj.message.trim()) return obj.message;
-    if (
-        typeof (obj.error as { message?: unknown })?.message === "string" &&
-        (obj.error as { message: string }).message.trim()
-    ) {
-        return (obj.error as { message: string }).message;
-    }
-    if (
-        typeof (obj.response as { error?: { message?: unknown } })?.error?.message === "string" &&
-        (obj.response as { error: { message: string } }).error.message.trim()
-    ) {
-        return (obj.response as { error: { message: string } }).error.message;
-    }
-    for (const child of Object.values(obj)) {
-        const found = findNestedMessage(child, depth + 1);
-        if (found) return found;
-    }
-    return null;
-}
-
-function normalizeReasoningEffortLocal(model: string, value?: string): string {
-    const supported = ["none", "minimal", "low", "medium", "high", "xhigh"];
-    if (value && supported.includes(value)) return value;
-    return "low";
-}
-
-// Accumulate streamed chunks into a non-streaming response (local copy to avoid circular import)
-function accumulateChunksLocal(
-    chunks: ChatCompletionChunk[],
-    model: string,
-): ChatCompletionResponse {
-    let content = "";
-    const toolCallMap = new Map<number, { id: string; name: string; args: string }>();
-
-    for (const chunk of chunks) {
-        const delta = chunk.choices[0]?.delta;
-        if (!delta) continue;
-        if (typeof delta.content === "string") content += delta.content;
-        if (Array.isArray(delta.tool_calls)) {
-            for (const tc of delta.tool_calls) {
-                const idx = tc.index ?? 0;
-                const entry = toolCallMap.get(idx) || { id: "", name: "", args: "" };
-                if (tc.id) entry.id = tc.id;
-                if (tc.function?.name) entry.name = tc.function.name;
-                if (tc.function?.arguments) entry.args += tc.function.arguments;
-                toolCallMap.set(idx, entry);
-            }
-        }
-    }
-
-    const toolCalls = Array.from(toolCallMap.values()).map((entry) => ({
-        id: entry.id,
-        type: "function" as const,
-        function: { name: entry.name, arguments: entry.args },
-    }));
-
-    const finishReason = chunks.at(-1)?.choices[0]?.finish_reason ?? "stop";
-    const usage = [...chunks].reverse().find((c) => c.usage)?.usage;
-
-    return {
-        id: `chatcmpl-${Date.now()}`,
-        object: "chat.completion",
-        created: Math.floor(Date.now() / 1000),
-        model,
-        choices: [
-            {
-                index: 0,
-                message: {
-                    role: "assistant",
-                    content: content || null,
-                    ...(toolCalls.length ? { tool_calls: toolCalls } : {}),
-                },
-                finish_reason: finishReason,
-            },
-        ],
-        ...(usage ? { usage } : {}),
-    };
 }

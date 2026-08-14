@@ -1,10 +1,8 @@
 import type {
     ChatCompletionChunk,
     ChatCompletionRequest,
-    ChatCompletionResponse,
     ChatMessage,
     FinishReason,
-    ToolCall,
 } from "@srouter/types";
 
 // --- OpenAI Responses API translation helpers (port of 9router openai-responses) ---
@@ -294,13 +292,12 @@ export function chatToResponsesBody(req: ChatCompletionRequest): ResponsesReques
     const reasoningEffort = (req as unknown as { reasoning_effort?: string }).reasoning_effort;
     if (reasoningEffort) {
         body.reasoning = {
-            effort: normalizeReasoningEffort(req.model, reasoningEffort),
+            effort: normalizeReasoningEffort(reasoningEffort),
             summary: "auto",
         };
     } else if ((req as unknown as { reasoning?: { effort?: string } }).reasoning) {
         body.reasoning = {
             effort: normalizeReasoningEffort(
-                req.model,
                 (req as unknown as { reasoning: { effort?: string } }).reasoning.effort,
             ),
             summary: "auto",
@@ -310,7 +307,7 @@ export function chatToResponsesBody(req: ChatCompletionRequest): ResponsesReques
     return body;
 }
 
-function normalizeReasoningEffort(model: string, value?: string): string {
+export function normalizeReasoningEffort(value?: string): string {
     const supported = ["none", "minimal", "low", "medium", "high", "xhigh"];
     if (value && supported.includes(value)) return value;
     // Codex default is low/medium — map unknown to low (matches 9router default)
@@ -431,62 +428,6 @@ export function createResponsesStreamState(model: string): ResponsesStreamState 
         currentToolCallId: null,
         finishReasonSent: false,
         model,
-    };
-}
-
-// Accumulate streamed OpenAI chunks into a single non-streaming ChatCompletionResponse.
-export function accumulateResponsesChunks(
-    chunks: ChatCompletionChunk[],
-    model: string,
-): ChatCompletionResponse {
-    let content = "";
-    const toolCalls: ToolCall[] = [];
-    const toolCallMap = new Map<number, { id: string; name: string; args: string }>();
-
-    for (const chunk of chunks) {
-        const delta = chunk.choices[0]?.delta;
-        if (!delta) continue;
-        if (typeof delta.content === "string") content += delta.content;
-        if (Array.isArray(delta.tool_calls)) {
-            for (const tc of delta.tool_calls) {
-                const idx = tc.index ?? 0;
-                const entry = toolCallMap.get(idx) || { id: "", name: "", args: "" };
-                if (tc.id) entry.id = tc.id;
-                if (tc.function?.name) entry.name = tc.function.name;
-                if (tc.function?.arguments) entry.args += tc.function.arguments;
-                toolCallMap.set(idx, entry);
-            }
-        }
-    }
-
-    for (const entry of toolCallMap.values()) {
-        toolCalls.push({
-            id: entry.id,
-            type: "function",
-            function: { name: entry.name, arguments: entry.args },
-        });
-    }
-
-    const finishReason: FinishReason = chunks.at(-1)?.choices[0]?.finish_reason ?? "stop";
-    const usage = [...chunks].reverse().find((c) => c.usage)?.usage;
-
-    return {
-        id: `chatcmpl-${Date.now()}`,
-        object: "chat.completion",
-        created: Math.floor(Date.now() / 1000),
-        model,
-        choices: [
-            {
-                index: 0,
-                message: {
-                    role: "assistant",
-                    content: content || null,
-                    ...(toolCalls.length ? { tool_calls: toolCalls } : {}),
-                },
-                finish_reason: finishReason,
-            },
-        ],
-        ...(usage ? { usage } : {}),
     };
 }
 

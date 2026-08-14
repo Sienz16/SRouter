@@ -679,3 +679,140 @@ export function geminiStreamToOpenAIChunks(
 
     return results.length > 0 ? results : null;
 }
+
+// ─── Antigravity request building (port of 9router executors/antigravity.js) ───
+
+// Fields Google generateContent rejects (Claude/OpenAI/Qwen thinking fields)
+const ANTIGRAVITY_REQUEST_BLACKLIST = [
+    "output_config",
+    "thinking",
+    "reasoning_effort",
+    "reasoning",
+    "enable_thinking",
+    "thinking_budget",
+    "thinkingConfig",
+];
+
+/**
+ * Remove fields Google generateContent rejects from a request body.
+ */
+export function stripBlacklistedRequest(obj: Record<string, unknown>): void {
+    for (const key of ANTIGRAVITY_REQUEST_BLACKLIST) delete obj[key];
+}
+
+// Image generation model name patterns
+const IMAGE_MODEL_PATTERNS = [/image/i, /imagen/i, /image-generation/i];
+
+export function isImageModel(model: string): boolean {
+    return IMAGE_MODEL_PATTERNS.some((p) => p.test(model));
+}
+
+// Parse aspect ratio / resolution from model name suffixes
+export function parseImageConfig(model: string): Record<string, string> {
+    const config: Record<string, string> = { aspectRatio: "1:1" };
+    const resMatch = model.match(/(\d+)x(\d+)$/);
+    if (resMatch) {
+        const w = parseInt(resMatch[1]);
+        const h = parseInt(resMatch[2]);
+        if (w <= 16 && h <= 16) {
+            config.aspectRatio = `${w}:${h}`;
+        } else {
+            const gcd = (a: number, b: number): number => (b ? gcd(b, a % b) : a);
+            const d = gcd(w, h);
+            config.aspectRatio = `${w / d}:${h / d}`;
+        }
+    }
+    return config;
+}
+
+// Strip any {alias}/ or {providerId}/ prefix — keep the real model id
+export function parseAntigravityModelName(rawModel: string): string {
+    return rawModel.includes("/") ? (rawModel.split("/")[1] ?? rawModel) : rawModel;
+}
+
+/**
+ * Build Antigravity Gemini contents from ChatCompletionRequest messages, mapping tools.
+ */
+export function buildAntigravityContents(req: ChatCompletionRequest): GeminiContent[] {
+    const contents: GeminiContent[] = [];
+    for (const m of req.messages) {
+        const role = m.role === "assistant" ? "model" : "user";
+        const parts: GeminiContent["parts"] = [];
+
+        if (m.role === "assistant" && Array.isArray(m.tool_calls) && m.tool_calls.length > 0) {
+            for (const tc of m.tool_calls) {
+                let args: Record<string, unknown> = {};
+                try {
+                    args = JSON.parse(tc.function.arguments || "{}");
+                } catch {
+                    args = { raw: tc.function.arguments };
+                }
+                parts.push({
+                    text: "",
+                    functionCall: { name: tc.function.name, args },
+                });
+            }
+        } else if (m.role === "tool" && m.tool_call_id) {
+            parts.push({
+                text: "",
+                functionResponse: {
+                    name: m.tool_call_id,
+                    response: {
+                        result:
+                            typeof m.content === "string" ? m.content : JSON.stringify(m.content),
+                    },
+                },
+            });
+        } else {
+            const text =
+                typeof m.content === "string"
+                    ? m.content
+                    : Array.isArray(m.content)
+                      ? m.content.map((c) => (c.type === "text" ? c.text || "" : "")).join("\n")
+                      : String(m.content ?? "");
+            if (text) parts.push({ text });
+        }
+
+        if (parts.length === 0) parts.push({ text: "" });
+        contents.push({ role, parts });
+    }
+    if (contents.length === 0) {
+        contents.push({ role: "user", parts: [{ text: "..." }] });
+    }
+    return contents;
+}
+
+/**
+ * Build Antigravity Gemini tools array from ChatCompletionRequest tools, sanitizing names + schemas.
+ */
+export function buildAntigravityTools(req: ChatCompletionRequest): Array<Record<string, unknown>> {
+    if (!Array.isArray(req.tools) || req.tools.length === 0) return [];
+    const declarations: Array<Record<string, unknown>> = [];
+    const seenNames = new Set<string>();
+    for (const tool of req.tools) {
+        if (!tool || typeof tool !== "object") continue;
+        const type = (tool as { type?: string }).type;
+        if (type !== "function") continue;
+        const fn = (
+            tool as { function?: { name?: string; description?: string; parameters?: unknown } }
+        ).function;
+        if (!fn) continue;
+        const name = sanitizeFunctionName(fn.name || "");
+        if (seenNames.has(name)) continue;
+        seenNames.add(name);
+        declarations.push({
+            name,
+            description: fn.description || "",
+            parameters: fn.parameters
+                ? cleanJSONSchemaForAntigravity(structuredClone(fn.parameters))
+                : {
+                      type: "object",
+                      properties: {
+                          reason: { type: "string", description: "Brief explanation" },
+                      },
+                      required: ["reason"],
+                  },
+        });
+    }
+    return declarations.length > 0 ? [{ functionDeclarations: declarations }] : [];
+}
