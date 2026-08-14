@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import type {
     AIProvider,
     ChatCompletionChunk,
@@ -13,19 +14,6 @@ const Q_URL = "https://q.us-east-1.amazonaws.com/generateAssistantResponse";
 const CODEWHISPERER_TARGET = "AmazonCodeWhispererStreamingService.GenerateAssistantResponse";
 const MAX_FRAME_BYTES = 24 * 1024 * 1024;
 const MAX_HEADER_BYTES = 128 * 1024;
-
-const DEFAULT_MODELS = [
-    "claude-sonnet-4.5",
-    "claude-sonnet-4.5-thinking",
-    "claude-opus-4.5",
-    "claude-opus-4.5-thinking",
-    "deepseek-r1",
-    "qwen3-coder-30b",
-    "gpt-5.6-sol",
-    "gpt-5.6-terra",
-    "gpt-5.6-luna",
-    "simple-task",
-];
 
 export interface KiroProviderSpecificData {
     authMethod?: "api_key" | "builder-id" | "social" | "external_idp" | "idc" | string;
@@ -76,7 +64,6 @@ type KiroRequest = {
     profileArn?: string;
 };
 
-const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
 function crc32(bytes: Uint8Array): number {
@@ -372,8 +359,8 @@ export class KiroExecutor implements AIProvider {
         const payload: KiroRequest = {
             conversationState: {
                 chatTriggerType: "MANUAL",
-                conversationId: crypto.randomUUID(),
-                agentContinuationId: crypto.randomUUID(),
+                conversationId: randomUUID(),
+                agentContinuationId: randomUUID(),
                 agentTaskType: "vibe",
                 currentMessage: current,
                 history: messages,
@@ -401,7 +388,7 @@ export class KiroExecutor implements AIProvider {
         const headers: Record<string, string> = {
             "Content-Type": "application/json",
             "Amz-Sdk-Request": "attempt=1; max=3",
-            "Amz-Sdk-Invocation-Id": crypto.randomUUID(),
+            "Amz-Sdk-Invocation-Id": randomUUID(),
         };
         if (url.includes("codewhisperer.")) headers["X-Amz-Target"] = CODEWHISPERER_TARGET;
         if (token) headers.Authorization = `Bearer ${token}`;
@@ -412,13 +399,8 @@ export class KiroExecutor implements AIProvider {
     }
 
     async listModels(): Promise<ModelObject[]> {
-        if (!(this.accessToken || this.apiKey)) return [];
-        return DEFAULT_MODELS.map((id) => ({
-            id,
-            object: "model" as const,
-            created: Math.floor(Date.now() / 1000),
-            owned_by: "kiro",
-        }));
+        // Never return hardcoded models — Kiro has no verified model-list endpoint.
+        return [];
     }
 
     async chatCompletion(req: ChatCompletionRequest): Promise<ChatCompletionResponse> {
@@ -440,7 +422,7 @@ export class KiroExecutor implements AIProvider {
                         ...(toolCalls.length
                             ? {
                                   tool_calls: toolCalls.map((call) => ({
-                                      id: call.id ?? crypto.randomUUID(),
+                                      id: call.id ?? randomUUID(),
                                       type: "function" as const,
                                       function: {
                                           name: call.function?.name ?? "",
@@ -460,7 +442,6 @@ export class KiroExecutor implements AIProvider {
         req: ChatCompletionRequest,
     ): AsyncGenerator<ChatCompletionChunk, void, void> {
         const body = this.buildRequest(req);
-        const model = bareModel(req.model);
         let response: Response | undefined;
         let lastError = "";
         for (const url of this.getOrderedBaseUrls()) {
