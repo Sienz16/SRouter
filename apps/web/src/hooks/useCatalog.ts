@@ -1,15 +1,34 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { KNOWN_PROVIDERS } from "@srouter/constants";
+import type { ProviderDefinition } from "@srouter/types";
 import {
     buildFilterOptions,
     buildGroups,
     buildSummaryItems,
-    flattenCatalog,
     matchesProvider,
     type CatalogSummary,
     type FilterValue,
 } from "@/utils/catalog.utils";
+
+const STATIC_DEFAULT_PROVIDERS: ProviderDefinition[] = KNOWN_PROVIDERS.map((kp) => ({
+    id: kp.id,
+    name: kp.name,
+    category: kp.category,
+    protocol: kp.protocol,
+    defaultBaseUrl: kp.baseUrl,
+    requiresApiKey: kp.requiresApiKey,
+    requiresOAuth: kp.requiresOAuth,
+    supportsCustomUrl: kp.supportsCustomUrl ?? true,
+    status: {
+        state: "no_connections",
+        message: kp.statusMessage,
+        connectedCount: 0,
+    },
+    models: [],
+    connections: [],
+}));
 
 export function useCatalog() {
     const [filter, setFilter] = useState<FilterValue>("all");
@@ -20,9 +39,39 @@ export function useCatalog() {
         queryFn: () => api.get<CatalogSummary>("/v1/providers/catalog"),
     });
 
-    const data = query.data;
+    const liveData = query.data;
 
-    const allProviders = useMemo(() => (data ? flattenCatalog(data) : []), [data]);
+    const allProviders = useMemo(() => {
+        // Base list from static known providers
+        const providerMap = new Map<string, ProviderDefinition>();
+
+        for (const p of STATIC_DEFAULT_PROVIDERS) {
+            providerMap.set(p.id, { ...p });
+        }
+
+        // Overlay live backend connections and status
+        if (liveData?.categories) {
+            for (const categoryProviders of Object.values(liveData.categories)) {
+                for (const live of categoryProviders) {
+                    const existing = providerMap.get(live.id);
+                    if (existing) {
+                        providerMap.set(live.id, {
+                            ...existing,
+                            ...live,
+                            name: existing.name,
+                            category: existing.category,
+                            protocol: existing.protocol,
+                        });
+                    } else {
+                        // User-created custom provider
+                        providerMap.set(live.id, live);
+                    }
+                }
+            }
+        }
+
+        return Array.from(providerMap.values());
+    }, [liveData]);
 
     const normalizedSearch = search.trim().toLowerCase();
 
@@ -32,21 +81,34 @@ export function useCatalog() {
         [allProviders, filter, normalizedSearch],
     );
 
+    const syntheticCatalogSummary: CatalogSummary = useMemo(() => {
+        const categories: Record<string, ProviderDefinition[]> = {
+            oauth: allProviders.filter((p) => p.category === "oauth"),
+            api_key: allProviders.filter((p) => p.category === "api_key"),
+            free_tier: allProviders.filter((p) => p.category === "free_tier"),
+            custom: allProviders.filter((p) => p.category === "custom"),
+        };
+        return {
+            total: allProviders.length,
+            categories: categories as CatalogSummary["categories"],
+        };
+    }, [allProviders]);
+
     const summaryItems = useMemo(
-        () => (data ? buildSummaryItems(data, allProviders) : []),
-        [data, allProviders],
+        () => buildSummaryItems(syntheticCatalogSummary, allProviders),
+        [syntheticCatalogSummary, allProviders],
     );
 
     const filterOptions = useMemo(
-        () => (data ? buildFilterOptions(data, allProviders) : []),
-        [data, allProviders],
+        () => buildFilterOptions(syntheticCatalogSummary, allProviders),
+        [syntheticCatalogSummary, allProviders],
     );
 
     const groups = useMemo(() => buildGroups(matches, filter), [matches, filter]);
 
     return {
         ...query,
-        data,
+        data: syntheticCatalogSummary,
         allProviders,
         filter,
         setFilter,

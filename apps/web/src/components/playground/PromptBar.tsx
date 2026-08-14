@@ -763,3 +763,5 @@ export function PromptBar({
         </div>
     );
 }
+
+export default PromptBar;

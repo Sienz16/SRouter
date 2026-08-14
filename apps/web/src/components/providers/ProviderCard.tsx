@@ -79,12 +79,8 @@ export function ProviderCard({ provider }: { provider: ProviderDefinition }) {
                 </div>
             </div>
 
-            {/* Bottom: Models count & Action */}
-            <div className="mt-4 pt-3 border-t border-[var(--line)] flex items-center justify-between text-[11px] text-[var(--ink-3)]">
-                <span className="tabular-nums">
-                    {provider.models.length} {provider.models.length === 1 ? "model" : "models"}
-                </span>
-
+            {/* Bottom: Action */}
+            <div className="mt-4 pt-3 border-t border-[var(--line)] flex items-center justify-end text-[11px]">
                 <div className="flex items-center gap-1 text-[var(--ink)] font-semibold text-[10.5px] group-hover:translate-x-0.5 transition-transform">
                     <span>{isConnected ? "Manage" : "Configure"}</span>
                     <ChevronRight className="size-3 text-[var(--ink-3)] group-hover:text-[var(--ink)]" />

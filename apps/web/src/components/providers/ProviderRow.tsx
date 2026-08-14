@@ -63,13 +63,11 @@ export function ProviderRow({ provider }: { provider: ProviderDefinition }) {
                 </div>
             </div>
 
-            {/* Right: Model count & Chevron */}
-            <div className="flex shrink-0 items-center gap-3 text-[11px] text-[var(--ink-3)] font-mono">
-                <span className="hidden sm:inline tabular-nums">
-                    {provider.models.length} {provider.models.length === 1 ? "model" : "models"}
-                </span>
+            {/* Right: Chevron Action */}
+            <div className="flex shrink-0 items-center gap-1.5 text-[10.5px] font-semibold text-[var(--ink-3)] group-hover:text-[var(--ink)] font-mono">
+                <span className="hidden sm:inline">{isConnected ? "Manage" : "Configure"}</span>
                 <ChevronRight
-                    className="size-3.5 text-[var(--ink-3)] transition-transform group-hover:translate-x-0.5 group-hover:text-[var(--ink)]"
+                    className="size-3.5 transition-transform group-hover:translate-x-0.5"
                     strokeWidth={1.75}
                 />
             </div>

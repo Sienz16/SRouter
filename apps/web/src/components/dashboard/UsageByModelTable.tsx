@@ -1,5 +1,23 @@
-import { useState } from "react";
-import { Database, Search } from "lucide-react";
+import { useState, useMemo } from "react";
+import {
+    type ColumnDef,
+    type SortingState,
+    type PaginationState,
+    flexRender,
+    getCoreRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
+    useReactTable,
+} from "@tanstack/react-table";
+import {
+    ArrowDown,
+    ArrowUp,
+    ArrowUpDown,
+    ChevronLeft,
+    ChevronRight,
+    Database,
+    Search,
+} from "lucide-react";
 import type { UsageStats } from "@srouter/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,17 +30,249 @@ import {
     TableRow,
 } from "@/components/ui/table";
 
+type ModelUsageItem = UsageStats["byModel"][number];
+
 type UsageByModelTableProps = {
     models: UsageStats["byModel"];
 };
 
 export function UsageByModelTable({ models }: UsageByModelTableProps) {
     const [searchModel, setSearchModel] = useState("");
+    const [sorting, setSorting] = useState<SortingState>([{ id: "totalRequests", desc: true }]);
+    const [pagination, setPagination] = useState<PaginationState>({
+        pageIndex: 0,
+        pageSize: 10,
+    });
+
     const normalizedSearch = searchModel.trim().toLowerCase();
-    const filteredModels = models.filter((model) =>
-        model.model.toLowerCase().includes(normalizedSearch),
+    const filteredModels = useMemo(
+        () => models.filter((model) => model.model.toLowerCase().includes(normalizedSearch)),
+        [models, normalizedSearch],
     );
     const hasUsage = models.length > 0;
+
+    const columns = useMemo<ColumnDef<ModelUsageItem>[]>(
+        () => [
+            {
+                accessorKey: "model",
+                header: ({ column }) => {
+                    const isSorted = column.getIsSorted();
+                    return (
+                        <button
+                            type="button"
+                            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                            className="flex items-center gap-1.5 hover:text-foreground transition-colors cursor-pointer"
+                        >
+                            <span>Model</span>
+                            {isSorted === "asc" ? (
+                                <ArrowUp className="size-3 text-amber-500" />
+                            ) : isSorted === "desc" ? (
+                                <ArrowDown className="size-3 text-amber-500" />
+                            ) : (
+                                <ArrowUpDown className="size-3 opacity-40 hover:opacity-100" />
+                            )}
+                        </button>
+                    );
+                },
+                cell: ({ row }) => (
+                    <span
+                        className="block max-w-64 truncate font-mono font-medium text-foreground"
+                        title={row.original.model}
+                    >
+                        {row.original.model}
+                    </span>
+                ),
+            },
+            {
+                accessorKey: "totalRequests",
+                header: ({ column }) => {
+                    const isSorted = column.getIsSorted();
+                    return (
+                        <button
+                            type="button"
+                            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                            className="flex items-center justify-end gap-1.5 ml-auto hover:text-foreground transition-colors cursor-pointer"
+                        >
+                            <span>Requests</span>
+                            {isSorted === "asc" ? (
+                                <ArrowUp className="size-3 text-amber-500" />
+                            ) : isSorted === "desc" ? (
+                                <ArrowDown className="size-3 text-amber-500" />
+                            ) : (
+                                <ArrowUpDown className="size-3 opacity-40 hover:opacity-100" />
+                            )}
+                        </button>
+                    );
+                },
+                cell: ({ row }) => (
+                    <span className="font-mono text-foreground tabular-nums">
+                        {row.original.totalRequests.toLocaleString()}
+                    </span>
+                ),
+            },
+            {
+                accessorKey: "totalInputTokens",
+                header: ({ column }) => {
+                    const isSorted = column.getIsSorted();
+                    return (
+                        <button
+                            type="button"
+                            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                            className="flex items-center justify-end gap-1.5 ml-auto hover:text-foreground transition-colors cursor-pointer"
+                        >
+                            <span>Input</span>
+                            {isSorted === "asc" ? (
+                                <ArrowUp className="size-3 text-amber-500" />
+                            ) : isSorted === "desc" ? (
+                                <ArrowDown className="size-3 text-amber-500" />
+                            ) : (
+                                <ArrowUpDown className="size-3 opacity-40 hover:opacity-100" />
+                            )}
+                        </button>
+                    );
+                },
+                cell: ({ row }) => (
+                    <span className="font-mono text-muted-foreground tabular-nums">
+                        {row.original.totalInputTokens.toLocaleString()}
+                    </span>
+                ),
+            },
+            {
+                accessorKey: "totalOutputTokens",
+                header: ({ column }) => {
+                    const isSorted = column.getIsSorted();
+                    return (
+                        <button
+                            type="button"
+                            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                            className="flex items-center justify-end gap-1.5 ml-auto hover:text-foreground transition-colors cursor-pointer"
+                        >
+                            <span>Output</span>
+                            {isSorted === "asc" ? (
+                                <ArrowUp className="size-3 text-amber-500" />
+                            ) : isSorted === "desc" ? (
+                                <ArrowDown className="size-3 text-amber-500" />
+                            ) : (
+                                <ArrowUpDown className="size-3 opacity-40 hover:opacity-100" />
+                            )}
+                        </button>
+                    );
+                },
+                cell: ({ row }) => (
+                    <span className="font-mono text-muted-foreground tabular-nums">
+                        {row.original.totalOutputTokens.toLocaleString()}
+                    </span>
+                ),
+            },
+            {
+                accessorKey: "totalCachedTokens",
+                header: ({ column }) => {
+                    const isSorted = column.getIsSorted();
+                    return (
+                        <button
+                            type="button"
+                            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                            className="flex items-center justify-end gap-1.5 ml-auto hover:text-foreground transition-colors cursor-pointer"
+                        >
+                            <span>Cached</span>
+                            {isSorted === "asc" ? (
+                                <ArrowUp className="size-3 text-amber-500" />
+                            ) : isSorted === "desc" ? (
+                                <ArrowDown className="size-3 text-amber-500" />
+                            ) : (
+                                <ArrowUpDown className="size-3 opacity-40 hover:opacity-100" />
+                            )}
+                        </button>
+                    );
+                },
+                cell: ({ row }) => (
+                    <span className="font-mono text-muted-foreground tabular-nums">
+                        {row.original.totalCachedTokens.toLocaleString()}
+                    </span>
+                ),
+            },
+            {
+                id: "total",
+                accessorFn: (row) => row.totalInputTokens + row.totalOutputTokens,
+                header: ({ column }) => {
+                    const isSorted = column.getIsSorted();
+                    return (
+                        <button
+                            type="button"
+                            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                            className="flex items-center justify-end gap-1.5 ml-auto hover:text-foreground transition-colors cursor-pointer"
+                        >
+                            <span>Total</span>
+                            {isSorted === "asc" ? (
+                                <ArrowUp className="size-3 text-amber-500" />
+                            ) : isSorted === "desc" ? (
+                                <ArrowDown className="size-3 text-amber-500" />
+                            ) : (
+                                <ArrowUpDown className="size-3 opacity-40 hover:opacity-100" />
+                            )}
+                        </button>
+                    );
+                },
+                cell: ({ row }) => {
+                    const total = row.original.totalInputTokens + row.original.totalOutputTokens;
+                    return (
+                        <span className="font-mono font-medium text-foreground tabular-nums">
+                            {total.toLocaleString()}
+                        </span>
+                    );
+                },
+            },
+            {
+                accessorKey: "estCost",
+                header: ({ column }) => {
+                    const isSorted = column.getIsSorted();
+                    return (
+                        <button
+                            type="button"
+                            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                            className="flex items-center justify-end gap-1.5 ml-auto hover:text-foreground transition-colors cursor-pointer"
+                        >
+                            <span>Est. cost</span>
+                            {isSorted === "asc" ? (
+                                <ArrowUp className="size-3 text-amber-500" />
+                            ) : isSorted === "desc" ? (
+                                <ArrowDown className="size-3 text-amber-500" />
+                            ) : (
+                                <ArrowUpDown className="size-3 opacity-40 hover:opacity-100" />
+                            )}
+                        </button>
+                    );
+                },
+                cell: ({ row }) => (
+                    <span className="font-mono font-semibold text-foreground tabular-nums">
+                        ${row.original.estCost.toFixed(4)}
+                    </span>
+                ),
+            },
+        ],
+        [],
+    );
+
+    const table = useReactTable({
+        data: filteredModels,
+        columns,
+        state: {
+            sorting,
+            pagination,
+        },
+        onSortingChange: setSorting,
+        onPaginationChange: setPagination,
+        getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+    });
+
+    const pageCount = table.getPageCount();
+    const currentPage = table.getState().pagination.pageIndex;
+    const pageSize = table.getState().pagination.pageSize;
+    const totalRows = filteredModels.length;
+    const startRow = totalRows === 0 ? 0 : currentPage * pageSize + 1;
+    const endRow = Math.min((currentPage + 1) * pageSize, totalRows);
 
     return (
         <Card className="min-w-0 gap-0 overflow-hidden p-0 shadow-none">
@@ -66,53 +316,90 @@ export function UsageByModelTable({ models }: UsageByModelTableProps) {
                         </p>
                     </div>
                 ) : (
-                    <Table className="min-w-[900px]">
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Model</TableHead>
-                                <TableHead className="text-right">Requests</TableHead>
-                                <TableHead className="text-right">Input</TableHead>
-                                <TableHead className="text-right">Output</TableHead>
-                                <TableHead className="text-right">Cached</TableHead>
-                                <TableHead className="text-right">Total</TableHead>
-                                <TableHead className="text-right">Est. cost</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredModels.map((model) => {
-                                const totalTokens =
-                                    model.totalInputTokens + model.totalOutputTokens;
-
-                                return (
-                                    <TableRow key={model.model}>
-                                        <TableCell className="max-w-64 font-mono font-medium text-foreground">
-                                            <span className="block truncate" title={model.model}>
-                                                {model.model}
-                                            </span>
-                                        </TableCell>
-                                        <TableCell className="text-right font-mono text-foreground tabular-nums">
-                                            {model.totalRequests.toLocaleString()}
-                                        </TableCell>
-                                        <TableCell className="text-right font-mono text-muted-foreground tabular-nums">
-                                            {model.totalInputTokens.toLocaleString()}
-                                        </TableCell>
-                                        <TableCell className="text-right font-mono text-muted-foreground tabular-nums">
-                                            {model.totalOutputTokens.toLocaleString()}
-                                        </TableCell>
-                                        <TableCell className="text-right font-mono text-muted-foreground tabular-nums">
-                                            {model.totalCachedTokens.toLocaleString()}
-                                        </TableCell>
-                                        <TableCell className="text-right font-mono font-medium text-foreground tabular-nums">
-                                            {totalTokens.toLocaleString()}
-                                        </TableCell>
-                                        <TableCell className="text-right font-mono font-semibold text-foreground tabular-nums">
-                                            ${model.estCost.toFixed(4)}
-                                        </TableCell>
+                    <>
+                        <Table className="min-w-[900px]">
+                            <TableHeader>
+                                {table.getHeaderGroups().map((headerGroup) => (
+                                    <TableRow key={headerGroup.id}>
+                                        {headerGroup.headers.map((header) => (
+                                            <TableHead
+                                                key={header.id}
+                                                className={
+                                                    header.id !== "model" ? "text-right" : ""
+                                                }
+                                            >
+                                                {header.isPlaceholder
+                                                    ? null
+                                                    : flexRender(
+                                                          header.column.columnDef.header,
+                                                          header.getContext(),
+                                                      )}
+                                            </TableHead>
+                                        ))}
                                     </TableRow>
-                                );
-                            })}
-                        </TableBody>
-                    </Table>
+                                ))}
+                            </TableHeader>
+                            <TableBody>
+                                {table.getRowModel().rows.map((row) => (
+                                    <TableRow key={row.id}>
+                                        {row.getVisibleCells().map((cell) => (
+                                            <TableCell
+                                                key={cell.id}
+                                                className={
+                                                    cell.column.id !== "model" ? "text-right" : ""
+                                                }
+                                            >
+                                                {flexRender(
+                                                    cell.column.columnDef.cell,
+                                                    cell.getContext(),
+                                                )}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+
+                        {totalRows > 10 && (
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-border/60 px-4 py-2.5 text-xs text-muted-foreground font-mono">
+                                <div className="flex items-center gap-2 text-[11px]">
+                                    <span>Showing</span>
+                                    <span className="font-semibold text-foreground">
+                                        {startRow}-{endRow}
+                                    </span>
+                                    <span>of</span>
+                                    <span className="font-semibold text-foreground">
+                                        {totalRows}
+                                    </span>
+                                    <span>models</span>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => table.previousPage()}
+                                        disabled={!table.getCanPreviousPage()}
+                                        className="flex size-6 items-center justify-center rounded-[4px] border border-border bg-secondary/30 text-foreground hover:bg-secondary disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                                        title="Previous page"
+                                    >
+                                        <ChevronLeft className="size-3.5" />
+                                    </button>
+                                    <span className="px-1 text-[11px] text-foreground">
+                                        {currentPage + 1} / {pageCount}
+                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={() => table.nextPage()}
+                                        disabled={!table.getCanNextPage()}
+                                        className="flex size-6 items-center justify-center rounded-[4px] border border-border bg-secondary/30 text-foreground hover:bg-secondary disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                                        title="Next page"
+                                    >
+                                        <ChevronRight className="size-3.5" />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </>
                 )}
             </CardContent>
         </Card>

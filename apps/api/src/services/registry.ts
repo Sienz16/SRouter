@@ -5,7 +5,7 @@ import {
     NEOSANTARA_BASE_URL,
     SEED_MARKER,
 } from "@srouter/constants";
-import { getAllProvidersDB, upsertProviderDB } from "@srouter/db";
+import { deleteProviderDB, getAllProvidersDB, upsertProviderDB } from "@srouter/db";
 import {
     AntigravityExecutor,
     AnthropicExecutor,
@@ -25,21 +25,32 @@ export const registry = new ProviderRegistry();
  * seed marker so they are not treated as real connections.
  */
 export function seedDefaultProviders(): void {
-    if (getAllProvidersDB().length > 0) return;
+    const existing = getAllProvidersDB();
+    const existingIds = new Set(existing.map((p) => p.id));
+    const validSeedIds = new Set(DEFAULT_PROVIDERS.map((p) => p.id));
+
+    // Clean up any stale seed records no longer in DEFAULT_PROVIDERS
+    for (const p of existing) {
+        if (isSeedProvider(p) && !validSeedIds.has(p.id)) {
+            deleteProviderDB(p.id);
+        }
+    }
 
     const now = Date.now();
     for (const seed of DEFAULT_PROVIDERS) {
-        upsertProviderDB({
-            id: seed.id,
-            providerId: seed.id,
-            name: seed.name,
-            category: seed.category,
-            protocol: seed.protocol,
-            baseUrl: seed.baseUrl,
-            enabled: true,
-            providerSpecificData: { [SEED_MARKER]: "true" },
-            createdAt: now,
-        });
+        if (!existingIds.has(seed.id)) {
+            upsertProviderDB({
+                id: seed.id,
+                providerId: seed.id,
+                name: seed.name,
+                category: seed.category,
+                protocol: seed.protocol,
+                baseUrl: seed.baseUrl,
+                enabled: true,
+                providerSpecificData: { [SEED_MARKER]: "true" },
+                createdAt: now,
+            });
+        }
     }
 }
 

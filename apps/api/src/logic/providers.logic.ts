@@ -123,6 +123,29 @@ function catalogWithSavedCustomProviders(): ProviderDefinition[] {
         });
     }
 
+    // Ensure all built-in drivers appear in the catalog
+    for (const seed of Object.values(DEFAULT_PROVIDER_MAP)) {
+        if (seen.has(seed.id)) continue;
+        seen.add(seed.id);
+
+        catalog.push({
+            id: seed.id,
+            name: seed.name,
+            category: seed.category,
+            protocol: seed.protocol,
+            defaultBaseUrl: seed.baseUrl,
+            requiresApiKey: seed.requiresApiKey,
+            requiresOAuth: seed.requiresOAuth,
+            supportsCustomUrl: seed.supportsCustomUrl ?? true,
+            status: {
+                state: "no_connections",
+                message: seed.statusMessage,
+                connectedCount: 0,
+            },
+            models: [],
+        });
+    }
+
     return catalog;
 }
 
