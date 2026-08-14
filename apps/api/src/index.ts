@@ -35,7 +35,7 @@ app.get("/", (c) => {
     return c.json({
         name: "SRouter API",
         status: "ok",
-        version: "1.0.0",
+        version: "0.1.0-beta",
         documentation: "Multi-Provider OpenAI & Anthropic Compatible LLM Gateway",
     });
 });

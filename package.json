@@ -1,7 +1,27 @@
 {
-    "name": "SRouter",
-    "version": "1.0.0",
-    "description": "",
+    "name": "srouter",
+    "version": "0.1.0-beta",
+    "description": "High-performance multi-provider AI Gateway and LLM proxy router built with Hono, TypeScript, and SQLite WAL",
+    "author": "Muhammad Adriansyah",
+    "license": "MIT",
+    "type": "module",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/seaavey/SRouter.git"
+    },
+    "keywords": [
+        "ai-gateway",
+        "llm-proxy",
+        "openai-compatible",
+        "anthropic-compatible",
+        "hono",
+        "sqlite",
+        "antigravity",
+        "gemini",
+        "claude",
+        "chatgpt",
+        "router"
+    ],
     "scripts": {
         "dev": "turbo dev",
         "start": "turbo start",
@@ -12,17 +32,16 @@
         "lint": "turbo lint",
         "test": "turbo test"
     },
-    "keywords": [],
-    "author": "Muhammad Adriansyah ",
-    "license": "MIT",
+    "engines": {
+        "node": ">=22.0.0"
+    },
     "devEngines": {
         "packageManager": {
             "name": "pnpm",
-            "version": "^11.17.0",
+            "version": "^11.20.0",
             "onFail": "download"
         }
     },
-    "type": "module",
     "dependencies": {
         "turbo": "^2.10.9"
     },

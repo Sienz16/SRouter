@@ -705,7 +705,7 @@ export function SettingsPage() {
                                         SRouter Gateway
                                     </span>
                                     <div className="font-bold text-[var(--ink)]">
-                                        v1.0.0 (Production Core)
+                                        v0.1.0-beta (Beta Core)
                                     </div>
                                 </div>
 
