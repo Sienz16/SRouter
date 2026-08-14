@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Bot, Boxes, LayoutDashboard, ScrollText, Terminal, Zap } from "lucide-react";
+import { Bot, Boxes, KeyRound, LayoutDashboard, ScrollText, Terminal, Zap } from "lucide-react";
 import {
     Sidebar,
     SidebarContent,
@@ -16,6 +16,7 @@ import {
 const mainNavItems = [
     { to: "/", label: "Dashboard", icon: LayoutDashboard },
     { to: "/playground", label: "Playground", icon: Terminal },
+    { to: "/keys", label: "API Keys", icon: KeyRound },
 ] as const;
 
 const routerNavItems = [

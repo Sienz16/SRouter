@@ -6,6 +6,7 @@ import {
     handleOAuthCallback,
 } from "@/routes/v1/auth.js";
 import { chatRoute } from "@/routes/v1/chat.js";
+import { keysRoute } from "@/routes/v1/keys.js";
 import { logsRoute } from "@/routes/v1/logs.js";
 import { modelsRoute } from "@/routes/v1/models.js";
 import { providersRoute } from "@/routes/v1/providers.js";
@@ -46,6 +47,7 @@ app.get("/health", (c) => {
 app.route("/v1", modelsRoute);
 app.route("/v1", chatRoute);
 app.route("/v1", providersRoute);
+app.route("/v1", keysRoute);
 app.route("/v1", logsRoute);
 app.route("/v1", authRoute);
 app.route("/v1", quotaRoute);
