@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { api } from "@/lib/api";
 import type { DBAPIKey } from "@srouter/types";
 
 export function useKeys() {
@@ -11,9 +12,7 @@ export function useKeys() {
 
     const fetchKeys = useCallback(async () => {
         try {
-            const res = await fetch("/v1/keys");
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const json = (await res.json()) as { data: DBAPIKey[] };
+            const json = await api.get<{ data: DBAPIKey[] }>("/v1/keys");
             setKeys(json.data ?? []);
         } catch (err) {
             console.error("Failed to fetch API keys:", err);
@@ -36,18 +35,7 @@ export function useKeys() {
 
             setCreating(true);
             try {
-                const res = await fetch("/v1/keys", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(data),
-                });
-
-                if (!res.ok) {
-                    const err = await res.json().catch(() => null);
-                    throw new Error(err?.error?.message ?? `HTTP ${res.status}`);
-                }
-
-                const created = (await res.json()) as DBAPIKey;
+                const created = await api.post<DBAPIKey>("/v1/keys", data);
                 setKeys((prev) => [created, ...prev]);
                 setNewlyCreatedKey(created);
                 toast.success(`API Key "${created.name}" created successfully`);
@@ -66,15 +54,7 @@ export function useKeys() {
     const deleteKey = useCallback(async (id: string) => {
         setDeletingId(id);
         try {
-            const res = await fetch(`/v1/keys/${id}`, {
-                method: "DELETE",
-            });
-
-            if (!res.ok) {
-                const err = await res.json().catch(() => null);
-                throw new Error(err?.error?.message ?? `HTTP ${res.status}`);
-            }
-
+            await api.delete(`/v1/keys/${id}`);
             setKeys((prev) => prev.filter((k) => k.id !== id));
             toast.success("API Key revoked and deleted");
             return true;

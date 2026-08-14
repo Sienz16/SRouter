@@ -12,9 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as KeysRouteImport } from './routes/keys'
 import { Route as LogsRouteImport } from './routes/logs'
-import { Route as ModelsRouteImport } from './routes/models'
 import { Route as PlaygroundRouteImport } from './routes/playground'
 import { Route as ProvidersRouteImport } from './routes/providers'
+import { Route as QuotaRouteImport } from './routes/quota'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ProvidersIndexRouteImport } from './routes/providers/index'
 import { Route as ProvidersProviderIdRouteImport } from './routes/providers/$providerId'
 
@@ -33,11 +34,6 @@ const LogsRoute = LogsRouteImport.update({
   path: '/logs',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ModelsRoute = ModelsRouteImport.update({
-  id: '/models',
-  path: '/models',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PlaygroundRoute = PlaygroundRouteImport.update({
   id: '/playground',
   path: '/playground',
@@ -46,6 +42,16 @@ const PlaygroundRoute = PlaygroundRouteImport.update({
 const ProvidersRoute = ProvidersRouteImport.update({
   id: '/providers',
   path: '/providers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuotaRoute = QuotaRouteImport.update({
+  id: '/quota',
+  path: '/quota',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProvidersIndexRoute = ProvidersIndexRouteImport.update({
@@ -63,9 +69,10 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/keys': typeof KeysRoute
   '/logs': typeof LogsRoute
-  '/models': typeof ModelsRoute
   '/playground': typeof PlaygroundRoute
   '/providers': typeof ProvidersRouteWithChildren
+  '/quota': typeof QuotaRoute
+  '/settings': typeof SettingsRoute
   '/providers/$providerId': typeof ProvidersProviderIdRoute
   '/providers/': typeof ProvidersIndexRoute
 }
@@ -73,8 +80,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/keys': typeof KeysRoute
   '/logs': typeof LogsRoute
-  '/models': typeof ModelsRoute
   '/playground': typeof PlaygroundRoute
+  '/quota': typeof QuotaRoute
+  '/settings': typeof SettingsRoute
   '/providers/$providerId': typeof ProvidersProviderIdRoute
   '/providers': typeof ProvidersIndexRoute
 }
@@ -83,9 +91,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/keys': typeof KeysRoute
   '/logs': typeof LogsRoute
-  '/models': typeof ModelsRoute
   '/playground': typeof PlaygroundRoute
   '/providers': typeof ProvidersRouteWithChildren
+  '/quota': typeof QuotaRoute
+  '/settings': typeof SettingsRoute
   '/providers/$providerId': typeof ProvidersProviderIdRoute
   '/providers/': typeof ProvidersIndexRoute
 }
@@ -95,9 +104,10 @@ export interface FileRouteTypes {
     | '/'
     | '/keys'
     | '/logs'
-    | '/models'
     | '/playground'
     | '/providers'
+    | '/quota'
+    | '/settings'
     | '/providers/$providerId'
     | '/providers/'
   fileRoutesByTo: FileRoutesByTo
@@ -105,8 +115,9 @@ export interface FileRouteTypes {
     | '/'
     | '/keys'
     | '/logs'
-    | '/models'
     | '/playground'
+    | '/quota'
+    | '/settings'
     | '/providers/$providerId'
     | '/providers'
   id:
@@ -114,9 +125,10 @@ export interface FileRouteTypes {
     | '/'
     | '/keys'
     | '/logs'
-    | '/models'
     | '/playground'
     | '/providers'
+    | '/quota'
+    | '/settings'
     | '/providers/$providerId'
     | '/providers/'
   fileRoutesById: FileRoutesById
@@ -125,9 +137,10 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   KeysRoute: typeof KeysRoute
   LogsRoute: typeof LogsRoute
-  ModelsRoute: typeof ModelsRoute
   PlaygroundRoute: typeof PlaygroundRoute
   ProvidersRoute: typeof ProvidersRouteWithChildren
+  QuotaRoute: typeof QuotaRoute
+  SettingsRoute: typeof SettingsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -153,13 +166,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LogsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/models': {
-      id: '/models'
-      path: '/models'
-      fullPath: '/models'
-      preLoaderRoute: typeof ModelsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/playground': {
       id: '/playground'
       path: '/playground'
@@ -172,6 +178,20 @@ declare module '@tanstack/react-router' {
       path: '/providers'
       fullPath: '/providers'
       preLoaderRoute: typeof ProvidersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quota': {
+      id: '/quota'
+      path: '/quota'
+      fullPath: '/quota'
+      preLoaderRoute: typeof QuotaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/providers/': {
@@ -209,9 +229,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   KeysRoute: KeysRoute,
   LogsRoute: LogsRoute,
-  ModelsRoute: ModelsRoute,
   PlaygroundRoute: PlaygroundRoute,
   ProvidersRoute: ProvidersRouteWithChildren,
+  QuotaRoute: QuotaRoute,
+  SettingsRoute: SettingsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

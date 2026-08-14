@@ -11,6 +11,7 @@ import { logsRoute } from "@/routes/v1/logs.js";
 import { modelsRoute } from "@/routes/v1/models.js";
 import { providersRoute } from "@/routes/v1/providers.js";
 import { quotaRoute } from "@/routes/v1/quota.js";
+import { settingsRoute } from "@/routes/v1/settings.js";
 import { startTokenRefreshSweeper } from "@/services/tokenRefresh.js";
 
 const app = new Hono();
@@ -51,6 +52,7 @@ app.route("/v1", keysRoute);
 app.route("/v1", logsRoute);
 app.route("/v1", authRoute);
 app.route("/v1", quotaRoute);
+app.route("/v1", settingsRoute);
 
 const port = Number(process.env.PORT) || 3000;
 

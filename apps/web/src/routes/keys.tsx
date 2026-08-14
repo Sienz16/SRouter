@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
 import {
     AlertTriangle,
     Check,
@@ -53,6 +55,12 @@ export function KeysPage() {
         createKey,
         deleteKey,
     } = useKeys();
+
+    const { data: serverSettings } = useQuery<{ requireApiKey: boolean }>({
+        queryKey: ["server_settings"],
+        queryFn: () => api.get<{ requireApiKey: boolean }>("/v1/settings"),
+    });
+    const requireApiKey = serverSettings?.requireApiKey ?? false;
 
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [name, setName] = useState("");
@@ -243,15 +251,28 @@ print(response.choices[0].message.content)`,
                     </div>
                 </div>
 
-                {/* 3. Auth Protocol */}
+                {/* 3. Auth Protocol & Requirement */}
                 <div className="rounded-[10px] border border-[var(--line)] bg-[var(--surface)] p-3.5 flex flex-col justify-between">
                     <div className="flex items-center justify-between text-[11px] text-[var(--ink-3)]">
-                        <span>Auth Protocol</span>
-                        <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <span>Gateway Security</span>
+                        <Link
+                            to="/settings"
+                            className="text-[10px] text-amber-500 hover:text-amber-400 transition-colors"
+                        >
+                            Configure
+                        </Link>
                     </div>
                     <div className="mt-2 flex items-baseline gap-1.5">
-                        <span className="text-sm font-bold text-[var(--ink)]">Bearer API Key</span>
-                        <span className="text-[10px] text-emerald-500">v1 standard</span>
+                        <span className="text-sm font-bold text-[var(--ink)]">
+                            {requireApiKey ? "Required" : "Optional"}
+                        </span>
+                        <span
+                            className={`text-[10px] font-semibold ${
+                                requireApiKey ? "text-emerald-500" : "text-amber-500"
+                            }`}
+                        >
+                            {requireApiKey ? "● Enforced" : "○ Open Access"}
+                        </span>
                     </div>
                 </div>
 

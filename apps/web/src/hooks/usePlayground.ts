@@ -349,6 +349,7 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                         "Content-Type": "application/json",
                         Accept: "text/event-stream",
                         "X-Chat-ID": activeChatId,
+                        "X-SRouter-Client": "playground",
                     },
                     signal: controller.signal,
                     body: JSON.stringify({
@@ -473,6 +474,7 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                             headers: {
                                 "Content-Type": "application/json",
                                 "X-Chat-ID": activeChatId,
+                                "X-SRouter-Client": "playground",
                             },
                             body: JSON.stringify({
                                 model: selectedModel.id,
@@ -585,6 +587,7 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                                 headers: {
                                     "Content-Type": "application/json",
                                     "X-Chat-ID": activeChatId,
+                                    "X-SRouter-Client": "playground",
                                 },
                                 body: JSON.stringify({
                                     model: selectedModel.id,

@@ -136,6 +136,14 @@ export function initDatabase(): void {
             // column already exists
         }
     }
+
+    // 5. Table for Global System Settings
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS system_settings (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL
+        );
+    `);
 }
 
 // Auto-run schema initialization

@@ -1,18 +1,20 @@
 import { useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
-    Bot,
     Boxes,
     ChevronDown,
+    Gauge,
     KeyRound,
     LayoutDashboard,
     ScrollText,
+    Settings,
     Terminal,
     Zap,
 } from "lucide-react";
 import {
     Sidebar,
     SidebarContent,
+    SidebarFooter,
     SidebarGroup,
     SidebarGroupContent,
     SidebarGroupLabel,
@@ -212,12 +214,12 @@ export function AppSidebar() {
                                     )}
                                 </SidebarMenuItem>
 
-                                {/* Models */}
+                                {/* Quotas */}
                                 <SidebarMenuItem>
                                     <SidebarMenuButton
                                         render={
                                             <Link
-                                                to="/models"
+                                                to="/quota"
                                                 activeOptions={{ exact: true }}
                                                 activeProps={{
                                                     className:
@@ -230,11 +232,11 @@ export function AppSidebar() {
                                                 }}
                                             />
                                         }
-                                        tooltip="Models"
+                                        tooltip="Quotas & Limits"
                                         className="h-8 rounded-none border-l-2 px-2.5 transition-colors group-data-[collapsible=icon]:border-l-0"
                                     >
-                                        <Bot strokeWidth={1.75} className="size-3.5 shrink-0" />
-                                        <span className="text-xs">Models</span>
+                                        <Gauge strokeWidth={1.75} className="size-3.5 shrink-0" />
+                                        <span className="text-xs">Quotas</span>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
 
@@ -271,6 +273,36 @@ export function AppSidebar() {
                     </SidebarGroup>
                 </nav>
             </SidebarContent>
+
+            {/* Footer with Settings */}
+            <SidebarFooter className="border-t border-border/70 p-2">
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton
+                            render={
+                                <Link
+                                    to="/settings"
+                                    activeOptions={{ exact: true }}
+                                    activeProps={{
+                                        className:
+                                            "border-foreground bg-sidebar-accent/60 text-foreground",
+                                        "aria-current": "page",
+                                    }}
+                                    inactiveProps={{
+                                        className:
+                                            "border-transparent text-muted-foreground hover:border-sidebar-border hover:bg-transparent hover:text-foreground",
+                                    }}
+                                />
+                            }
+                            tooltip="Settings"
+                            className="h-8 rounded-none border-l-2 px-2.5 transition-colors group-data-[collapsible=icon]:border-l-0"
+                        >
+                            <Settings strokeWidth={1.75} className="size-3.5 shrink-0" />
+                            <span className="text-xs">Settings</span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+            </SidebarFooter>
 
             <SidebarRail />
         </Sidebar>
