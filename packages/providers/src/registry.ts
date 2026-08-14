@@ -1,3 +1,4 @@
+import { providerAlias, providerBaseId } from "@srouter/constants";
 import type {
     AIProvider,
     ChatCompletionChunk,
@@ -7,22 +8,8 @@ import type {
     ProviderDefinition,
 } from "@srouter/types";
 
-// Provider base id -> short alias used in model ids (e.g. openai/gpt-4o).
-// Multi-account ids (openai_1700000000) resolve to the same alias.
-const PROVIDER_ALIASES: Record<string, string> = {
-    openai: "openai",
-    anthropic: "anthropic",
-    antigravity: "antigravity",
-    openai_codex: "openai",
-    commandcode: "commandcode",
-    gemini: "gemini",
-    vertex: "vertex",
-    neosantara: "neosantara",
-};
-
 export function getProviderAlias(providerId: string): string {
-    const baseId = providerId.split("_")[0]?.split("-")[0] ?? providerId;
-    return PROVIDER_ALIASES[baseId] ?? baseId;
+    return providerAlias(providerBaseId(providerId));
 }
 
 // Strip any {alias}/ or {providerId}/ prefix from a model id, returning the bare id.
@@ -81,7 +68,7 @@ export class ProviderRegistry {
 
         for (const provider of this.providers.values()) {
             if (provider.id === "default") continue;
-            const baseId = provider.id.split("_")[0]?.split("-")[0] ?? provider.id;
+            const baseId = providerBaseId(provider.id);
             if (seen.has(baseId)) continue;
             seen.add(baseId);
 

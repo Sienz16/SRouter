@@ -1,5 +1,6 @@
 import {
     DEFAULT_PROVIDERS,
+    isProviderBaseId,
     isSeedProvider,
     NEOSANTARA_BASE_URL,
     SEED_MARKER,
@@ -56,7 +57,7 @@ export function loadSavedProvidersFromDB(): void {
         const baseUrl = p.baseUrl;
 
         switch (true) {
-            case providerType === "kiro" || p.id.startsWith("kiro"):
+            case isProviderBaseId(p.id, "kiro"):
                 registry.registerProvider(
                     new KiroExecutor({
                         id: p.id || p.providerId,
@@ -69,7 +70,7 @@ export function loadSavedProvidersFromDB(): void {
                     }),
                 );
                 break;
-            case providerType === "commandcode" || p.id.startsWith("commandcode"):
+            case isProviderBaseId(p.id, "commandcode"):
                 registry.registerProvider(
                     new CommandCodeExecutor({
                         id: p.id || p.providerId,
@@ -80,7 +81,7 @@ export function loadSavedProvidersFromDB(): void {
                     }),
                 );
                 break;
-            case providerType === "antigravity" || p.id.startsWith("antigravity"):
+            case isProviderBaseId(p.id, "antigravity"):
                 registry.registerProvider(
                     new AntigravityExecutor({
                         id: p.id || p.providerId,
@@ -92,7 +93,7 @@ export function loadSavedProvidersFromDB(): void {
                     }),
                 );
                 break;
-            case providerType === "openai_codex" || p.id.startsWith("openai_codex"):
+            case isProviderBaseId(p.id, "openai_codex"):
                 registry.registerProvider(
                     new CodexExecutor({
                         id: p.id || p.providerId,
@@ -105,7 +106,7 @@ export function loadSavedProvidersFromDB(): void {
                     }),
                 );
                 break;
-            case providerType === "neosantara" || p.id.startsWith("neosantara"):
+            case isProviderBaseId(p.id, "neosantara"):
                 registry.registerProvider(
                     new OpenAIExecutor({
                         id: p.id || p.providerId,

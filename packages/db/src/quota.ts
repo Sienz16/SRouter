@@ -1,3 +1,4 @@
+import { isProviderBaseId } from "@srouter/constants";
 import type {
     LiveModelQuotaItem,
     ProviderQuotaAccount,
@@ -106,10 +107,13 @@ export async function getProviderQuotaAccount(p: {
     accessToken?: string;
     enabled: boolean;
 }): Promise<ProviderQuotaAccount> {
-    const isAntigravity = p.providerId === "antigravity" || p.id.startsWith("antigravity");
-    const isOpenAICodex = p.providerId === "openai_codex" || p.id.startsWith("openai_codex");
-    const isOpenAI = p.providerId === "openai" || p.id.startsWith("openai");
-    const isAnthropic = p.providerId === "anthropic" || p.id.startsWith("anthropic");
+    const isAntigravity =
+        isProviderBaseId(p.providerId, "antigravity") || isProviderBaseId(p.id, "antigravity");
+    const isOpenAICodex =
+        isProviderBaseId(p.providerId, "openai_codex") || isProviderBaseId(p.id, "openai_codex");
+    const isOpenAI = isProviderBaseId(p.providerId, "openai") || isProviderBaseId(p.id, "openai");
+    const isAnthropic =
+        isProviderBaseId(p.providerId, "anthropic") || isProviderBaseId(p.id, "anthropic");
 
     const token = p.accessToken || p.apiKey || "";
 

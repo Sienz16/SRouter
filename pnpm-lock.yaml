@@ -364,6 +364,9 @@ importers:
 
   packages/db:
     dependencies:
+      '@srouter/constants':
+        specifier: workspace:*
+        version: link:../constants
       '@srouter/types':
         specifier: workspace:*
         version: link:../types

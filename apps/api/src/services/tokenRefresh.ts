@@ -1,3 +1,4 @@
+import { providerTypeForAlias } from "@srouter/constants";
 import { getAllProvidersDB, updateProviderTokensDB, getProviderByIdDB } from "@srouter/db";
 import type { AIProvider, ProviderConfig } from "@srouter/types";
 import { authProviderHandlers } from "@/logic/auth.providers.js";
@@ -169,13 +170,6 @@ export function stopTokenRefreshSweeper(): void {
         clearInterval(sweepTimer);
         sweepTimer = null;
     }
-}
-
-function providerTypeForAlias(alias: string): string | null {
-    if (alias === "openai" || alias === "openai_codex") return "openai_codex";
-    if (alias === "antigravity") return "antigravity";
-    if (alias === "claude") return "claude";
-    return null;
 }
 
 /**
