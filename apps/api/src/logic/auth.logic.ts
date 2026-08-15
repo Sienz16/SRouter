@@ -18,6 +18,7 @@ import {
     openaiCodexAuthHandler,
     qoderAuthHandler,
     seekAIAuthHandler,
+    tabiTokenAuthHandler,
     type AuthProviderHandler,
     type OAuthLoginParams,
     type OAuthLoginResult,
@@ -245,6 +246,11 @@ export class AuthLogic {
     // SeekAI (API key)
     public static processSeekAITokenImport(params: TokenImportParams): ProviderConfig {
         return processTokenImportFor(seekAIAuthHandler, params);
+    }
+
+    // TabiToken (API key)
+    public static processTabiTokenTokenImport(params: TokenImportParams): ProviderConfig {
+        return processTokenImportFor(tabiTokenAuthHandler, params);
     }
 
     // Qoder OAuth & Token Import

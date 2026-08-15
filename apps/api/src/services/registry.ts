@@ -7,6 +7,7 @@ import {
     NEOSANTARA_BASE_URL,
     SEED_MARKER,
     SEEKAI_BASE_URL,
+    TABITOKEN_BASE_URL,
 } from "@srouter/constants";
 import { deleteProviderDB, getAllProvidersDB, upsertProviderDB } from "@srouter/db";
 import {
@@ -20,6 +21,7 @@ import {
     OpenAIExecutor,
     QoderExecutor,
     SeekAIExecutor,
+    TabiTokenExecutor,
 } from "@srouter/executors";
 import { ProviderRegistry } from "@srouter/providers";
 
@@ -163,6 +165,17 @@ export function loadSavedProvidersFromDB(): void {
                         id: p.id || p.providerId,
                         name: p.name,
                         baseUrl: baseUrl || SEEKAI_BASE_URL,
+                        apiKey: p.apiKey,
+                        accessToken: p.accessToken,
+                    }),
+                );
+                break;
+            case isProviderBaseId(p.id, "tabitoken"):
+                registry.registerProvider(
+                    new TabiTokenExecutor({
+                        id: p.id || p.providerId,
+                        name: p.name,
+                        baseUrl: baseUrl || TABITOKEN_BASE_URL,
                         apiKey: p.apiKey,
                         accessToken: p.accessToken,
                     }),

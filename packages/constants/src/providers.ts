@@ -8,6 +8,7 @@ export const NEOSANTARA_BASE_URL = "https://api.neosantara.xyz/v1";
 export const GOROUTER_BASE_URL = "https://gorouter.app/v1";
 export const BLUESMINDS_BASE_URL = "https://api.bluesminds.com/v1";
 export const SEEKAI_BASE_URL = "https://seekai.cc/v1";
+export const TABITOKEN_BASE_URL = "https://tabitoken.com/v1";
 export const COMMANDCODE_BASE_URL = "https://api.commandcode.ai/alpha/generate";
 export const CODEX_BASE_URL = "https://chatgpt.com/backend-api/codex/responses";
 export const CODEX_MODELS_URL = "https://chatgpt.com/backend-api/codex/models";
@@ -143,6 +144,17 @@ export const KNOWN_PROVIDERS: KnownProvider[] = [
         requiresApiKey: true,
         supportsCustomUrl: true,
         statusMessage: "SeekAI API key missing",
+    },
+    {
+        id: "tabitoken",
+        name: "TabiToken",
+        category: "api_key",
+        protocol: "openai",
+        baseUrl: TABITOKEN_BASE_URL,
+        websiteUrl: "https://tabitoken.com/sign-up?aff=h5iN",
+        requiresApiKey: true,
+        supportsCustomUrl: true,
+        statusMessage: "TabiToken API key missing",
     },
     {
         id: "openai_codex",

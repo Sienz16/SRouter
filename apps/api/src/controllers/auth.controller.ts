@@ -9,6 +9,7 @@ import {
     openaiCodexAuthHandler,
     qoderAuthHandler,
     seekAIAuthHandler,
+    tabiTokenAuthHandler,
     type AuthProviderHandler,
     type OAuthLoginParams,
     type TokenImportParams,
@@ -275,6 +276,15 @@ export class AuthController {
         return importTokenFor(
             seekAIAuthHandler,
             (b) => AuthLogic.processSeekAITokenImport(b),
+            c,
+        );
+    }
+
+    // TabiToken Provider (API key)
+    public static async importTabiTokenToken(c: Context): Promise<Response> {
+        return importTokenFor(
+            tabiTokenAuthHandler,
+            (b) => AuthLogic.processTabiTokenTokenImport(b),
             c,
         );
     }

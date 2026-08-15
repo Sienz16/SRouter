@@ -81,6 +81,7 @@ graph TD
         GoRouter["GoRouter<br/>(API Key Provider)"]
         BluesMinds["BluesMinds<br/>(API Key Provider)"]
         SeekAI["SeekAI<br/>(API Key Provider)"]
+        TabiToken["TabiToken<br/>(API Key Provider)"]
         Kiro["Kiro / Amazon Q<br/>(CodeWhisperer / Bedrock)"]
         CommandCode["Command Code<br/>(API Key Provider)"]
     end
@@ -97,6 +98,7 @@ graph TD
     Registry -->|Bearer Key| GoRouter
     Registry -->|Bearer Key| BluesMinds
     Registry -->|Bearer Key| SeekAI
+    Registry -->|Bearer Key| TabiToken
     Registry -->|SigV4 / Bearer| Kiro
     Registry -->|Bearer Key| CommandCode
 ```

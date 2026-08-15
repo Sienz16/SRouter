@@ -57,6 +57,11 @@ authRoute.post("/auth/bluesminds/import-token", AuthController.importBluesMindsT
 authRoute.post("/auth/seekai/token", AuthController.importSeekAIToken);
 authRoute.post("/auth/seekai/import-token", AuthController.importSeekAIToken);
 
+// --- TabiToken Provider (API key) ---
+// 1. POST /v1/auth/tabitoken/token & POST /v1/auth/tabitoken/import-token
+authRoute.post("/auth/tabitoken/token", AuthController.importTabiTokenToken);
+authRoute.post("/auth/tabitoken/import-token", AuthController.importTabiTokenToken);
+
 // --- Qoder Provider (OAuth & PAT) ---
 // 1. GET /v1/auth/qoder/login - Initiate Qoder OAuth PKCE Login Flow
 authRoute.get("/auth/qoder/login", AuthController.loginQoder);
