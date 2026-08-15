@@ -12,7 +12,7 @@ import {
     revokeAdminSession,
     validateAdminPassword,
     verifyAdminPassword,
-    verifyAdminSession,
+    verifyAdminSession
 } from "@/services/adminAuth.js";
 import type { Context } from "hono";
 
@@ -57,7 +57,7 @@ function setAdminSessionCookie(c: Context, token: string, secure: boolean): void
         maxAge: Math.floor(ADMIN_SESSION_TTL_MS / 1000),
         path: "/",
         sameSite: "Lax",
-        secure,
+        secure
     });
 }
 
@@ -83,7 +83,7 @@ export function createAdminRoute(options: AdminRouteOptions = {}): Hono {
         if (store.hasAdminAccount()) {
             return err(c, "Admin setup has already been completed", 409, {
                 type: "authentication_error",
-                code: "setup_already_complete",
+                code: "setup_already_complete"
             });
         }
 
@@ -92,14 +92,14 @@ export function createAdminRoute(options: AdminRouteOptions = {}): Hono {
         if (passwordError) {
             return err(c, passwordError, 400, {
                 type: "invalid_request_error",
-                code: "invalid_password",
+                code: "invalid_password"
             });
         }
 
         if (body?.confirmation !== body.password) {
             return err(c, "Password confirmation does not match", 400, {
                 type: "invalid_request_error",
-                code: "password_mismatch",
+                code: "password_mismatch"
             });
         }
 
@@ -114,8 +114,8 @@ export function createAdminRoute(options: AdminRouteOptions = {}): Hono {
                 403,
                 {
                     type: "authentication_error",
-                    code: "setup_not_allowed",
-                },
+                    code: "setup_not_allowed"
+                }
             );
         }
 
@@ -123,7 +123,7 @@ export function createAdminRoute(options: AdminRouteOptions = {}): Hono {
         if (!created) {
             return err(c, "Admin setup has already been completed", 409, {
                 type: "authentication_error",
-                code: "setup_already_complete",
+                code: "setup_already_complete"
             });
         }
 
@@ -139,7 +139,7 @@ export function createAdminRoute(options: AdminRouteOptions = {}): Hono {
         if (failure && failure.blockedUntil > timestamp) {
             return err(c, "Too many failed login attempts", 429, {
                 type: "authentication_error",
-                code: "login_rate_limited",
+                code: "login_rate_limited"
             });
         }
         if (failure && failure.blockedUntil > 0 && failure.blockedUntil <= timestamp) {
@@ -154,11 +154,11 @@ export function createAdminRoute(options: AdminRouteOptions = {}): Hono {
             const count = (current?.count ?? 0) + 1;
             failedLogins.set(address, {
                 count,
-                blockedUntil: count >= MAX_LOGIN_FAILURES ? timestamp + LOGIN_BLOCK_MS : 0,
+                blockedUntil: count >= MAX_LOGIN_FAILURES ? timestamp + LOGIN_BLOCK_MS : 0
             });
             return err(c, "Invalid admin password", 401, {
                 type: "authentication_error",
-                code: "invalid_credentials",
+                code: "invalid_credentials"
             });
         }
 
@@ -174,7 +174,7 @@ export function createAdminRoute(options: AdminRouteOptions = {}): Hono {
             clearAdminSessionCookie(c, secureCookies);
             return err(c, "Admin authentication is required", 401, {
                 type: "authentication_error",
-                code: "authentication_required",
+                code: "authentication_required"
             });
         }
 

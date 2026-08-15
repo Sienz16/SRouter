@@ -31,7 +31,7 @@ export function hashAdminPassword(password: string): string {
         N: PASSWORD_SCRYPT_N,
         r: PASSWORD_SCRYPT_R,
         p: PASSWORD_SCRYPT_P,
-        maxmem: PASSWORD_SCRYPT_MAXMEM,
+        maxmem: PASSWORD_SCRYPT_MAXMEM
     });
 
     return [
@@ -40,7 +40,7 @@ export function hashAdminPassword(password: string): string {
         PASSWORD_SCRYPT_R,
         PASSWORD_SCRYPT_P,
         salt.toString("base64url"),
-        derivedKey.toString("base64url"),
+        derivedKey.toString("base64url")
     ].join("$");
 }
 
@@ -65,7 +65,7 @@ export function verifyAdminPassword(password: string, storedHash: string): boole
             N: n,
             r,
             p,
-            maxmem: PASSWORD_SCRYPT_MAXMEM,
+            maxmem: PASSWORD_SCRYPT_MAXMEM
         });
         return actual.length === expected.length && timingSafeEqual(actual, expected);
     } catch {
@@ -79,7 +79,7 @@ export function hashSessionToken(token: string): string {
 
 export function createAdminSession(
     store: Pick<AdminAuthStore, "createSession"> = adminAuthStore,
-    now = Date.now(),
+    now = Date.now()
 ): string {
     const token = randomBytes(32).toString("base64url");
     store.createSession(hashSessionToken(token), now, now + ADMIN_SESSION_TTL_MS);
@@ -89,7 +89,7 @@ export function createAdminSession(
 export function verifyAdminSession(
     store: Pick<AdminAuthStore, "getSession"> = adminAuthStore,
     token: string | undefined,
-    now = Date.now(),
+    now = Date.now()
 ): boolean {
     if (!token) return false;
     return store.getSession(hashSessionToken(token), now) !== null;
@@ -97,7 +97,7 @@ export function verifyAdminSession(
 
 export function revokeAdminSession(
     store: Pick<AdminAuthStore, "deleteSession"> = adminAuthStore,
-    token: string | undefined,
+    token: string | undefined
 ): boolean {
     if (!token) return false;
     return store.deleteSession(hashSessionToken(token));

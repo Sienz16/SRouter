@@ -22,7 +22,7 @@ test("admin auth store creates, finds, and deletes sessions", () => {
     assert.deepEqual(store.getSession("token-hash", 150), {
         tokenHash: "token-hash",
         createdAt: 100,
-        expiresAt: 200,
+        expiresAt: 200
     });
     assert.equal(store.deleteSession("token-hash"), true);
     assert.equal(store.getSession("token-hash", 150), null);

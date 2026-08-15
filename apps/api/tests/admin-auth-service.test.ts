@@ -10,7 +10,7 @@ import {
     isLoopbackAddress,
     validateAdminPassword,
     verifyAdminPassword,
-    verifyAdminSession,
+    verifyAdminSession
 } from "../src/services/adminAuth.js";
 
 test("admin passwords use salted scrypt hashes", () => {
@@ -36,7 +36,7 @@ test("admin sessions store only a token hash and expire", () => {
 
     assert.equal(
         store.getSession(hashSessionToken(token), 1_000)?.tokenHash,
-        hashSessionToken(token),
+        hashSessionToken(token)
     );
     assert.equal(verifyAdminSession(store, token, 1_000), true);
     assert.equal(verifyAdminSession(store, token, 1_000 + ADMIN_SESSION_TTL_MS), false);

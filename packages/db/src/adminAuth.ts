@@ -36,7 +36,7 @@ export class AdminAuthStore {
         const result = this.database
             .prepare(
                 `INSERT OR IGNORE INTO admin_account (id, password_hash, created_at, updated_at)
-                 VALUES (1, ?, ?, ?)`,
+                 VALUES (1, ?, ?, ?)`
             )
             .run(passwordHash, now, now);
 
@@ -55,7 +55,7 @@ export class AdminAuthStore {
         this.database
             .prepare(
                 `INSERT INTO admin_sessions (token_hash, created_at, expires_at)
-                 VALUES (?, ?, ?)`,
+                 VALUES (?, ?, ?)`
             )
             .run(tokenHash, createdAt, expiresAt);
     }
@@ -67,7 +67,7 @@ export class AdminAuthStore {
             .prepare(
                 `SELECT token_hash, created_at, expires_at
                  FROM admin_sessions
-                 WHERE token_hash = ? AND expires_at > ?`,
+                 WHERE token_hash = ? AND expires_at > ?`
             )
             .get(tokenHash, now) as
             { token_hash?: string; created_at?: number; expires_at?: number } | undefined;
@@ -77,7 +77,7 @@ export class AdminAuthStore {
         return {
             tokenHash: String(row.token_hash),
             createdAt: Number(row.created_at),
-            expiresAt: Number(row.expires_at),
+            expiresAt: Number(row.expires_at)
         };
     }
 

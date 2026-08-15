@@ -24,7 +24,7 @@ test("admin middleware requires a valid session cookie", async () => {
 
     const token = createAdminSession(store);
     const accepted = await app.request("/providers", {
-        headers: { Cookie: `${ADMIN_SESSION_COOKIE}=${token}` },
+        headers: { Cookie: `${ADMIN_SESSION_COOKIE}=${token}` }
     });
     assert.equal(accepted.status, 200);
 });
@@ -39,14 +39,14 @@ test("client-identifying headers do not bypass API-key auth", async () => {
 
     const spoofed = await app.request("/chat/completions", {
         method: "POST",
-        headers: { "X-SRouter-Client": "playground" },
+        headers: { "X-SRouter-Client": "playground" }
     });
     assert.equal(spoofed.status, 401);
 
     const token = createAdminSession(store);
     const adminRequest = await app.request("/chat/completions", {
         method: "POST",
-        headers: { Cookie: `${ADMIN_SESSION_COOKIE}=${token}` },
+        headers: { Cookie: `${ADMIN_SESSION_COOKIE}=${token}` }
     });
     assert.equal(adminRequest.status, 200);
 });

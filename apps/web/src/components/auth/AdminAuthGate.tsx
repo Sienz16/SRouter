@@ -32,7 +32,7 @@ function AdminAuthForm({ setupRequired, onAuthenticated }: AdminAuthFormProps) {
                 setupRequired ? "/v1/admin/setup" : "/v1/admin/login",
                 setupRequired
                     ? { password, confirmation, ...(setupToken ? { setupToken } : {}) }
-                    : { password },
+                    : { password }
             );
             setPassword("");
             setConfirmation("");
@@ -161,7 +161,7 @@ export function AdminAuthGate({ children }: { children: ReactNode }) {
         queryKey: ["admin-auth-status"],
         queryFn: () => api.get<AdminStatus>("/v1/admin/status"),
         retry: false,
-        staleTime: 0,
+        staleTime: 0
     });
 
     if (statusQuery.isPending) return <AuthLoadingScreen />;

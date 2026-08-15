@@ -15,8 +15,8 @@ function createTestApp(options: { address?: string; setupToken?: string } = {}) 
             store,
             getClientAddress: () => options.address,
             getSetupToken: () => options.setupToken,
-            secureCookies: false,
-        }),
+            secureCookies: false
+        })
     );
     return { app, store };
 }
@@ -43,8 +43,8 @@ test("local setup creates an account and establishes a session", async () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             password: "correct horse battery staple",
-            confirmation: "correct horse battery staple",
-        }),
+            confirmation: "correct horse battery staple"
+        })
     });
 
     assert.equal(setup.status, 201);
@@ -52,7 +52,7 @@ test("local setup creates an account and establishes a session", async () => {
     assert.equal(store.hasAdminAccount(), true);
 
     const status = await app.request("/v1/admin/status", {
-        headers: { Cookie: getSessionCookie(setup) },
+        headers: { Cookie: getSessionCookie(setup) }
     });
     assert.deepEqual(await status.json(), { setupRequired: false, authenticated: true });
 });
@@ -64,8 +64,8 @@ test("remote setup requires the configured one-time setup token", async () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             password: "correct horse battery staple",
-            confirmation: "correct horse battery staple",
-        }),
+            confirmation: "correct horse battery staple"
+        })
     });
     assert.equal(rejected.status, 403);
 
@@ -75,8 +75,8 @@ test("remote setup requires the configured one-time setup token", async () => {
         body: JSON.stringify({
             password: "correct horse battery staple",
             confirmation: "correct horse battery staple",
-            setupToken: "setup-secret",
-        }),
+            setupToken: "setup-secret"
+        })
     });
     assert.equal(accepted.status, 201);
 
@@ -86,8 +86,8 @@ test("remote setup requires the configured one-time setup token", async () => {
         body: JSON.stringify({
             password: "another correct password",
             confirmation: "another correct password",
-            setupToken: "setup-secret",
-        }),
+            setupToken: "setup-secret"
+        })
     });
     assert.equal(second.status, 409);
 });
@@ -99,21 +99,21 @@ test("login and logout manage the admin session", async () => {
     const invalid = await app.request("/v1/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: "wrong password" }),
+        body: JSON.stringify({ password: "wrong password" })
     });
     assert.equal(invalid.status, 401);
 
     const login = await app.request("/v1/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: "correct horse battery staple" }),
+        body: JSON.stringify({ password: "correct horse battery staple" })
     });
     assert.equal(login.status, 200);
     const cookie = getSessionCookie(login);
 
     const logout = await app.request("/v1/admin/logout", {
         method: "POST",
-        headers: { Cookie: cookie },
+        headers: { Cookie: cookie }
     });
     assert.equal(logout.status, 204);
 
@@ -129,7 +129,7 @@ test("repeated failed logins are throttled", async () => {
         const response = await app.request("/v1/admin/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ password: "wrong password" }),
+            body: JSON.stringify({ password: "wrong password" })
         });
         assert.equal(response.status, 401);
     }
@@ -137,7 +137,7 @@ test("repeated failed logins are throttled", async () => {
     const throttled = await app.request("/v1/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: "wrong password" }),
+        body: JSON.stringify({ password: "wrong password" })
     });
     assert.equal(throttled.status, 429);
 });

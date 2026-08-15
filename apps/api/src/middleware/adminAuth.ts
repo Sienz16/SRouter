@@ -10,7 +10,7 @@ export interface AdminAuthMiddlewareOptions {
 }
 
 export function createAdminAuthMiddleware(
-    options: AdminAuthMiddlewareOptions = {},
+    options: AdminAuthMiddlewareOptions = {}
 ): MiddlewareHandler {
     const store = options.store ?? adminAuthStore;
     const now = options.now ?? (() => Date.now());
@@ -20,7 +20,7 @@ export function createAdminAuthMiddleware(
         if (!verifyAdminSession(store, sessionToken, now())) {
             return err(c, "Admin authentication is required", 401, {
                 type: "authentication_error",
-                code: "authentication_required",
+                code: "authentication_required"
             });
         }
 
