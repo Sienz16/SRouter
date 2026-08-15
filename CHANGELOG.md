@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.0-rc.1] - 2026-08-15
+
+### 🚀 Release Candidate 1 Highlights
+
+#### 🔌 New Upstream AI Providers
+- **GoRouter**: Native OpenAI-compatible executor supporting live chat completions, streaming, and custom branding (`https://gorouter.app`).
+- **BluesMinds**: OpenAI-compatible gateway integration with instant token management (`https://api.bluesminds.com/v1`).
+- **SeekAI**: High-performance OpenAI-compatible proxy with dynamic model catalog discovery (`https://seekai.cc/v1`).
+- **Qoder**: Complete Alibaba Cloud Qoder integration featuring OAuth PKCE device flow, WAF-bypass body encoding, and live token refresh.
+
+#### 🤖 Anthropic Messages API & Claude Code Compatibility
+- **Native `/v1/messages` Endpoint**: Full support for Anthropic Messages protocol with non-streaming and real-time SSE streaming.
+- **Claude Code Ready**: Drop-in proxy support for Claude Code CLI, Cursor, and official Anthropic SDKs.
+- **Bidirectional Translation**: Real-time conversion between Anthropic message format and OpenAI completion requests.
+
+#### 🐳 Containerization & Deployment
+- **Multi-Stage Dockerfile**: Lightweight production container image with Node 22 alpine.
+- **Docker Compose**: Ready-to-run `docker-compose.yml` with SQLite persistence volumes.
+- **Embedded SPA Serving**: Hono API automatically serves static web dashboard assets in production.
+
+#### 🎨 Web Dashboard & Playground Enhancements
+- **Simplified Connection Modal**: Streamlined modal dialog replacing slide-out sheets, focusing solely on API Key inputs with show/hide toggles.
+- **Instant Playground Feedback (0ms)**: Assistant message placeholder, ThinkingState, and LoadingState render immediately on prompt submission.
+- **Reasoning Delta Streaming**: Real-time extraction and streaming for `reasoning_content`, `thought`, and `thinking` chunks.
+- **Interactive Toasts**: Toast notifications via `sonner` across connection lifecycle events.
+- **Direct Provider Web Links**: One-click navigation to provider consoles and referral portals.
+
+---
+
 ## [0.1.0-beta] - 2026-08-15
 
 ### 🚀 Initial Public Beta Release
