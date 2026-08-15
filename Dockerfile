@@ -9,10 +9,12 @@ WORKDIR /app
 # Enable Corepack & prepare PNPM
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
+ENV COREPACK_ENABLE_PROJECT_SPEC=0
 RUN corepack enable && corepack prepare pnpm@11.20.0 --activate
 
 # --- Stage 2: Dependencies and Build ---
 FROM base AS builder
+ENV CI=true
 
 # Copy package manifests for workspace dependency resolution & layer caching
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
@@ -35,8 +37,10 @@ COPY . .
 # Build all packages, API server, and web dashboard
 RUN pnpm build
 
-# Prune devDependencies to keep production runtime footprint minimal
-RUN pnpm prune --prod
+# Create a self-contained production dependency graph for the API.
+# Injected workspace packages are copied into the deployment instead of
+# remaining symlinks to the builder workspace.
+RUN pnpm --config.inject-workspace-packages=true --filter api deploy --prod /app/deploy
 
 # --- Stage 3: Production Runner ---
 FROM node:22-alpine AS runner
@@ -55,30 +59,10 @@ ENV WEB_DIST_PATH=/app/apps/web/dist
 # Create persistent storage directory for SQLite WAL database
 RUN mkdir -p /app/data
 
-# Copy workspace package manifests & production node_modules from builder
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
-COPY --from=builder /app/node_modules ./node_modules
+# Copy the isolated API production deployment.
+COPY --from=builder /app/deploy ./
 
-# Copy compiled workspace packages
-COPY --from=builder /app/packages/constants/dist ./packages/constants/dist
-COPY --from=builder /app/packages/constants/package.json ./packages/constants/package.json
-COPY --from=builder /app/packages/db/dist ./packages/db/dist
-COPY --from=builder /app/packages/db/package.json ./packages/db/package.json
-COPY --from=builder /app/packages/executors/dist ./packages/executors/dist
-COPY --from=builder /app/packages/executors/package.json ./packages/executors/package.json
-COPY --from=builder /app/packages/pricing/dist ./packages/pricing/dist
-COPY --from=builder /app/packages/pricing/package.json ./packages/pricing/package.json
-COPY --from=builder /app/packages/providers/dist ./packages/providers/dist
-COPY --from=builder /app/packages/providers/package.json ./packages/providers/package.json
-COPY --from=builder /app/packages/translator/dist ./packages/translator/dist
-COPY --from=builder /app/packages/translator/package.json ./packages/translator/package.json
-COPY --from=builder /app/packages/types/dist ./packages/types/dist
-COPY --from=builder /app/packages/types/package.json ./packages/types/package.json
-
-# Copy compiled API server & Web Dashboard build
-COPY --from=builder /app/apps/api/dist ./apps/api/dist
-COPY --from=builder /app/apps/api/package.json ./apps/api/package.json
+# The API serves the dashboard as static files at runtime.
 COPY --from=builder /app/apps/web/dist ./apps/web/dist
 
 # Expose API/Web port (3000) and OAuth callback receiver port (1455)
@@ -92,4 +76,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
   CMD node -e "fetch('http://localhost:' + (process.env.PORT || 3000) + '/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"
 
 # Start SRouter unified API & Dashboard server
-CMD ["node", "apps/api/dist/index.js"]
+CMD ["node", "dist/index.js"]
