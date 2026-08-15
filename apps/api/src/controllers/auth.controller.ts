@@ -4,6 +4,7 @@ import {
     anthropicAuthHandler,
     antigravityAuthHandler,
     bluesMindsAuthHandler,
+    claudeAuthHandler,
     commandCodeAuthHandler,
     goRouterAuthHandler,
     openaiCodexAuthHandler,
@@ -251,6 +252,23 @@ export class AuthController {
             (b) => AuthLogic.processAnthropicTokenImport(b),
             c
         );
+    }
+
+    // Claude Code OAuth
+    public static loginClaude(c: Context): Response {
+        return loginFor(claudeAuthHandler, (p) => AuthLogic.initiateClaudeOAuthPKCE(p), c, false);
+    }
+
+    public static async handleClaudeOAuthCallback(c: Context): Promise<Response> {
+        return handleOAuthCallbackFor(
+            claudeAuthHandler,
+            (code, state) => AuthLogic.processClaudeOAuthCallback(code, state),
+            c
+        );
+    }
+
+    public static async importClaudeToken(c: Context): Promise<Response> {
+        return importTokenFor(claudeAuthHandler, (b) => AuthLogic.processClaudeTokenImport(b), c);
     }
 
     // GoRouter Provider (API key)

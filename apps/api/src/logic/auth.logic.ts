@@ -13,6 +13,7 @@ import {
     anthropicAuthHandler,
     antigravityAuthHandler,
     bluesMindsAuthHandler,
+    claudeAuthHandler,
     commandCodeAuthHandler,
     goRouterAuthHandler,
     openaiCodexAuthHandler,
@@ -128,6 +129,7 @@ async function processOAuthCallbackFor(
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
         accountId: tokens.accountId,
+        organizationId: tokens.organizationId,
         tokenExpiresAt: tokens.expiresIn ? Date.now() + tokens.expiresIn * 1000 : undefined,
         lastRefreshedAt: Date.now(),
         enabled: true,
@@ -138,6 +140,7 @@ async function processOAuthCallbackFor(
         id: accountId,
         name: accountName,
         accountId: tokens.accountId,
+        organizationId: tokens.organizationId,
         baseUrl,
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken
@@ -173,6 +176,7 @@ function processTokenImportFor(
         accessToken: mapping.accessToken,
         refreshToken: mapping.refreshToken,
         accountId: mapping.accountId,
+        organizationId: mapping.organizationId,
         enabled: true,
         createdAt: timestamp
     });
@@ -181,6 +185,7 @@ function processTokenImportFor(
         id: accountId,
         name: providerName,
         accountId: mapping.accountId,
+        organizationId: mapping.organizationId,
         baseUrl: mapping.baseUrl ?? baseUrl,
         apiKey: mapping.apiKey,
         accessToken: mapping.accessToken,
@@ -231,6 +236,22 @@ export class AuthLogic {
     // Anthropic (API key)
     public static processAnthropicTokenImport(params: TokenImportParams): ProviderConfig {
         return processTokenImportFor(anthropicAuthHandler, params);
+    }
+
+    // Claude Code (OAuth)
+    public static initiateClaudeOAuthPKCE(params: OAuthLoginParams): OAuthLoginResult {
+        return initiatePKCEFor(claudeAuthHandler, params);
+    }
+
+    public static async processClaudeOAuthCallback(
+        code: string,
+        state: string
+    ): Promise<ProviderConfig> {
+        return processOAuthCallbackFor(claudeAuthHandler, code, state);
+    }
+
+    public static processClaudeTokenImport(params: TokenImportParams): ProviderConfig {
+        return processTokenImportFor(claudeAuthHandler, params);
     }
 
     // GoRouter (API key)

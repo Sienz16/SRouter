@@ -22,7 +22,7 @@ import {
     SeekAIExecutor,
     TabiTokenExecutor
 } from "@srouter/executors";
-import { AntigravityOAuth, OpenAICodexOAuth, QoderOAuth } from "@srouter/providers";
+import { AntigravityOAuth, ClaudeOAuth, OpenAICodexOAuth, QoderOAuth } from "@srouter/providers";
 import type { AIProvider, ProviderCategory, ProviderProtocol } from "@srouter/types";
 
 export interface OAuthLoginParams {
@@ -55,6 +55,7 @@ export interface OAuthTokens {
     accessToken: string;
     refreshToken?: string;
     accountId?: string;
+    organizationId?: string;
     expiresIn?: number;
 }
 
@@ -67,6 +68,7 @@ export type ExecutorFactory = (args: {
     id: string;
     name: string;
     accountId?: string;
+    organizationId?: string;
     baseUrl?: string;
     apiKey?: string;
     accessToken?: string;
@@ -92,6 +94,7 @@ export interface ImportTokenMapping {
     accessToken?: string;
     refreshToken?: string;
     accountId?: string;
+    organizationId?: string;
     baseUrl?: string;
     apiKey?: string;
 }
@@ -117,6 +120,7 @@ export interface AuthProviderHandler {
         accessToken: string;
         refreshToken?: string;
         accountId?: string;
+        organizationId?: string;
         expiresIn?: number;
         baseUrl?: string;
     };
@@ -216,6 +220,31 @@ export const anthropicAuthHandler: AuthProviderHandler = {
     }),
     buildExecutor: ({ id, name, baseUrl, apiKey }) =>
         new AnthropicExecutor({ id, name, baseUrl, apiKey })
+};
+
+export const claudeAuthHandler: AuthProviderHandler = {
+    providerId: "claude",
+    displayName: "Claude Code",
+    category: "oauth",
+    protocol: "anthropic",
+    idPrefix: "claude",
+    clientId: () => process.env.CLAUDE_OAUTH_CLIENT_ID || "9d1c250a-e61b-44d9-88ed-5944d1962f5e",
+    defaultRedirectUri: "http://localhost:1455/auth/claude/callback",
+    oauthSuccessMessage: "Login Claude Code OAuth Berhasil!",
+    tokenImportMessage: "Claude Code OAuth token registered and saved directly to SQLite database!",
+    oauthClass: ClaudeOAuth,
+    mapOAuthTokens: (tokens) => ({
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        organizationId: tokens.organizationId,
+        expiresIn: tokens.expiresIn
+    }),
+    mapImportTokens: (params) => ({
+        accessToken: params.accessToken,
+        refreshToken: params.refreshToken
+    }),
+    buildExecutor: ({ id, name, accessToken, refreshToken, organizationId }) =>
+        new AnthropicExecutor({ id, name, accessToken, refreshToken, organizationId })
 };
 
 export const qoderAuthHandler: AuthProviderHandler = {
@@ -321,6 +350,7 @@ export const authProviderHandlers: Record<string, AuthProviderHandler> = {
     antigravity: antigravityAuthHandler,
     commandcode: commandCodeAuthHandler,
     anthropic: anthropicAuthHandler,
+    claude: claudeAuthHandler,
     qoder: qoderAuthHandler,
     gorouter: goRouterAuthHandler,
     bluesminds: bluesMindsAuthHandler,

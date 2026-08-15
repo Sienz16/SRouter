@@ -49,6 +49,7 @@ export interface ProviderConfig {
     accountId?: string;
     tokenExpiresAt?: number;
     lastRefreshedAt?: number;
+    organizationId?: string;
     customHeaders?: Record<string, string>;
     providerSpecificData?: Record<string, string>;
     enabled: boolean;

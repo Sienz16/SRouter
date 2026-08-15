@@ -209,6 +209,19 @@ export function loadSavedProvidersFromDB(): void {
                     })
                 );
                 break;
+            case isProviderBaseId(p.id, "claude") || providerType === "claude":
+                registry.registerProvider(
+                    new AnthropicExecutor({
+                        id: p.id || p.providerId,
+                        name: p.name,
+                        baseUrl,
+                        apiKey: p.apiKey,
+                        accessToken: p.accessToken,
+                        refreshToken: p.refreshToken,
+                        organizationId: p.organizationId
+                    })
+                );
+                break;
             case p.protocol === "anthropic" ||
                 providerType === "anthropic" ||
                 providerType === "custom_anthropic":

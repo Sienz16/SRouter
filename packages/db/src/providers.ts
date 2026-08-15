@@ -16,6 +16,7 @@ export function getAllProvidersDB(): ProviderConfig[] {
         accessToken: row.access_token ? String(row.access_token) : undefined,
         refreshToken: row.refresh_token ? String(row.refresh_token) : undefined,
         accountId: row.account_id ? String(row.account_id) : undefined,
+        organizationId: row.organization_id ? String(row.organization_id) : undefined,
         tokenExpiresAt: row.token_expires_at ? Number(row.token_expires_at) : undefined,
         lastRefreshedAt: row.last_refreshed_at ? Number(row.last_refreshed_at) : undefined,
         customHeaders: row.custom_headers ? JSON.parse(String(row.custom_headers)) : undefined,
@@ -44,6 +45,7 @@ export function getProviderByIdDB(id: string): ProviderConfig | null {
         accessToken: row.access_token ? String(row.access_token) : undefined,
         refreshToken: row.refresh_token ? String(row.refresh_token) : undefined,
         accountId: row.account_id ? String(row.account_id) : undefined,
+        organizationId: row.organization_id ? String(row.organization_id) : undefined,
         tokenExpiresAt: row.token_expires_at ? Number(row.token_expires_at) : undefined,
         lastRefreshedAt: row.last_refreshed_at ? Number(row.last_refreshed_at) : undefined,
         customHeaders: row.custom_headers ? JSON.parse(String(row.custom_headers)) : undefined,
@@ -59,8 +61,13 @@ export function upsertProviderDB(
     config: ProviderConfig & { category: string; protocol: string }
 ): ProviderConfig {
     const query = db.prepare(`
-        INSERT INTO providers (id, provider_id, name, category, protocol, base_url, api_key, access_token, refresh_token, account_id, token_expires_at, last_refreshed_at, custom_headers, provider_specific_data, enabled, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO providers (
+            id, provider_id, name, category, protocol, base_url, api_key,
+            access_token, refresh_token, account_id, organization_id,
+            token_expires_at, last_refreshed_at, custom_headers,
+            provider_specific_data, enabled, created_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(id) DO UPDATE SET
             provider_id = excluded.provider_id,
             name = excluded.name,
@@ -71,6 +78,7 @@ export function upsertProviderDB(
             access_token = excluded.access_token,
             refresh_token = excluded.refresh_token,
             account_id = excluded.account_id,
+            organization_id = excluded.organization_id,
             token_expires_at = excluded.token_expires_at,
             last_refreshed_at = excluded.last_refreshed_at,
             custom_headers = excluded.custom_headers,
@@ -90,6 +98,7 @@ export function upsertProviderDB(
         config.accessToken ?? null,
         config.refreshToken ?? null,
         config.accountId ?? null,
+        config.organizationId ?? null,
         config.tokenExpiresAt ?? null,
         config.lastRefreshedAt ?? null,
         config.customHeaders ? JSON.stringify(config.customHeaders) : null,
@@ -159,6 +168,7 @@ export function getConnectionsByProviderIdDB(providerId: string): ProviderConfig
         accessToken: row.access_token ? String(row.access_token) : undefined,
         refreshToken: row.refresh_token ? String(row.refresh_token) : undefined,
         accountId: row.account_id ? String(row.account_id) : undefined,
+        organizationId: row.organization_id ? String(row.organization_id) : undefined,
         tokenExpiresAt: row.token_expires_at ? Number(row.token_expires_at) : undefined,
         lastRefreshedAt: row.last_refreshed_at ? Number(row.last_refreshed_at) : undefined,
         customHeaders: row.custom_headers ? JSON.parse(String(row.custom_headers)) : undefined,
