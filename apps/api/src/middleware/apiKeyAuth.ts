@@ -5,6 +5,7 @@ import { err } from "@/utils/response.js";
 export async function apiKeyAuth(c: Context, next: Next) {
     const isRequired = getRequireApiKeyDB();
     const authHeader = c.req.header("Authorization") || c.req.header("authorization");
+    const xApiKey = c.req.header("x-api-key") || c.req.header("X-Api-Key") || c.req.header("X-API-KEY");
     const clientHeader = c.req.header("X-SRouter-Client") || c.req.header("x-srouter-client");
 
     // Allow internal web playground / dashboard requests
@@ -13,7 +14,9 @@ export async function apiKeyAuth(c: Context, next: Next) {
     }
 
     let bearerKey: string | null = null;
-    if (authHeader && authHeader.startsWith("Bearer ")) {
+    if (xApiKey) {
+        bearerKey = xApiKey.trim();
+    } else if (authHeader && authHeader.startsWith("Bearer ")) {
         bearerKey = authHeader.slice(7).trim();
     } else if (authHeader) {
         bearerKey = authHeader.trim();
