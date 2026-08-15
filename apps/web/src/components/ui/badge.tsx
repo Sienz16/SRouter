@@ -18,13 +18,13 @@ const badgeVariants = cva(
                 emerald: "border-emerald-500/20 bg-emerald-500/10 text-emerald-500",
                 sky: "border-sky-500/20 bg-sky-500/10 text-sky-500",
                 indigo: "border-indigo-500/20 bg-indigo-500/10 text-indigo-500",
-                amber: "border-amber-500/20 bg-amber-500/10 text-amber-500",
-            },
+                amber: "border-amber-500/20 bg-amber-500/10 text-amber-500"
+            }
         },
         defaultVariants: {
-            variant: "default",
-        },
-    },
+            variant: "default"
+        }
+    }
 );
 
 export interface BadgeProps

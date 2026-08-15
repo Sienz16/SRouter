@@ -8,7 +8,7 @@ import {
     getCoreRowModel,
     getPaginationRowModel,
     getSortedRowModel,
-    useReactTable,
+    useReactTable
 } from "@tanstack/react-table";
 import {
     ArrowDown,
@@ -20,7 +20,7 @@ import {
     ChevronRight,
     Copy,
     Play,
-    Trash2,
+    Trash2
 } from "lucide-react";
 import type { ModelObject } from "@srouter/types";
 import {
@@ -29,7 +29,7 @@ import {
     TableBody,
     TableHead,
     TableRow,
-    TableCell,
+    TableCell
 } from "@/components/ui/table";
 
 interface ProviderModelTableProps {
@@ -43,7 +43,7 @@ export function ProviderModelTable({ models, copied, onCopy, onDelete }: Provide
     const [sorting, setSorting] = useState<SortingState>([]);
     const [pagination, setPagination] = useState<PaginationState>({
         pageIndex: 0,
-        pageSize: 25,
+        pageSize: 25
     });
 
     const columns = useMemo<ColumnDef<ModelObject>[]>(
@@ -96,7 +96,7 @@ export function ProviderModelTable({ models, copied, onCopy, onDelete }: Provide
                             </button>
                         </div>
                     );
-                },
+                }
             },
             {
                 id: "status",
@@ -106,7 +106,7 @@ export function ProviderModelTable({ models, copied, onCopy, onDelete }: Provide
                         <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
                         <span>Active</span>
                     </span>
-                ),
+                )
             },
             {
                 id: "actions",
@@ -136,10 +136,10 @@ export function ProviderModelTable({ models, copied, onCopy, onDelete }: Provide
                             )}
                         </div>
                     );
-                },
-            },
+                }
+            }
         ],
-        [copied, onCopy, onDelete],
+        [copied, onCopy, onDelete]
     );
 
     const table = useReactTable({
@@ -147,13 +147,13 @@ export function ProviderModelTable({ models, copied, onCopy, onDelete }: Provide
         columns,
         state: {
             sorting,
-            pagination,
+            pagination
         },
         onSortingChange: setSorting,
         onPaginationChange: setPagination,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
+        getPaginationRowModel: getPaginationRowModel()
     });
 
     const pageCount = table.getPageCount();
@@ -189,7 +189,7 @@ export function ProviderModelTable({ models, copied, onCopy, onDelete }: Provide
                                             ? null
                                             : flexRender(
                                                   header.column.columnDef.header,
-                                                  header.getContext(),
+                                                  header.getContext()
                                               )}
                                     </TableHead>
                                 ))}

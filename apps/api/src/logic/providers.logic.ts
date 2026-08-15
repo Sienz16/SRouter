@@ -3,7 +3,7 @@ import type {
     ProviderCategory,
     ProviderConfig,
     ProviderDefinition,
-    ProviderProtocol,
+    ProviderProtocol
 } from "@srouter/types";
 import { getAllProvidersDB, upsertProviderDB } from "@srouter/db";
 import { loadSavedProvidersFromDB, registry } from "@/services/registry.js";
@@ -71,7 +71,7 @@ function providerDefinitionFromConfig(connection: ProviderConfig): ProviderDefin
         requiresApiKey: Boolean(connection.apiKey),
         supportsCustomUrl: true,
         status: { state: "connected", connectedCount: 1 },
-        models: [],
+        models: []
     };
 }
 
@@ -102,7 +102,7 @@ function catalogWithSavedCustomProviders(): ProviderDefinition[] {
                 : "openai";
 
         const connectedCount = rows.filter(
-            (c) => !isSeedProvider(c) && c.enabled && baseIdOf(c.providerId || c.id) === baseId,
+            (c) => !isSeedProvider(c) && c.enabled && baseIdOf(c.providerId || c.id) === baseId
         ).length;
 
         catalog.push({
@@ -117,9 +117,9 @@ function catalogWithSavedCustomProviders(): ProviderDefinition[] {
             status: {
                 state: connectedCount > 0 ? "connected" : "no_connections",
                 message: seed?.statusMessage,
-                connectedCount,
+                connectedCount
             },
-            models: [],
+            models: []
         });
     }
 
@@ -140,9 +140,9 @@ function catalogWithSavedCustomProviders(): ProviderDefinition[] {
             status: {
                 state: "no_connections",
                 message: seed.statusMessage,
-                connectedCount: 0,
+                connectedCount: 0
             },
-            models: [],
+            models: []
         });
     }
 
@@ -161,12 +161,12 @@ export class ProvidersLogic {
             custom: catalog.filter((p) => p.category === "custom"),
             oauth: catalog.filter((p) => p.category === "oauth"),
             free_tier: catalog.filter((p) => p.category === "free_tier"),
-            api_key: catalog.filter((p) => p.category === "api_key"),
+            api_key: catalog.filter((p) => p.category === "api_key")
         };
 
         return {
             total: catalog.length,
-            categories,
+            categories
         };
     }
 
@@ -178,7 +178,7 @@ export class ProvidersLogic {
         // Resolve connections by base driver id so multi-account rows (e.g.
         // neosantara-1786…) show up on their driver's page (e.g. /providers/neosantara).
         const connections = getAllProvidersDB().filter(
-            (c) => !isSeedProvider(c) && baseIdOf(c.providerId || c.id) === providerId,
+            (c) => !isSeedProvider(c) && baseIdOf(c.providerId || c.id) === providerId
         );
         const connectedCount = connections.filter((c) => c.enabled).length;
 
@@ -189,7 +189,7 @@ export class ProvidersLogic {
                 (p) =>
                     p.id.startsWith(providerId) ||
                     p.id.startsWith(`${providerId}_`) ||
-                    p.id.startsWith(`${providerId}-`),
+                    p.id.startsWith(`${providerId}-`)
             );
 
         if (registeredProvider) {
@@ -210,8 +210,8 @@ export class ProvidersLogic {
             status: {
                 ...provider.status,
                 connectedCount,
-                state: connectedCount > 0 ? "connected" : "no_connections",
-            },
+                state: connectedCount > 0 ? "connected" : "no_connections"
+            }
         };
     }
 
@@ -254,7 +254,7 @@ export class ProvidersLogic {
             refreshToken: payload.refreshToken,
             providerSpecificData: payload.providerSpecificData,
             enabled: true,
-            createdAt: Date.now(),
+            createdAt: Date.now()
         };
 
         upsertProviderDB(config);

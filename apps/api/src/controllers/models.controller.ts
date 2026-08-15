@@ -8,7 +8,7 @@ export class ModelsController {
         const models = await ModelsLogic.getAllModels();
         const response: ModelListResponse = {
             object: "list",
-            data: models,
+            data: models
         };
         return ok(c, response);
     }
@@ -17,7 +17,7 @@ export class ModelsController {
         const modelId = c.req.param("model");
         if (!modelId) {
             return err(c, "Model ID parameter is required", 400, {
-                type: "invalid_request_error",
+                type: "invalid_request_error"
             });
         }
 
@@ -28,7 +28,7 @@ export class ModelsController {
 
         return err(c, `Model '${modelId}' not found`, 404, {
             type: "invalid_request_error",
-            code: "model_not_found",
+            code: "model_not_found"
         });
     }
 }

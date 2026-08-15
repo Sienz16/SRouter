@@ -22,10 +22,10 @@ test("Kiro provider metadata survives SQLite round-trip", () => {
         providerSpecificData: {
             authMethod: "api_key",
             region: "eu-west-1",
-            profileArn: "arn:aws:codewhisperer:eu-west-1:123:profile/test",
+            profileArn: "arn:aws:codewhisperer:eu-west-1:123:profile/test"
         },
         enabled: true,
-        createdAt: Date.now(),
+        createdAt: Date.now()
     };
 
     upsertProviderDB({ ...config, category: "api_key", protocol: "custom" });

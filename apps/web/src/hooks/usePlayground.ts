@@ -5,7 +5,7 @@ import type {
     ExportLanguage,
     PlaygroundMessage,
     PlaygroundModel,
-    PlaygroundSession,
+    PlaygroundSession
 } from "@/components/playground/types";
 import { getGatewayBaseUrl } from "@/lib/api";
 
@@ -85,7 +85,7 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
             model: initialModel,
             messages: [],
             createdAt: Date.now(),
-            updatedAt: Date.now(),
+            updatedAt: Date.now()
         };
         return [firstSession];
     });
@@ -103,7 +103,7 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
     const [model, setModel] = useState<string>(() => currentSession?.model || initialModel);
     const [input, setInput] = useState("");
     const [messages, setMessages] = useState<PlaygroundMessage[]>(
-        () => currentSession?.messages || [],
+        () => currentSession?.messages || []
     );
     const [streaming, setStreaming] = useState(false);
     const [statusMessage, setStatusMessage] = useState("");
@@ -148,7 +148,7 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                 title,
                 model,
                 messages,
-                updatedAt: Date.now(),
+                updatedAt: Date.now()
             };
 
             const next = [...prev];
@@ -168,7 +168,7 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                 model: targetModel || model || initialModel,
                 messages: [],
                 createdAt: Date.now(),
-                updatedAt: Date.now(),
+                updatedAt: Date.now()
             };
 
             setSessions((prev) => {
@@ -185,7 +185,7 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
             }
             toast.success(`Started new session: ${newId}`);
         },
-        [model, initialModel],
+        [model, initialModel]
     );
 
     // Switch between sessions
@@ -212,7 +212,7 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
             }
             toast.info(`Switched to session: ${target.title || target.id}`);
         },
-        [sessions, model, streaming],
+        [sessions, model, streaming]
     );
 
     // Delete a session
@@ -228,7 +228,7 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                         model: model || initialModel,
                         messages: [],
                         createdAt: Date.now(),
-                        updatedAt: Date.now(),
+                        updatedAt: Date.now()
                     };
                     saveStoredSessions([fallback], fallbackId);
                     setActiveChatId(fallbackId);
@@ -248,7 +248,7 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
             });
             toast.info("Session deleted");
         },
-        [activeChatId, model, initialModel],
+        [activeChatId, model, initialModel]
     );
 
     const copyChatId = useCallback(async () => {
@@ -263,7 +263,7 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
     }, [activeChatId]);
 
     function requestMessages(
-        currentMessages: PlaygroundMessage[] = messages,
+        currentMessages: PlaygroundMessage[] = messages
     ): Array<{ role: string; content: string }> {
         const base =
             currentMessages.length > 0
@@ -288,7 +288,7 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                 id: userMsgId,
                 role: "user",
                 content,
-                createdAt: startTime,
+                createdAt: startTime
             };
 
             const initialAssistantMessage: PlaygroundMessage = {
@@ -296,7 +296,7 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                 role: "assistant",
                 content: "",
                 createdAt: startTime,
-                durationMs: 0,
+                durationMs: 0
             };
 
             const updatedMessages = [...messages, userMessage];
@@ -333,7 +333,7 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                         createdAt: startTime,
                         durationMs: duration,
                         error: isErr,
-                        usage,
+                        usage
                     };
 
                     if (lastIdx !== -1) {
@@ -349,7 +349,7 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                 const outboundMessages = systemPrompt.trim()
                     ? [
                           { role: "system", content: systemPrompt.trim() },
-                          ...updatedMessages.map((m) => ({ role: m.role, content: m.content })),
+                          ...updatedMessages.map((m) => ({ role: m.role, content: m.content }))
                       ]
                     : updatedMessages.map((m) => ({ role: m.role, content: m.content }));
 
@@ -359,7 +359,7 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                         "Content-Type": "application/json",
                         Accept: "text/event-stream",
                         "X-Chat-ID": activeChatId,
-                        "X-SRouter-Client": "playground",
+                        "X-SRouter-Client": "playground"
                     },
                     signal: controller.signal,
                     body: JSON.stringify({
@@ -369,8 +369,8 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                         temperature,
                         max_tokens: maxTokens,
                         stream_options: { include_usage: true },
-                        ...(thinkingEnabled ? { reasoning_effort: "high" } : {}),
-                    }),
+                        ...(thinkingEnabled ? { reasoning_effort: "high" } : {})
+                    })
                 });
 
                 if (!res.ok) {
@@ -423,7 +423,7 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                             completionTokens,
                             totalTokens: u.total_tokens ?? promptTokens + completionTokens,
                             cachedTokens:
-                                cachedTokens && cachedTokens > 0 ? cachedTokens : undefined,
+                                cachedTokens && cachedTokens > 0 ? cachedTokens : undefined
                         };
                     }
 
@@ -460,14 +460,14 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                 if (!assistantUsage && assistantText) {
                     const promptChars = updatedMessages.reduce(
                         (sum, m) => sum + m.content.length,
-                        0,
+                        0
                     );
                     const promptTokens = Math.max(1, Math.ceil(promptChars / 4));
                     const completionTokens = Math.max(1, Math.ceil(assistantText.length / 4));
                     assistantUsage = {
                         promptTokens,
                         completionTokens,
-                        totalTokens: promptTokens + completionTokens,
+                        totalTokens: promptTokens + completionTokens
                     };
                 }
 
@@ -482,8 +482,8 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                     try {
                         setMessages((prev) =>
                             prev.map((m) =>
-                                m.id === assistantMsgId ? { ...m, isGeneratingFollowUps: true } : m,
-                            ),
+                                m.id === assistantMsgId ? { ...m, isGeneratingFollowUps: true } : m
+                            )
                         );
 
                         const followUpRes = await fetch("/v1/chat/completions", {
@@ -491,7 +491,7 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                             headers: {
                                 "Content-Type": "application/json",
                                 "X-Chat-ID": activeChatId,
-                                "X-SRouter-Client": "playground",
+                                "X-SRouter-Client": "playground"
                             },
                             body: JSON.stringify({
                                 model: selectedModel.id,
@@ -503,12 +503,12 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                                     {
                                         role: "user",
                                         content:
-                                            'Suggest 3 brief, actionable follow-up prompt questions the user might ask next based on this response. Return ONLY a JSON array of 3 strings, e.g. ["question 1", "question 2", "question 3"]. No other text.',
-                                    },
+                                            'Suggest 3 brief, actionable follow-up prompt questions the user might ask next based on this response. Return ONLY a JSON array of 3 strings, e.g. ["question 1", "question 2", "question 3"]. No other text.'
+                                    }
                                 ],
                                 max_tokens: 150,
-                                temperature: 0.6,
-                            }),
+                                temperature: 0.6
+                            })
                         });
 
                         if (followUpRes.ok) {
@@ -525,7 +525,7 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                                             .filter(
                                                 (item) =>
                                                     typeof item === "string" &&
-                                                    item.trim().length > 0,
+                                                    item.trim().length > 0
                                             )
                                             .map((item) => item.trim())
                                             .slice(0, 4);
@@ -539,11 +539,11 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                                 parsedFollowUps = rawContent
                                     .split("\n")
                                     .map((l: string) =>
-                                        l.replace(/^\d+[\.\)]\s*|-\s*|"\s*|,\s*$/g, "").trim(),
+                                        l.replace(/^\d+[\.\)]\s*|-\s*|"\s*|,\s*$/g, "").trim()
                                     )
                                     .filter(
                                         (l: string) =>
-                                            l.length > 5 && !l.startsWith("[") && !l.endsWith("]"),
+                                            l.length > 5 && !l.startsWith("[") && !l.endsWith("]")
                                     )
                                     .slice(0, 3);
                             }
@@ -555,18 +555,18 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                                             ? {
                                                   ...m,
                                                   followUps: parsedFollowUps,
-                                                  isGeneratingFollowUps: false,
+                                                  isGeneratingFollowUps: false
                                               }
-                                            : m,
-                                    ),
+                                            : m
+                                    )
                                 );
                             } else {
                                 setMessages((prev) =>
                                     prev.map((m) =>
                                         m.id === assistantMsgId
                                             ? { ...m, isGeneratingFollowUps: false }
-                                            : m,
-                                    ),
+                                            : m
+                                    )
                                 );
                             }
                         } else {
@@ -574,17 +574,15 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                                 prev.map((m) =>
                                     m.id === assistantMsgId
                                         ? { ...m, isGeneratingFollowUps: false }
-                                        : m,
-                                ),
+                                        : m
+                                )
                             );
                         }
                     } catch {
                         setMessages((prev) =>
                             prev.map((m) =>
-                                m.id === assistantMsgId
-                                    ? { ...m, isGeneratingFollowUps: false }
-                                    : m,
-                            ),
+                                m.id === assistantMsgId ? { ...m, isGeneratingFollowUps: false } : m
+                            )
                         );
                     }
                 };
@@ -604,19 +602,19 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                                 headers: {
                                     "Content-Type": "application/json",
                                     "X-Chat-ID": activeChatId,
-                                    "X-SRouter-Client": "playground",
+                                    "X-SRouter-Client": "playground"
                                 },
                                 body: JSON.stringify({
                                     model: selectedModel.id,
                                     messages: [
                                         {
                                             role: "user",
-                                            content: `Summarize this user request into a concise 3-5 words title. Return ONLY the title without quotes, punctuation, or markdown:\n\n${content.slice(0, 300)}`,
-                                        },
+                                            content: `Summarize this user request into a concise 3-5 words title. Return ONLY the title without quotes, punctuation, or markdown:\n\n${content.slice(0, 300)}`
+                                        }
                                     ],
                                     max_tokens: 20,
-                                    temperature: 0.4,
-                                }),
+                                    temperature: 0.4
+                                })
                             });
 
                             if (titleRes.ok) {
@@ -627,7 +625,7 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                                 if (rawTitle && rawTitle.length > 2 && rawTitle.length < 60) {
                                     setSessions((prev) => {
                                         const next = prev.map((s) =>
-                                            s.id === activeChatId ? { ...s, title: rawTitle } : s,
+                                            s.id === activeChatId ? { ...s, title: rawTitle } : s
                                         );
                                         saveStoredSessions(next, activeChatId);
                                         return next;
@@ -641,7 +639,7 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                             const fallbackTitle = content.slice(0, 26).trim() + "...";
                             setSessions((prev) => {
                                 const next = prev.map((s) =>
-                                    s.id === activeChatId ? { ...s, title: fallbackTitle } : s,
+                                    s.id === activeChatId ? { ...s, title: fallbackTitle } : s
                                 );
                                 saveStoredSessions(next, activeChatId);
                                 return next;
@@ -669,7 +667,7 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                         assistantText
                             ? `${assistantText}\n\nError: ${message}`
                             : `Error: ${message}`,
-                        true,
+                        true
                     );
                     setStatusMessage(`Generation failed: ${message}`);
                 }
@@ -678,7 +676,7 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                 setStreaming(false);
             }
         },
-        [input, streaming, selectedModel, messages, activeChatId],
+        [input, streaming, selectedModel, messages, activeChatId]
     );
 
     const cancel = useCallback(() => {
@@ -715,7 +713,7 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                     const payload = {
                         model: modelId,
                         messages: reqMessages,
-                        stream: true,
+                        stream: true
                     };
                     return `curl ${apiBase}/chat/completions \\\n  -H "Content-Type: application/json" \\\n  -H "Authorization: Bearer YOUR_API_KEY" \\\n  -H "X-Chat-ID: ${activeChatId}" \\\n  -d ${shellQuote(JSON.stringify(payload, null, 2))}`;
                 }
@@ -784,7 +782,7 @@ console.log(data);`;
                 }
             }
         },
-        [selectedModel, messages, apiBase, activeChatId],
+        [selectedModel, messages, apiBase, activeChatId]
     );
 
     const handleCopyCode = useCallback(async () => {
@@ -839,6 +837,6 @@ console.log(data);`;
         deleteMessage,
         clearMessages,
         generateCode,
-        handleCopyCode,
+        handleCopyCode
     };
 }

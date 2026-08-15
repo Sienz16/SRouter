@@ -35,7 +35,7 @@ export function useTheme() {
             const y = event?.clientY ?? window.innerHeight / 2;
             const endRadius = Math.hypot(
                 Math.max(x, window.innerWidth - x),
-                Math.max(y, window.innerHeight - y),
+                Math.max(y, window.innerHeight - y)
             );
 
             const transition = (
@@ -49,11 +49,11 @@ export function useTheme() {
             transition.ready.then(() => {
                 const clipPath = [
                     `circle(0px at ${x}px ${y}px)`,
-                    `circle(${endRadius}px at ${x}px ${y}px)`,
+                    `circle(${endRadius}px at ${x}px ${y}px)`
                 ];
                 document.documentElement.animate(
                     {
-                        clipPath: theme === "dark" ? clipPath : [...clipPath].reverse(),
+                        clipPath: theme === "dark" ? clipPath : [...clipPath].reverse()
                     },
                     {
                         duration: 500,
@@ -61,12 +61,12 @@ export function useTheme() {
                         pseudoElement:
                             theme === "dark"
                                 ? "::view-transition-new(root)"
-                                : "::view-transition-old(root)",
-                    },
+                                : "::view-transition-old(root)"
+                    }
                 );
             });
         },
-        [theme],
+        [theme]
     );
 
     return { theme, toggleTheme };

@@ -10,7 +10,7 @@ export class ProvidersController {
         const catalog = ProvidersLogic.listProviders();
         return ok(c, {
             object: "list",
-            data: catalog,
+            data: catalog
         });
     }
 

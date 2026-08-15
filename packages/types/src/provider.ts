@@ -2,7 +2,7 @@ import type {
     ChatCompletionChunk,
     ChatCompletionRequest,
     ChatCompletionResponse,
-    ModelObject,
+    ModelObject
 } from "./openai.js";
 
 // --- Provider Spectrum & Catalog Types ---
@@ -63,6 +63,6 @@ export interface AIProvider {
     listModels(): Promise<ModelObject[]>;
     chatCompletion(req: ChatCompletionRequest): Promise<ChatCompletionResponse>;
     chatCompletionStream(
-        req: ChatCompletionRequest,
+        req: ChatCompletionRequest
     ): AsyncGenerator<ChatCompletionChunk, void, void>;
 }

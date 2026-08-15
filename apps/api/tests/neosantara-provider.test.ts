@@ -24,7 +24,7 @@ test("saved Neosantara connections use the official URL and bearer auth", async 
         protocol: "openai",
         accessToken: fixtureKey,
         enabled: true,
-        createdAt: Date.now(),
+        createdAt: Date.now()
     };
     upsertProviderDB(config);
 

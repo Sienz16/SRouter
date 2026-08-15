@@ -5,7 +5,7 @@ import type {
     ChatCompletionRequest,
     ChatCompletionResponse,
     ModelObject,
-    ToolDefinition,
+    ToolDefinition
 } from "@srouter/types";
 
 const RUNTIME_URL = "https://runtime.us-east-1.kiro.dev/generateAssistantResponse";
@@ -201,7 +201,7 @@ function parseFrames(bytes: Uint8Array): KiroEvent[] {
 }
 
 async function* streamFrames(
-    body: ReadableStream<Uint8Array>,
+    body: ReadableStream<Uint8Array>
 ): AsyncGenerator<KiroEvent, void, void> {
     const reader = body.getReader();
     let buffer = new Uint8Array(0);
@@ -219,7 +219,7 @@ async function* streamFrames(
                 const view = new DataView(
                     buffer.buffer,
                     buffer.byteOffset + offset,
-                    buffer.length - offset,
+                    buffer.length - offset
                 );
                 const totalLength = view.getUint32(0, false);
                 if (totalLength < 16 || totalLength > MAX_FRAME_BYTES)
@@ -243,14 +243,14 @@ function chunk(
     id: string,
     model: string,
     delta: ChatCompletionChunk["choices"][number]["delta"],
-    finishReason: ChatCompletionChunk["choices"][number]["finish_reason"] = null,
+    finishReason: ChatCompletionChunk["choices"][number]["finish_reason"] = null
 ): ChatCompletionChunk {
     return {
         id,
         object: "chat.completion.chunk",
         created: Math.floor(Date.now() / 1000),
         model,
-        choices: [{ index: 0, delta, finish_reason: finishReason }],
+        choices: [{ index: 0, delta, finish_reason: finishReason }]
     };
 }
 
@@ -278,7 +278,7 @@ export class KiroExecutor implements AIProvider {
                 options.providerSpecificData?.authMethod ??
                 (options.apiKey ? "api_key" : "builder-id"),
             region: options.region ?? options.providerSpecificData?.region ?? "us-east-1",
-            profileArn: options.profileArn ?? options.providerSpecificData?.profileArn,
+            profileArn: options.profileArn ?? options.providerSpecificData?.profileArn
         };
     }
 
@@ -310,8 +310,8 @@ export class KiroExecutor implements AIProvider {
                 messages.push({
                     userInputMessage: {
                         content: `<instructions>\n${textOf(message.content)}\n</instructions>`,
-                        modelId: model,
-                    },
+                        modelId: model
+                    }
                 });
             } else if (message.role === "assistant") {
                 messages.push({ assistantResponseMessage: { content: textOf(message.content) } });
@@ -322,15 +322,15 @@ export class KiroExecutor implements AIProvider {
                         {
                             toolUseId: message.tool_call_id,
                             status: "success",
-                            content: [{ text: textOf(message.content) }],
-                        },
+                            content: [{ text: textOf(message.content) }]
+                        }
                     ];
                 }
                 const userMessage: KiroMessage = {
                     userInputMessage: {
                         content: textOf(message.content) || "continue",
-                        modelId: model,
-                    },
+                        modelId: model
+                    }
                 };
                 if (Object.keys(context).length > 0)
                     userMessage.userInputMessage!.userInputMessageContext = context;
@@ -347,14 +347,14 @@ export class KiroExecutor implements AIProvider {
                 name: tool.function.name,
                 description: tool.function.description ?? "",
                 inputSchema: {
-                    json: tool.function.parameters ?? { type: "object", properties: {} },
-                },
-            },
+                    json: tool.function.parameters ?? { type: "object", properties: {} }
+                }
+            }
         }));
         if (tools.length > 0)
             current.userInputMessage!.userInputMessageContext = {
                 ...(current.userInputMessage!.userInputMessageContext ?? {}),
-                tools,
+                tools
             };
         const payload: KiroRequest = {
             conversationState: {
@@ -363,14 +363,14 @@ export class KiroExecutor implements AIProvider {
                 agentContinuationId: randomUUID(),
                 agentTaskType: "vibe",
                 currentMessage: current,
-                history: messages,
+                history: messages
             },
             agentMode: "vibe",
             inferenceConfig: {
                 maxTokens: req.max_tokens ?? 32000,
                 ...(req.temperature === undefined ? {} : { temperature: req.temperature }),
-                ...(req.top_p === undefined ? {} : { topP: req.top_p }),
-            },
+                ...(req.top_p === undefined ? {} : { topP: req.top_p })
+            }
         };
         const authMethod = this.providerSpecificData.authMethod;
         if (
@@ -388,7 +388,7 @@ export class KiroExecutor implements AIProvider {
         const headers: Record<string, string> = {
             "Content-Type": "application/json",
             "Amz-Sdk-Request": "attempt=1; max=3",
-            "Amz-Sdk-Invocation-Id": randomUUID(),
+            "Amz-Sdk-Invocation-Id": randomUUID()
         };
         if (url.includes("codewhisperer.")) headers["X-Amz-Target"] = CODEWHISPERER_TARGET;
         if (token) headers.Authorization = `Bearer ${token}`;
@@ -426,20 +426,20 @@ export class KiroExecutor implements AIProvider {
                                       type: "function" as const,
                                       function: {
                                           name: call.function?.name ?? "",
-                                          arguments: call.function?.arguments ?? "",
-                                      },
-                                  })),
+                                          arguments: call.function?.arguments ?? ""
+                                      }
+                                  }))
                               }
-                            : {}),
+                            : {})
                     },
-                    finish_reason: toolCalls.length ? "tool_calls" : "stop",
-                },
-            ],
+                    finish_reason: toolCalls.length ? "tool_calls" : "stop"
+                }
+            ]
         };
     }
 
     async *chatCompletionStream(
-        req: ChatCompletionRequest,
+        req: ChatCompletionRequest
     ): AsyncGenerator<ChatCompletionChunk, void, void> {
         const body = this.buildRequest(req);
         let response: Response | undefined;
@@ -449,7 +449,7 @@ export class KiroExecutor implements AIProvider {
                 response = await fetch(url, {
                     method: "POST",
                     headers: this.headers(url),
-                    body: JSON.stringify(body),
+                    body: JSON.stringify(body)
                 });
                 if (
                     response.ok ||
@@ -477,7 +477,7 @@ export class KiroExecutor implements AIProvider {
                 if (content) {
                     yield chunk(responseId, req.model, {
                         ...(first ? { role: "assistant" as const } : {}),
-                        content,
+                        content
                     });
                     first = false;
                 }
@@ -491,7 +491,7 @@ export class KiroExecutor implements AIProvider {
                 if (content) {
                     yield chunk(responseId, req.model, {
                         ...(first ? { role: "assistant" as const } : {}),
-                        reasoning_content: content,
+                        reasoning_content: content
                     });
                     first = false;
                 }
@@ -509,7 +509,7 @@ export class KiroExecutor implements AIProvider {
                               : JSON.stringify(value.input);
                     tools.set(id, {
                         name: String(value.name ?? previous?.name ?? ""),
-                        input: `${previous?.input ?? ""}${fragment}`,
+                        input: `${previous?.input ?? ""}${fragment}`
                     });
                 }
                 hadTool = true;
@@ -521,7 +521,7 @@ export class KiroExecutor implements AIProvider {
                 const metadata = asObject(payload.metadata);
                 stop =
                     normalizeStopReason(
-                        payload.stopReason ?? payload.stop_reason ?? metadata.stopReason,
+                        payload.stopReason ?? payload.stop_reason ?? metadata.stopReason
                     ) ?? stop;
             }
         }
@@ -533,9 +533,9 @@ export class KiroExecutor implements AIProvider {
                         index: 0,
                         id,
                         type: "function",
-                        function: { name: value.name, arguments: value.input },
-                    },
-                ],
+                        function: { name: value.name, arguments: value.input }
+                    }
+                ]
             });
             first = false;
         }
@@ -547,7 +547,7 @@ export class KiroExecutor implements AIProvider {
                 ? "tool_calls"
                 : stop === "max_tokens"
                   ? "length"
-                  : "stop",
+                  : "stop"
         );
     }
 }

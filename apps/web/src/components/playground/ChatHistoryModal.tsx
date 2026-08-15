@@ -24,7 +24,7 @@ export function ChatHistoryModal({
     onCreateSession,
     onDeleteSession,
     onCopyChatId,
-    copiedChatId,
+    copiedChatId
 }: ChatHistoryModalProps) {
     const [search, setSearch] = useState("");
 
@@ -36,7 +36,7 @@ export function ChatHistoryModal({
                 s.title.toLowerCase().includes(q) ||
                 s.id.toLowerCase().includes(q) ||
                 s.model.toLowerCase().includes(q) ||
-                s.messages.some((m) => m.content.toLowerCase().includes(q)),
+                s.messages.some((m) => m.content.toLowerCase().includes(q))
         );
     }, [sessions, search]);
 

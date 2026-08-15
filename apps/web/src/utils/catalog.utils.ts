@@ -21,12 +21,12 @@ export interface CatalogSummaryItems {
 
 export function buildSummaryItems(
     data: CatalogSummary,
-    allProviders: ProviderDefinition[],
+    allProviders: ProviderDefinition[]
 ): CatalogSummaryItems[] {
     const connectedProviders = allProviders.filter((provider) => getConnectedCount(provider) > 0);
     const totalConnections = allProviders.reduce(
         (total, provider) => total + getConnectedCount(provider),
-        0,
+        0
     );
     const totalModels = allProviders.reduce((total, provider) => total + provider.models.length, 0);
 
@@ -34,44 +34,44 @@ export function buildSummaryItems(
         {
             label: "Drivers",
             value: data.total.toLocaleString(),
-            detail: "Available in the registry",
+            detail: "Available in the registry"
         },
         {
             label: "Connected",
             value: connectedProviders.length.toLocaleString(),
-            detail: `${totalConnections.toLocaleString()} active ${totalConnections === 1 ? "connection" : "connections"}`,
+            detail: `${totalConnections.toLocaleString()} active ${totalConnections === 1 ? "connection" : "connections"}`
         },
         {
             label: "Unconfigured",
             value: (allProviders.length - connectedProviders.length).toLocaleString(),
-            detail: "Ready to connect",
+            detail: "Ready to connect"
         },
         {
             label: "Models",
             value: totalModels.toLocaleString(),
-            detail: "Exposed across all drivers",
-        },
+            detail: "Exposed across all drivers"
+        }
     ];
 }
 
 export function buildFilterOptions(
     data: CatalogSummary,
-    allProviders: ProviderDefinition[],
+    allProviders: ProviderDefinition[]
 ): { value: FilterValue; label: string; count: number }[] {
     return [
         { value: "all", label: "All", count: allProviders.length },
         ...CATEGORY_ORDER.map((category) => ({
             value: category as FilterValue,
             label: CATEGORY_LABELS[category],
-            count: (data.categories[category] ?? []).length,
-        })),
+            count: (data.categories[category] ?? []).length
+        }))
     ];
 }
 
 export function matchesProvider(
     provider: ProviderDefinition,
     filter: FilterValue,
-    normalizedSearch: string,
+    normalizedSearch: string
 ): boolean {
     if (filter !== "all" && provider.category !== filter) return false;
     if (!normalizedSearch) return true;
@@ -84,12 +84,12 @@ export function matchesProvider(
 
 export function buildGroups(
     providers: ProviderDefinition[],
-    filter: FilterValue,
+    filter: FilterValue
 ): { category: ProviderCategory; providers: ProviderDefinition[] }[] {
     if (filter === "all") {
         return CATEGORY_ORDER.map((category) => ({
             category,
-            providers: providers.filter((provider) => provider.category === category),
+            providers: providers.filter((provider) => provider.category === category)
         })).filter((group) => group.providers.length > 0);
     }
     return [{ category: filter, providers }];

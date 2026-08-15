@@ -16,7 +16,7 @@ export interface UsageBreakdown {
  */
 export function extractUsageBreakdown(
     provider: string | undefined,
-    usage: unknown,
+    usage: unknown
 ): UsageBreakdown {
     const empty: UsageBreakdown = {
         promptTokens: 0,
@@ -24,7 +24,7 @@ export function extractUsageBreakdown(
         cachedTokens: 0,
         cacheCreationTokens: 0,
         reasoningTokens: 0,
-        totalTokens: 0,
+        totalTokens: 0
     };
 
     if (!usage || typeof usage !== "object") return empty;
@@ -46,9 +46,9 @@ export function extractUsageBreakdown(
             cachedTokens: cached,
             cacheCreationTokens: cacheCreation,
             reasoningTokens: n(
-                (u as { reasoning?: { reasoning_tokens?: unknown } }).reasoning?.reasoning_tokens,
+                (u as { reasoning?: { reasoning_tokens?: unknown } }).reasoning?.reasoning_tokens
             ),
-            totalTokens: input + output,
+            totalTokens: input + output
         };
     }
 
@@ -65,7 +65,7 @@ export function extractUsageBreakdown(
         cachedTokens: n(promptDetails.cached_tokens),
         cacheCreationTokens: 0,
         reasoningTokens: n(completionDetails.reasoning_tokens),
-        totalTokens: total || prompt + completion,
+        totalTokens: total || prompt + completion
     };
 }
 
@@ -76,7 +76,7 @@ export function extractUsageBreakdown(
 export function estimateCostForUsage(
     provider: string | undefined,
     model: string,
-    breakdown: UsageBreakdown,
+    breakdown: UsageBreakdown
 ): number {
     const pricing = getPricingForModel(provider, model);
     return calculateCostFromTokens(
@@ -85,8 +85,8 @@ export function estimateCostForUsage(
             completion_tokens: breakdown.completionTokens,
             cached_tokens: breakdown.cachedTokens,
             cache_creation_input_tokens: breakdown.cacheCreationTokens,
-            reasoning_tokens: breakdown.reasoningTokens,
+            reasoning_tokens: breakdown.reasoningTokens
         },
-        pricing,
+        pricing
     );
 }

@@ -6,7 +6,7 @@ import {
     SlidersHorizontal,
     Sparkles,
     Trash2,
-    X,
+    X
 } from "lucide-react";
 
 interface PlaygroundSettingsPopoverProps {
@@ -24,20 +24,20 @@ interface PlaygroundSettingsPopoverProps {
 const PRESETS = [
     {
         label: "Default",
-        prompt: "",
+        prompt: ""
     },
     {
         label: "Senior Dev",
-        prompt: "You are a senior full-stack software engineer. Provide clean, modular, production-ready TypeScript/Go code with minimal fluff.",
+        prompt: "You are a senior full-stack software engineer. Provide clean, modular, production-ready TypeScript/Go code with minimal fluff."
     },
     {
         label: "JSON Output",
-        prompt: "You are a specialized data extractor. Always respond with raw, valid JSON only. Do not include markdown codeblocks or explanatory text.",
+        prompt: "You are a specialized data extractor. Always respond with raw, valid JSON only. Do not include markdown codeblocks or explanatory text."
     },
     {
         label: "Concise",
-        prompt: "Be extremely concise, direct, and avoid polite conversational filler. Answer with bullet points and code.",
-    },
+        prompt: "Be extremely concise, direct, and avoid polite conversational filler. Answer with bullet points and code."
+    }
 ];
 
 export function PlaygroundSettingsPopover({
@@ -49,7 +49,7 @@ export function PlaygroundSettingsPopover({
     onMaxTokensChange,
     onOpenCode,
     onClear,
-    hasMessages,
+    hasMessages
 }: PlaygroundSettingsPopoverProps) {
     const [isOpen, setIsOpen] = useState(false);
     const popoverRef = useRef<HTMLDivElement>(null);

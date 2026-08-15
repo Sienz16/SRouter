@@ -23,7 +23,7 @@ export class QoderOAuth {
             challenge: pkce.codeChallenge,
             challenge_method: "S256",
             machine_id: machineId,
-            nonce: pkce.state,
+            nonce: pkce.state
         });
         return `${this.loginUrl}?${params.toString()}`;
     }
@@ -40,8 +40,8 @@ export class QoderOAuth {
             method: "GET",
             headers: {
                 Accept: "application/json",
-                "User-Agent": "qodercli/1.0.0",
-            },
+                "User-Agent": "qodercli/1.0.0"
+            }
         });
 
         if (response.status === 202 || response.status === 404) {
@@ -81,7 +81,7 @@ export class QoderOAuth {
             accessToken: body.token,
             refreshToken: body.refresh_token || "",
             userId: body.user_id || "",
-            expiresIn,
+            expiresIn
         };
     }
 
@@ -97,8 +97,8 @@ export class QoderOAuth {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                     Accept: "application/json",
-                    "User-Agent": "qodercli/1.0.0",
-                },
+                    "User-Agent": "qodercli/1.0.0"
+                }
             });
             if (!response.ok) return { id: "", name: "", email: "", organizationId: "" };
             const body = (await response.json()) as {
@@ -114,7 +114,7 @@ export class QoderOAuth {
                 id: body.id || body.userId || body.user_id || "",
                 name: (body.name || body.username || "").trim(),
                 email: (body.email || "").trim(),
-                organizationId: (body.organization_id || "").trim(),
+                organizationId: (body.organization_id || "").trim()
             };
         } catch {
             return { id: "", name: "", email: "", organizationId: "" };
@@ -137,7 +137,7 @@ export class QoderOAuth {
             refreshToken: poll.refreshToken,
             expiresIn: poll.expiresIn,
             tokenType: "Bearer",
-            accountId: poll.userId || userInfo.id,
+            accountId: poll.userId || userInfo.id
         };
     }
 
@@ -146,7 +146,7 @@ export class QoderOAuth {
         return {
             accessToken: refreshToken,
             refreshToken,
-            tokenType: "Bearer",
+            tokenType: "Bearer"
         };
     }
 }

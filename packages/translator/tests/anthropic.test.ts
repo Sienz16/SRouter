@@ -3,12 +3,12 @@ import { test } from "node:test";
 import {
     anthropicToOpenAIRequest,
     openAIToAnthropicResponse,
-    openAIToAnthropicStream,
+    openAIToAnthropicStream
 } from "../src/anthropic.js";
 import type {
     AnthropicMessageRequest,
     ChatCompletionChunk,
-    ChatCompletionResponse,
+    ChatCompletionResponse
 } from "@srouter/types";
 
 test("anthropicToOpenAIRequest maps system string, messages, and tools", () => {
@@ -19,7 +19,7 @@ test("anthropicToOpenAIRequest maps system string, messages, and tools", () => {
         messages: [
             {
                 role: "user",
-                content: "Run test suite",
+                content: "Run test suite"
             },
             {
                 role: "assistant",
@@ -28,9 +28,9 @@ test("anthropicToOpenAIRequest maps system string, messages, and tools", () => {
                         type: "tool_use",
                         id: "call_123",
                         name: "bash",
-                        input: { command: "pnpm test" },
-                    },
-                ],
+                        input: { command: "pnpm test" }
+                    }
+                ]
             },
             {
                 role: "user",
@@ -38,10 +38,10 @@ test("anthropicToOpenAIRequest maps system string, messages, and tools", () => {
                     {
                         type: "tool_result",
                         tool_use_id: "call_123",
-                        content: "Tests passed: 20",
-                    },
-                ],
-            },
+                        content: "Tests passed: 20"
+                    }
+                ]
+            }
         ],
         tools: [
             {
@@ -50,10 +50,10 @@ test("anthropicToOpenAIRequest maps system string, messages, and tools", () => {
                 input_schema: {
                     type: "object",
                     properties: { command: { type: "string" } },
-                    required: ["command"],
-                },
-            },
-        ],
+                    required: ["command"]
+                }
+            }
+        ]
     };
 
     const openAIReq = anthropicToOpenAIRequest(req);
@@ -76,7 +76,7 @@ test("anthropicToOpenAIRequest maps system string, messages, and tools", () => {
     assert.equal(openAIReq.messages[2]?.tool_calls?.[0]?.function.name, "bash");
     assert.equal(
         openAIReq.messages[2]?.tool_calls?.[0]?.function.arguments,
-        '{"command":"pnpm test"}',
+        '{"command":"pnpm test"}'
     );
 
     // Tool result
@@ -90,7 +90,7 @@ test("anthropicToOpenAIRequest maps system string, messages, and tools", () => {
     assert.deepEqual(openAIReq.tools?.[0]?.function.parameters, {
         type: "object",
         properties: { command: { type: "string" } },
-        required: ["command"],
+        required: ["command"]
     });
 });
 
@@ -112,19 +112,19 @@ test("openAIToAnthropicResponse maps OpenAI response to Anthropic message format
                             type: "function",
                             function: {
                                 name: "read_file",
-                                arguments: '{"path":"main.ts"}',
-                            },
-                        },
-                    ],
+                                arguments: '{"path":"main.ts"}'
+                            }
+                        }
+                    ]
                 },
-                finish_reason: "tool_calls",
-            },
+                finish_reason: "tool_calls"
+            }
         ],
         usage: {
             prompt_tokens: 150,
             completion_tokens: 45,
-            total_tokens: 195,
-        },
+            total_tokens: 195
+        }
     };
 
     const antRes = openAIToAnthropicResponse(openAIRes, "claude-3-7-sonnet-20250219");
@@ -156,10 +156,10 @@ test("openAIToAnthropicStream translates streaming chunks into Anthropic SSE eve
                 {
                     index: 0,
                     delta: { role: "assistant", content: "Hello " },
-                    finish_reason: null,
-                },
+                    finish_reason: null
+                }
             ],
-            usage: { prompt_tokens: 20, completion_tokens: 0, total_tokens: 20 },
+            usage: { prompt_tokens: 20, completion_tokens: 0, total_tokens: 20 }
         };
         yield {
             id: "chatcmpl-stream-1",
@@ -170,9 +170,9 @@ test("openAIToAnthropicStream translates streaming chunks into Anthropic SSE eve
                 {
                     index: 0,
                     delta: { content: "world!" },
-                    finish_reason: null,
-                },
-            ],
+                    finish_reason: null
+                }
+            ]
         };
         yield {
             id: "chatcmpl-stream-1",
@@ -183,9 +183,9 @@ test("openAIToAnthropicStream translates streaming chunks into Anthropic SSE eve
                 {
                     index: 0,
                     delta: {},
-                    finish_reason: "stop",
-                },
-            ],
+                    finish_reason: "stop"
+                }
+            ]
         };
     }
 
@@ -202,7 +202,7 @@ test("openAIToAnthropicStream translates streaming chunks into Anthropic SSE eve
     assert.equal((events[4] as { type: string }).type, "content_block_stop");
     assert.equal(
         (events[5] as { type: string; delta: { stop_reason: string } }).delta.stop_reason,
-        "end_turn",
+        "end_turn"
     );
     assert.equal((events[6] as { type: string }).type, "message_stop");
 });

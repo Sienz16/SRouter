@@ -15,7 +15,7 @@ import {
     Shield,
     Terminal,
     Trash2,
-    Zap,
+    Zap
 } from "lucide-react";
 import { useKeys } from "@/hooks/useKeys";
 import {
@@ -24,7 +24,7 @@ import {
     DialogDescription,
     DialogFooter,
     DialogHeader,
-    DialogTitle,
+    DialogTitle
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,7 +34,7 @@ import type { DBAPIKey } from "@srouter/types";
 
 export const Route = createFileRoute("/keys")({
     staticData: { title: "API Keys" },
-    component: KeysPage,
+    component: KeysPage
 });
 
 function maskKey(key: string): string {
@@ -53,12 +53,12 @@ function KeysPage() {
         newlyCreatedKey,
         setNewlyCreatedKey,
         createKey,
-        deleteKey,
+        deleteKey
     } = useKeys();
 
     const { data: serverSettings } = useQuery<{ requireApiKey: boolean }>({
         queryKey: ["server_settings"],
-        queryFn: () => api.get<{ requireApiKey: boolean }>("/v1/settings"),
+        queryFn: () => api.get<{ requireApiKey: boolean }>("/v1/settings")
     });
     const requireApiKey = serverSettings?.requireApiKey ?? false;
 
@@ -80,7 +80,7 @@ function KeysPage() {
         const res = await createKey({
             name: name.trim(),
             rateLimit: rateLimit ? parseInt(rateLimit, 10) : undefined,
-            quotaLimit: quotaLimit ? parseInt(quotaLimit, 10) : undefined,
+            quotaLimit: quotaLimit ? parseInt(quotaLimit, 10) : undefined
         });
 
         if (res) {
@@ -120,7 +120,7 @@ function KeysPage() {
         (k) =>
             k.name.toLowerCase().includes(search.toLowerCase()) ||
             k.id.toLowerCase().includes(search.toLowerCase()) ||
-            k.key.toLowerCase().includes(search.toLowerCase()),
+            k.key.toLowerCase().includes(search.toLowerCase())
     );
 
     const totalUsage = keys.reduce((acc, k) => acc + (k.usageTokens || 0), 0);
@@ -166,7 +166,7 @@ response = client.chat.completions.create(
     messages=[{"role": "user", "content": "Hello from SRouter!"}],
 )
 
-print(response.choices[0].message.content)`,
+print(response.choices[0].message.content)`
     };
 
     if (loading) {
@@ -370,8 +370,8 @@ print(response.choices[0].message.content)`,
                                             ? Math.min(
                                                   100,
                                                   Math.round(
-                                                      ((k.usageTokens || 0) / k.quotaLimit) * 100,
-                                                  ),
+                                                      ((k.usageTokens || 0) / k.quotaLimit) * 100
+                                                  )
                                               )
                                             : null;
 
@@ -442,7 +442,7 @@ print(response.choices[0].message.content)`,
                                                                           : "bg-emerald-500"
                                                                 }`}
                                                                 style={{
-                                                                    width: `${quotaPercent}%`,
+                                                                    width: `${quotaPercent}%`
                                                                 }}
                                                             />
                                                         </div>

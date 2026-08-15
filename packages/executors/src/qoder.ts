@@ -11,14 +11,14 @@ import {
     QODER_MACHINE_OS,
     QODER_MACHINE_TYPE,
     QODER_RSA_PUBLIC_KEY,
-    QODER_USERINFO_URL,
+    QODER_USERINFO_URL
 } from "@srouter/constants";
 import type {
     AIProvider,
     ChatCompletionChunk,
     ChatCompletionRequest,
     ChatCompletionResponse,
-    ModelObject,
+    ModelObject
 } from "@srouter/types";
 import { parseDataLine, streamLines } from "./base.js";
 
@@ -106,7 +106,7 @@ function aesEncryptCbcBase64(plaintext: string, keyStr: string): string {
 function rsaEncryptBase64(data: string): string {
     const encrypted = crypto.publicEncrypt(
         { key: QODER_RSA_PUBLIC_KEY, padding: crypto.constants.RSA_PKCS1_PADDING },
-        Buffer.from(data, "utf8"),
+        Buffer.from(data, "utf8")
     );
     return encrypted.toString("base64");
 }
@@ -146,7 +146,7 @@ export interface CosyCredentials {
 export function buildCosyHeaders(
     body: Buffer | Uint8Array | string,
     requestUrl: string,
-    creds: CosyCredentials,
+    creds: CosyCredentials
 ): Record<string, string> {
     if (!creds?.userId) throw new Error("cosy: user id is empty");
     if (!creds?.authToken) throw new Error("cosy: auth token is empty");
@@ -162,7 +162,7 @@ export function buildCosyHeaders(
         security_oauth_token: creds.authToken,
         name: creds.name || "",
         aid: "",
-        email: creds.email || "",
+        email: creds.email || ""
     });
 
     const timestamp = String(Math.floor(Date.now() / 1000));
@@ -173,7 +173,7 @@ export function buildCosyHeaders(
         requestId,
         info,
         cosyVersion: QODER_IDE_VERSION,
-        ideVersion: "",
+        ideVersion: ""
     });
     const payloadB64 = Buffer.from(payloadJson, "utf8").toString("base64");
 
@@ -204,7 +204,7 @@ export function buildCosyHeaders(
         "Cosy-Organization-Id": "",
         "Cosy-Organization-Tags": "",
         "Login-Version": QODER_LOGIN_VERSION,
-        "X-Request-Id": randomUUID(),
+        "X-Request-Id": randomUUID()
     };
 }
 
@@ -219,7 +219,7 @@ export function isQoderPat(token?: string): boolean {
 }
 
 export async function exchangeJobToken(
-    pat: string,
+    pat: string
 ): Promise<{ jobToken: string; expiresAt: number }> {
     const res = await fetch(QODER_JOB_TOKEN_EXCHANGE_URL, {
         method: "POST",
@@ -228,9 +228,9 @@ export async function exchangeJobToken(
             Accept: "application/json",
             "User-Agent": "qodercli/1.0.0",
             "Cosy-Version": QODER_IDE_VERSION,
-            "Cosy-ClientType": QODER_CLIENT_TYPE,
+            "Cosy-ClientType": QODER_CLIENT_TYPE
         },
-        body: JSON.stringify({ personal_token: pat }),
+        body: JSON.stringify({ personal_token: pat })
     });
 
     if (!res.ok) {
@@ -263,8 +263,8 @@ export async function fetchUserIdForJobToken(jobToken: string): Promise<string> 
             headers: {
                 Authorization: `Bearer ${jobToken}`,
                 Accept: "application/json",
-                "User-Agent": "qodercli/1.0.0",
-            },
+                "User-Agent": "qodercli/1.0.0"
+            }
         });
         if (!res.ok) return "";
         const data = (await res.json()) as { id?: string; userId?: string; user_id?: string };
@@ -275,7 +275,7 @@ export async function fetchUserIdForJobToken(jobToken: string): Promise<string> 
 }
 
 export async function resolvePatCredential(
-    pat: string,
+    pat: string
 ): Promise<{ accessToken: string; userId: string; expiresAt: number }> {
     const cached = patJobCache.get(pat);
     if (cached && cached.expiresAt - Date.now() > PAT_REFRESH_BUFFER_MS) {
@@ -417,7 +417,7 @@ export class QoderExecutor implements AIProvider {
             machineId,
             name,
             email,
-            isJobToken,
+            isJobToken
         };
     }
 
@@ -452,8 +452,8 @@ export class QoderExecutor implements AIProvider {
                     authToken: creds.accessToken,
                     name: creds.name,
                     email: creds.email,
-                    machineId: creds.machineId,
-                }),
+                    machineId: creds.machineId
+                })
             };
 
             const res = await fetch(url, { method: "GET", headers });
@@ -475,7 +475,7 @@ export class QoderExecutor implements AIProvider {
                 models.push({
                     id: `${baseId}/${key}`,
                     object: "model",
-                    owned_by: baseId,
+                    owned_by: baseId
                 });
             }
 
@@ -492,7 +492,7 @@ export class QoderExecutor implements AIProvider {
 
     private async buildPayload(
         req: ChatCompletionRequest,
-        creds: { userId: string; machineId: string },
+        creds: { userId: string; machineId: string }
     ): Promise<{
         qoderKey: string;
         payload: Record<string, unknown>;
@@ -508,7 +508,7 @@ export class QoderExecutor implements AIProvider {
                     qoderKey.includes("preview") ||
                     qoderKey === "ultimate" ||
                     qoderKey.includes("model"),
-                source: "system",
+                source: "system"
             };
         }
 
@@ -558,10 +558,10 @@ export class QoderExecutor implements AIProvider {
                 extra: {
                     context: [],
                     modelConfig: { key: qoderKey, is_reasoning: isReasoning },
-                    originalContent: lastUser,
+                    originalContent: lastUser
                 },
                 features: [],
-                text: lastUser,
+                text: lastUser
             },
             model_config: modelConfig,
             business: {
@@ -571,15 +571,15 @@ export class QoderExecutor implements AIProvider {
                 stage: "start",
                 id: randomUUID(),
                 name: lastUser.slice(0, 30),
-                begin_at: Date.now(),
-            },
+                begin_at: Date.now()
+            }
         };
 
         return { qoderKey, payload, modelConfig };
     }
 
     async *chatCompletionStream(
-        req: ChatCompletionRequest,
+        req: ChatCompletionRequest
     ): AsyncGenerator<ChatCompletionChunk, void, void> {
         const creds = await this.resolveCredentials();
         if (!creds.accessToken) {
@@ -598,7 +598,7 @@ export class QoderExecutor implements AIProvider {
             authToken: creds.accessToken,
             name: creds.name,
             email: creds.email,
-            machineId: creds.machineId,
+            machineId: creds.machineId
         });
 
         const headers = {
@@ -608,13 +608,13 @@ export class QoderExecutor implements AIProvider {
             "X-Model-Key": qoderKey,
             "X-Model-Source": (modelConfig.source as string) || "system",
             "Accept-Encoding": "identity",
-            ...cosyHeaders,
+            ...cosyHeaders
         };
 
         const res = await fetch(url, {
             method: "POST",
             headers,
-            body: encodedBodyBuf,
+            body: encodedBodyBuf
         });
 
         if (!res.ok) {
@@ -699,8 +699,8 @@ export class QoderExecutor implements AIProvider {
                             type: "function",
                             function: {
                                 name: tc.function?.name || "",
-                                arguments: tc.function?.arguments || "",
-                            },
+                                arguments: tc.function?.arguments || ""
+                            }
                         };
                     } else {
                         if (tc.function?.name) {
@@ -725,11 +725,11 @@ export class QoderExecutor implements AIProvider {
                     message: {
                         role: role as "assistant",
                         content: content || null,
-                        ...(toolCalls.length > 0 ? { tool_calls: toolCalls } : {}),
+                        ...(toolCalls.length > 0 ? { tool_calls: toolCalls } : {})
                     },
-                    finish_reason: toolCalls.length > 0 ? "tool_calls" : "stop",
-                },
-            ],
+                    finish_reason: toolCalls.length > 0 ? "tool_calls" : "stop"
+                }
+            ]
         };
     }
 }

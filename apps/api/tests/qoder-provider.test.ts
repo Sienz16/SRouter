@@ -30,7 +30,7 @@ test("saved Qoder connections initialize QoderExecutor on startup", async () => 
         protocol: "openai",
         accessToken: fixtureToken,
         enabled: true,
-        createdAt: Date.now(),
+        createdAt: Date.now()
     };
     upsertProviderDB(config);
 
@@ -46,7 +46,7 @@ test("saved Qoder connections initialize QoderExecutor on startup", async () => 
 test("processQoderTokenImport stores Qoder provider and registers in registry", async () => {
     const config = AuthLogic.processQoderTokenImport({
         accessToken: "pt-my-pat-token",
-        name: "My Qoder Account",
+        name: "My Qoder Account"
     });
     createdIds.push(config.id);
 
@@ -84,13 +84,13 @@ test("pollQoderDeviceToken polls upstream and creates provider when user authori
                 token: "dt-polled-device-token",
                 refresh_token: "rt-polled-device-token",
                 user_id: "user-polled-id",
-                expires_in: 86400,
+                expires_in: 86400
             });
         }
         if (urlStr.includes("/userinfo")) {
             return Response.json({
                 name: "Seaavey Dev",
-                email: "seaavey@example.com",
+                email: "seaavey@example.com"
             });
         }
         return Response.json({});

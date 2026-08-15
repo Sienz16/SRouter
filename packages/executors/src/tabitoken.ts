@@ -10,7 +10,7 @@ export class TabiTokenExecutor extends OpenAIExecutor {
             name: options.name ?? "TabiToken",
             baseUrl: options.baseUrl ?? TABITOKEN_BASE_URL,
             apiKey: options.apiKey,
-            accessToken: options.accessToken,
+            accessToken: options.accessToken
         });
     }
 }

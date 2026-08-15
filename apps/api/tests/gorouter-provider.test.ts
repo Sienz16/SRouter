@@ -26,7 +26,7 @@ test("saved GoRouter connections use the official URL and bearer auth", async ()
         protocol: "openai",
         accessToken: fixtureKey,
         enabled: true,
-        createdAt: Date.now(),
+        createdAt: Date.now()
     };
     upsertProviderDB(config);
 
@@ -54,7 +54,7 @@ test("saved GoRouter connections use the official URL and bearer auth", async ()
 test("processGoRouterTokenImport creates and registers GoRouter provider config", () => {
     const config = AuthLogic.processGoRouterTokenImport({
         accessToken: "test-gorouter-key",
-        name: "My GoRouter Account",
+        name: "My GoRouter Account"
     });
 
     createdIds.push(config.id);
@@ -68,6 +68,6 @@ test("processGoRouterTokenImport creates and registers GoRouter provider config"
     assert.equal(config.enabled, true);
     assert.equal(
         goRouterAuthHandler.tokenImportMessage,
-        "GoRouter API Key registered and saved directly to SQLite database!",
+        "GoRouter API Key registered and saved directly to SQLite database!"
     );
 });

@@ -7,7 +7,7 @@ import {
     getCoreRowModel,
     getPaginationRowModel,
     getSortedRowModel,
-    useReactTable,
+    useReactTable
 } from "@tanstack/react-table";
 import {
     ArrowDown,
@@ -16,7 +16,7 @@ import {
     ChevronLeft,
     ChevronRight,
     Database,
-    Search,
+    Search
 } from "lucide-react";
 import type { UsageStats } from "@srouter/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,7 +27,7 @@ import {
     TableCell,
     TableHead,
     TableHeader,
-    TableRow,
+    TableRow
 } from "@/components/ui/table";
 
 type ModelUsageItem = UsageStats["byModel"][number];
@@ -41,13 +41,13 @@ export function UsageByModelTable({ models }: UsageByModelTableProps) {
     const [sorting, setSorting] = useState<SortingState>([{ id: "totalRequests", desc: true }]);
     const [pagination, setPagination] = useState<PaginationState>({
         pageIndex: 0,
-        pageSize: 10,
+        pageSize: 10
     });
 
     const normalizedSearch = searchModel.trim().toLowerCase();
     const filteredModels = useMemo(
         () => models.filter((model) => model.model.toLowerCase().includes(normalizedSearch)),
-        [models, normalizedSearch],
+        [models, normalizedSearch]
     );
     const hasUsage = models.length > 0;
 
@@ -81,7 +81,7 @@ export function UsageByModelTable({ models }: UsageByModelTableProps) {
                     >
                         {row.original.model}
                     </span>
-                ),
+                )
             },
             {
                 accessorKey: "totalRequests",
@@ -108,7 +108,7 @@ export function UsageByModelTable({ models }: UsageByModelTableProps) {
                     <span className="font-mono text-foreground tabular-nums">
                         {row.original.totalRequests.toLocaleString()}
                     </span>
-                ),
+                )
             },
             {
                 accessorKey: "totalInputTokens",
@@ -135,7 +135,7 @@ export function UsageByModelTable({ models }: UsageByModelTableProps) {
                     <span className="font-mono text-muted-foreground tabular-nums">
                         {row.original.totalInputTokens.toLocaleString()}
                     </span>
-                ),
+                )
             },
             {
                 accessorKey: "totalOutputTokens",
@@ -162,7 +162,7 @@ export function UsageByModelTable({ models }: UsageByModelTableProps) {
                     <span className="font-mono text-muted-foreground tabular-nums">
                         {row.original.totalOutputTokens.toLocaleString()}
                     </span>
-                ),
+                )
             },
             {
                 accessorKey: "totalCachedTokens",
@@ -189,7 +189,7 @@ export function UsageByModelTable({ models }: UsageByModelTableProps) {
                     <span className="font-mono text-muted-foreground tabular-nums">
                         {row.original.totalCachedTokens.toLocaleString()}
                     </span>
-                ),
+                )
             },
             {
                 id: "total",
@@ -220,7 +220,7 @@ export function UsageByModelTable({ models }: UsageByModelTableProps) {
                             {total.toLocaleString()}
                         </span>
                     );
-                },
+                }
             },
             {
                 accessorKey: "estCost",
@@ -247,10 +247,10 @@ export function UsageByModelTable({ models }: UsageByModelTableProps) {
                     <span className="font-mono font-semibold text-foreground tabular-nums">
                         ${row.original.estCost.toFixed(4)}
                     </span>
-                ),
-            },
+                )
+            }
         ],
-        [],
+        []
     );
 
     const table = useReactTable({
@@ -258,13 +258,13 @@ export function UsageByModelTable({ models }: UsageByModelTableProps) {
         columns,
         state: {
             sorting,
-            pagination,
+            pagination
         },
         onSortingChange: setSorting,
         onPaginationChange: setPagination,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
+        getPaginationRowModel: getPaginationRowModel()
     });
 
     const pageCount = table.getPageCount();
@@ -332,7 +332,7 @@ export function UsageByModelTable({ models }: UsageByModelTableProps) {
                                                     ? null
                                                     : flexRender(
                                                           header.column.columnDef.header,
-                                                          header.getContext(),
+                                                          header.getContext()
                                                       )}
                                             </TableHead>
                                         ))}
@@ -351,7 +351,7 @@ export function UsageByModelTable({ models }: UsageByModelTableProps) {
                                             >
                                                 {flexRender(
                                                     cell.column.columnDef.cell,
-                                                    cell.getContext(),
+                                                    cell.getContext()
                                                 )}
                                             </TableCell>
                                         ))}

@@ -17,10 +17,10 @@ export function validateJson<T extends ZodSchema>(schema: T) {
                         message: firstIssue.message,
                         type: "invalid_request_error",
                         param,
-                        code: firstIssue.code,
-                    },
+                        code: firstIssue.code
+                    }
                 },
-                400,
+                400
             );
         }
     });

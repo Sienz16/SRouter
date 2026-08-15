@@ -26,7 +26,7 @@ test("saved SeekAI connections use the official URL and bearer auth", async () =
         protocol: "openai",
         accessToken: fixtureKey,
         enabled: true,
-        createdAt: Date.now(),
+        createdAt: Date.now()
     };
     upsertProviderDB(config);
 
@@ -54,7 +54,7 @@ test("saved SeekAI connections use the official URL and bearer auth", async () =
 test("processSeekAITokenImport creates and registers SeekAI provider config", () => {
     const config = AuthLogic.processSeekAITokenImport({
         accessToken: "test-seekai-key",
-        name: "My SeekAI Account",
+        name: "My SeekAI Account"
     });
 
     createdIds.push(config.id);
@@ -68,6 +68,6 @@ test("processSeekAITokenImport creates and registers SeekAI provider config", ()
     assert.equal(config.enabled, true);
     assert.equal(
         seekAIAuthHandler.tokenImportMessage,
-        "SeekAI API Key registered and saved directly to SQLite database!",
+        "SeekAI API Key registered and saved directly to SQLite database!"
     );
 });

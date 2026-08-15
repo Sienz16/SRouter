@@ -9,7 +9,7 @@ import {
     COMMANDCODE_BASE_URL,
     GOROUTER_BASE_URL,
     SEEKAI_BASE_URL,
-    TABITOKEN_BASE_URL,
+    TABITOKEN_BASE_URL
 } from "@srouter/constants";
 import {
     AntigravityExecutor,
@@ -20,7 +20,7 @@ import {
     GoRouterExecutor,
     QoderExecutor,
     SeekAIExecutor,
-    TabiTokenExecutor,
+    TabiTokenExecutor
 } from "@srouter/executors";
 import { AntigravityOAuth, OpenAICodexOAuth, QoderOAuth } from "@srouter/providers";
 import type { AIProvider, ProviderCategory, ProviderProtocol } from "@srouter/types";
@@ -144,15 +144,15 @@ export const openaiCodexAuthHandler: AuthProviderHandler = {
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
         accountId: tokens.accountId,
-        expiresIn: tokens.expiresIn,
+        expiresIn: tokens.expiresIn
     }),
     mapImportTokens: (params) => ({
         accessToken: params.accessToken,
         refreshToken: params.refreshToken,
-        accountId: params.accountId,
+        accountId: params.accountId
     }),
     buildExecutor: ({ id, name, accessToken, refreshToken, accountId }) =>
-        new CodexExecutor({ id, name, accessToken, refreshToken, accountId }),
+        new CodexExecutor({ id, name, accessToken, refreshToken, accountId })
 };
 
 export const antigravityAuthHandler: AuthProviderHandler = {
@@ -171,15 +171,15 @@ export const antigravityAuthHandler: AuthProviderHandler = {
     mapOAuthTokens: (tokens) => ({
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
-        expiresIn: tokens.expiresIn,
+        expiresIn: tokens.expiresIn
     }),
     mapImportTokens: (params) => ({
         accessToken: params.accessToken,
         refreshToken: params.refreshToken,
-        baseUrl: params.baseUrl,
+        baseUrl: params.baseUrl
     }),
     buildExecutor: ({ id, name, baseUrl, accessToken, refreshToken }) =>
-        new AntigravityExecutor({ id, name, baseUrl, accessToken, refreshToken }),
+        new AntigravityExecutor({ id, name, baseUrl, accessToken, refreshToken })
 };
 
 export const commandCodeAuthHandler: AuthProviderHandler = {
@@ -194,10 +194,10 @@ export const commandCodeAuthHandler: AuthProviderHandler = {
     mapImportTokens: (params) => ({
         apiKey: params.accessToken,
         refreshToken: params.refreshToken,
-        baseUrl: params.baseUrl,
+        baseUrl: params.baseUrl
     }),
     buildExecutor: ({ id, name, baseUrl, apiKey }) =>
-        new CommandCodeExecutor({ id, name, baseUrl, apiKey }),
+        new CommandCodeExecutor({ id, name, baseUrl, apiKey })
 };
 
 export const anthropicAuthHandler: AuthProviderHandler = {
@@ -212,10 +212,10 @@ export const anthropicAuthHandler: AuthProviderHandler = {
     mapImportTokens: (params) => ({
         apiKey: params.accessToken,
         refreshToken: params.refreshToken,
-        baseUrl: params.baseUrl,
+        baseUrl: params.baseUrl
     }),
     buildExecutor: ({ id, name, baseUrl, apiKey }) =>
-        new AnthropicExecutor({ id, name, baseUrl, apiKey }),
+        new AnthropicExecutor({ id, name, baseUrl, apiKey })
 };
 
 export const qoderAuthHandler: AuthProviderHandler = {
@@ -232,16 +232,16 @@ export const qoderAuthHandler: AuthProviderHandler = {
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
         accountId: tokens.accountId,
-        expiresIn: tokens.expiresIn,
+        expiresIn: tokens.expiresIn
     }),
     mapImportTokens: (params) => ({
         accessToken: params.accessToken,
         refreshToken: params.refreshToken,
         accountId: params.accountId,
-        baseUrl: params.baseUrl,
+        baseUrl: params.baseUrl
     }),
     buildExecutor: ({ id, name, baseUrl, apiKey, accessToken, refreshToken }) =>
-        new QoderExecutor({ id, name, baseUrl, apiKey, accessToken, refreshToken }),
+        new QoderExecutor({ id, name, baseUrl, apiKey, accessToken, refreshToken })
 };
 
 export const goRouterAuthHandler: AuthProviderHandler = {
@@ -256,10 +256,10 @@ export const goRouterAuthHandler: AuthProviderHandler = {
     mapImportTokens: (params) => ({
         apiKey: params.accessToken,
         refreshToken: params.refreshToken,
-        baseUrl: params.baseUrl,
+        baseUrl: params.baseUrl
     }),
     buildExecutor: ({ id, name, baseUrl, apiKey }) =>
-        new GoRouterExecutor({ id, name, baseUrl: baseUrl || GOROUTER_BASE_URL, apiKey }),
+        new GoRouterExecutor({ id, name, baseUrl: baseUrl || GOROUTER_BASE_URL, apiKey })
 };
 
 export const bluesMindsAuthHandler: AuthProviderHandler = {
@@ -274,10 +274,10 @@ export const bluesMindsAuthHandler: AuthProviderHandler = {
     mapImportTokens: (params) => ({
         apiKey: params.accessToken,
         refreshToken: params.refreshToken,
-        baseUrl: params.baseUrl,
+        baseUrl: params.baseUrl
     }),
     buildExecutor: ({ id, name, baseUrl, apiKey }) =>
-        new BluesMindsExecutor({ id, name, baseUrl: baseUrl || BLUESMINDS_BASE_URL, apiKey }),
+        new BluesMindsExecutor({ id, name, baseUrl: baseUrl || BLUESMINDS_BASE_URL, apiKey })
 };
 
 export const seekAIAuthHandler: AuthProviderHandler = {
@@ -292,10 +292,10 @@ export const seekAIAuthHandler: AuthProviderHandler = {
     mapImportTokens: (params) => ({
         apiKey: params.accessToken,
         refreshToken: params.refreshToken,
-        baseUrl: params.baseUrl,
+        baseUrl: params.baseUrl
     }),
     buildExecutor: ({ id, name, baseUrl, apiKey }) =>
-        new SeekAIExecutor({ id, name, baseUrl: baseUrl || SEEKAI_BASE_URL, apiKey }),
+        new SeekAIExecutor({ id, name, baseUrl: baseUrl || SEEKAI_BASE_URL, apiKey })
 };
 
 export const tabiTokenAuthHandler: AuthProviderHandler = {
@@ -310,10 +310,10 @@ export const tabiTokenAuthHandler: AuthProviderHandler = {
     mapImportTokens: (params) => ({
         apiKey: params.accessToken,
         refreshToken: params.refreshToken,
-        baseUrl: params.baseUrl,
+        baseUrl: params.baseUrl
     }),
     buildExecutor: ({ id, name, baseUrl, apiKey }) =>
-        new TabiTokenExecutor({ id, name, baseUrl: baseUrl || TABITOKEN_BASE_URL, apiKey }),
+        new TabiTokenExecutor({ id, name, baseUrl: baseUrl || TABITOKEN_BASE_URL, apiKey })
 };
 
 export const authProviderHandlers: Record<string, AuthProviderHandler> = {
@@ -325,5 +325,5 @@ export const authProviderHandlers: Record<string, AuthProviderHandler> = {
     gorouter: goRouterAuthHandler,
     bluesminds: bluesMindsAuthHandler,
     seekai: seekAIAuthHandler,
-    tabitoken: tabiTokenAuthHandler,
+    tabitoken: tabiTokenAuthHandler
 };

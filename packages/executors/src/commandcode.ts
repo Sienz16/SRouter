@@ -5,14 +5,14 @@ import type {
     ChatCompletionChunk,
     ChatCompletionRequest,
     ChatCompletionResponse,
-    ModelObject,
+    ModelObject
 } from "@srouter/types";
 import {
     accumulateChunks,
     buildRequestBody,
     commandCodeEventToOpenAIChunk,
     createCommandCodeStreamState,
-    type CommandCodeEvent,
+    type CommandCodeEvent
 } from "@srouter/translator";
 import { parseDataLine } from "./base.js";
 
@@ -44,7 +44,7 @@ export class CommandCodeExecutor implements AIProvider {
             "Content-Type": "application/json",
             "x-command-code-version": "0.25.7",
             "x-cli-environment": "cli",
-            "x-session-id": randomUUID(),
+            "x-session-id": randomUUID()
         };
         const token = this.accessToken || this.apiKey;
         if (token) {
@@ -68,13 +68,13 @@ export class CommandCodeExecutor implements AIProvider {
     }
 
     async *chatCompletionStream(
-        req: ChatCompletionRequest,
+        req: ChatCompletionRequest
     ): AsyncGenerator<ChatCompletionChunk, void, void> {
         const body = buildRequestBody(req);
         const res = await fetch(this.baseUrl, {
             method: "POST",
             headers: this.getHeaders(),
-            body: JSON.stringify(body),
+            body: JSON.stringify(body)
         });
 
         if (!res.ok) {
@@ -107,7 +107,7 @@ export class CommandCodeExecutor implements AIProvider {
 // CommandCode upstream emits NDJSON (one JSON object per line, no "data:" prefix),
 // but tolerate "data:" framing if the wrapper inserts it.
 async function* streamCommandCodeLines(
-    body: ReadableStream<Uint8Array>,
+    body: ReadableStream<Uint8Array>
 ): AsyncGenerator<string, void, void> {
     const reader = body.getReader();
     const decoder = new TextDecoder("utf-8");

@@ -11,11 +11,11 @@ chatRoute.post(
     "/chat/completions",
     apiKeyAuth,
     validateJson(ChatCompletionRequestSchema),
-    ChatController.createCompletion,
+    ChatController.createCompletion
 );
 chatRoute.post(
     "/chat/completion",
     apiKeyAuth,
     validateJson(ChatCompletionRequestSchema),
-    ChatController.createCompletion,
+    ChatController.createCompletion
 );

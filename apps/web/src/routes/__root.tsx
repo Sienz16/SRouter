@@ -28,5 +28,5 @@ export const Route = createRootRouteWithContext<RouterContext>()({
                 </SidebarInset>
             </SidebarProvider>
         </TooltipProvider>
-    ),
+    )
 });

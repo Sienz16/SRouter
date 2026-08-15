@@ -7,7 +7,7 @@ import {
     getCoreRowModel,
     getPaginationRowModel,
     getSortedRowModel,
-    useReactTable,
+    useReactTable
 } from "@tanstack/react-table";
 import {
     AlertCircle,
@@ -16,7 +16,7 @@ import {
     ArrowUpDown,
     CheckCircle2,
     ChevronLeft,
-    ChevronRight,
+    ChevronRight
 } from "lucide-react";
 import type { RequestLogEntry } from "@srouter/types";
 import { Badge } from "@/components/ui/badge";
@@ -26,14 +26,14 @@ import {
     TableBody,
     TableHead,
     TableRow,
-    TableCell,
+    TableCell
 } from "@/components/ui/table";
 
 function formatTime(ms: number): string {
     return new Date(ms).toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
-        second: "2-digit",
+        second: "2-digit"
     });
 }
 
@@ -50,7 +50,7 @@ export function LogTable({ logs, onSelect }: LogTableProps) {
     const [sorting, setSorting] = useState<SortingState>([{ id: "createdAt", desc: true }]);
     const [pagination, setPagination] = useState<PaginationState>({
         pageIndex: 0,
-        pageSize: 25,
+        pageSize: 25
     });
 
     const columns = useMemo<ColumnDef<RequestLogEntry>[]>(
@@ -85,7 +85,7 @@ export function LogTable({ logs, onSelect }: LogTableProps) {
                             {formatDate(row.original.createdAt)}
                         </div>
                     </div>
-                ),
+                )
             },
             {
                 accessorKey: "providerId",
@@ -112,7 +112,7 @@ export function LogTable({ logs, onSelect }: LogTableProps) {
                     <span className="font-mono text-xs text-muted-foreground">
                         {row.original.providerId}
                     </span>
-                ),
+                )
             },
             {
                 accessorKey: "model",
@@ -139,7 +139,7 @@ export function LogTable({ logs, onSelect }: LogTableProps) {
                     <span className="font-mono text-xs font-semibold text-foreground truncate block max-w-xs">
                         {row.original.model}
                     </span>
-                ),
+                )
             },
             {
                 accessorKey: "statusCode",
@@ -159,7 +159,7 @@ export function LogTable({ logs, onSelect }: LogTableProps) {
                             {row.original.statusCode}
                         </Badge>
                     );
-                },
+                }
             },
             {
                 accessorKey: "totalTokens",
@@ -189,7 +189,7 @@ export function LogTable({ logs, onSelect }: LogTableProps) {
                             ({row.original.promptTokens} in / {row.original.completionTokens} out)
                         </span>
                     </span>
-                ),
+                )
             },
             {
                 accessorKey: "latencyMs",
@@ -220,7 +220,7 @@ export function LogTable({ logs, onSelect }: LogTableProps) {
                     >
                         {row.original.latencyMs}ms
                     </span>
-                ),
+                )
             },
             {
                 accessorKey: "estimatedCost",
@@ -231,7 +231,7 @@ export function LogTable({ logs, onSelect }: LogTableProps) {
                             ? `$${row.original.estimatedCost.toFixed(4)}`
                             : "—"}
                     </span>
-                ),
+                )
             },
             {
                 id: "details",
@@ -249,10 +249,10 @@ export function LogTable({ logs, onSelect }: LogTableProps) {
                             <ChevronRight className="size-3.5" />
                         </button>
                     </div>
-                ),
-            },
+                )
+            }
         ],
-        [onSelect],
+        [onSelect]
     );
 
     const table = useReactTable({
@@ -260,13 +260,13 @@ export function LogTable({ logs, onSelect }: LogTableProps) {
         columns,
         state: {
             sorting,
-            pagination,
+            pagination
         },
         onSortingChange: setSorting,
         onPaginationChange: setPagination,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
+        getPaginationRowModel: getPaginationRowModel()
     });
 
     const pageCount = table.getPageCount();
@@ -292,7 +292,7 @@ export function LogTable({ logs, onSelect }: LogTableProps) {
                                             ? null
                                             : flexRender(
                                                   header.column.columnDef.header,
-                                                  header.getContext(),
+                                                  header.getContext()
                                               )}
                                     </TableHead>
                                 ))}

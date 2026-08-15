@@ -66,7 +66,7 @@ export function ConnectOAuthModal({ provider, open, onOpenChange }: ConnectOAuth
                     const popup = window.open(
                         res.authorizeUrl,
                         "_blank",
-                        "width=600,height=700,status=yes,scrollbars=yes",
+                        "width=600,height=700,status=yes,scrollbars=yes"
                     );
                     popupRef.current = popup;
                 } catch {
@@ -112,7 +112,7 @@ export function ConnectOAuthModal({ provider, open, onOpenChange }: ConnectOAuth
         const interval = setInterval(async () => {
             try {
                 const res = await api.get<{ status: string; provider?: ProviderConfig }>(
-                    `/v1/auth/qoder/poll?state=${encodeURIComponent(oauthState)}`,
+                    `/v1/auth/qoder/poll?state=${encodeURIComponent(oauthState)}`
                 );
                 if (res && res.status === "ok") {
                     if (popupRef.current && !popupRef.current.closed) {
@@ -157,7 +157,7 @@ export function ConnectOAuthModal({ provider, open, onOpenChange }: ConnectOAuth
         },
         onError: (err: Error) => {
             setError(err.message || "Failed to process callback URL");
-        },
+        }
     });
 
     const patMutation = useMutation({
@@ -177,7 +177,7 @@ export function ConnectOAuthModal({ provider, open, onOpenChange }: ConnectOAuth
         },
         onError: (err: Error) => {
             setError(err.message || "Failed to save token");
-        },
+        }
     });
 
     const handleCopy = async () => {

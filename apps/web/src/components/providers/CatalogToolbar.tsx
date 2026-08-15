@@ -28,7 +28,7 @@ export function CatalogToolbar({
     search,
     onSearchChange,
     viewMode,
-    onViewModeChange,
+    onViewModeChange
 }: CatalogToolbarProps) {
     return (
         <div className="space-y-6 font-mono">

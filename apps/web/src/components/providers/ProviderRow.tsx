@@ -9,7 +9,7 @@ const protocolLabels: Record<string, string> = {
     openai: "OpenAI",
     anthropic: "Anthropic",
     gemini: "Gemini",
-    custom: "Custom",
+    custom: "Custom"
 };
 
 function authLabel(provider: ProviderDefinition): string {

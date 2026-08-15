@@ -26,7 +26,7 @@ test("saved TabiToken connections use the official URL and bearer auth", async (
         protocol: "openai",
         accessToken: fixtureKey,
         enabled: true,
-        createdAt: Date.now(),
+        createdAt: Date.now()
     };
     upsertProviderDB(config);
 
@@ -54,7 +54,7 @@ test("saved TabiToken connections use the official URL and bearer auth", async (
 test("processTabiTokenTokenImport creates and registers TabiToken provider config", () => {
     const config = AuthLogic.processTabiTokenTokenImport({
         accessToken: "test-tabitoken-key",
-        name: "My TabiToken Account",
+        name: "My TabiToken Account"
     });
 
     createdIds.push(config.id);
@@ -68,6 +68,6 @@ test("processTabiTokenTokenImport creates and registers TabiToken provider confi
     assert.equal(config.enabled, true);
     assert.equal(
         tabiTokenAuthHandler.tokenImportMessage,
-        "TabiToken API Key registered and saved directly to SQLite database!",
+        "TabiToken API Key registered and saved directly to SQLite database!"
     );
 });

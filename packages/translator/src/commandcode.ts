@@ -5,7 +5,7 @@ import type {
     ChatCompletionRequest,
     ChatCompletionResponse,
     FinishReason,
-    ToolCall,
+    ToolCall
 } from "@srouter/types";
 
 const DEFAULT_MAX_TOKENS = 4096;
@@ -128,9 +128,9 @@ function convertMessages(messages: ChatCompletionRequest["messages"]): {
                         type: "tool-result",
                         toolCallId: m.tool_call_id || "",
                         toolName: m.name || "",
-                        output: { type: "text", value },
-                    },
-                ],
+                        output: { type: "text", value }
+                    }
+                ]
             });
             continue;
         }
@@ -146,13 +146,13 @@ function convertMessages(messages: ChatCompletionRequest["messages"]): {
                         type: "tool-call",
                         toolCallId: tc.id || "",
                         toolName: fn.name || "",
-                        input: safeParseJson(fn.arguments),
+                        input: safeParseJson(fn.arguments)
                     });
                 }
             }
             out.push({
                 role: "assistant",
-                content: blocks.length ? blocks : [{ type: "text", text: "" }],
+                content: blocks.length ? blocks : [{ type: "text", text: "" }]
             });
             continue;
         }
@@ -164,7 +164,7 @@ function convertMessages(messages: ChatCompletionRequest["messages"]): {
 }
 
 function convertTools(
-    tools: ChatCompletionRequest["tools"],
+    tools: ChatCompletionRequest["tools"]
 ): Array<{ name: string; description?: string; input_schema: unknown }> | undefined {
     if (!Array.isArray(tools) || tools.length === 0) return undefined;
     const result: Array<{ name: string; description?: string; input_schema: unknown }> = [];
@@ -173,7 +173,7 @@ function convertTools(
         result.push({
             name: t.function.name,
             description: t.function.description,
-            input_schema: t.function.parameters || { type: "object" },
+            input_schema: t.function.parameters || { type: "object" }
         });
     }
     return result.length ? result : undefined;
@@ -189,7 +189,7 @@ export function buildRequestBody(req: ChatCompletionRequest): CommandCodeRequest
         messages,
         stream: true,
         max_tokens: req.max_tokens ?? DEFAULT_MAX_TOKENS,
-        temperature: req.temperature ?? 0.3,
+        temperature: req.temperature ?? 0.3
     };
 
     if (system) params.system = system;
@@ -210,9 +210,9 @@ export function buildRequestBody(req: ChatCompletionRequest): CommandCodeRequest
             currentBranch: "",
             mainBranch: "",
             gitStatus: "",
-            recentCommits: [],
+            recentCommits: []
         },
-        params,
+        params
     };
 }
 
@@ -240,7 +240,7 @@ export function createCommandCodeStreamState(): CommandCodeStreamState {
         toolIndexById: new Map(),
         openTools: new Set(),
         finishReason: null,
-        usage: null,
+        usage: null
     };
 }
 
@@ -261,14 +261,14 @@ function ensureState(state: CommandCodeStreamState, model: string): void {
 function makeChunk(
     state: CommandCodeStreamState,
     delta: ChatCompletionChunkDelta,
-    finishReason: FinishReason = null,
+    finishReason: FinishReason = null
 ): ChatCompletionChunk {
     return {
         id: state.responseId,
         object: "chat.completion.chunk",
         created: state.created,
         model: state.model,
-        choices: [{ index: 0, delta, finish_reason: finishReason }],
+        choices: [{ index: 0, delta, finish_reason: finishReason }]
     };
 }
 
@@ -313,7 +313,7 @@ export interface CommandCodeEvent {
 
 export function commandCodeEventToOpenAIChunk(
     event: CommandCodeEvent,
-    state: CommandCodeStreamState,
+    state: CommandCodeStreamState
 ): ChatCompletionChunk[] {
     if (!event || typeof event !== "object" || !event.type) return [];
 
@@ -356,9 +356,9 @@ export function commandCodeEventToOpenAIChunk(
                         index: idx,
                         id,
                         type: "function",
-                        function: { name: event.toolName || "", arguments: "" },
-                    },
-                ],
+                        function: { name: event.toolName || "", arguments: "" }
+                    }
+                ]
             };
             state.chunkIndex++;
             out.push(makeChunk(state, delta));
@@ -373,9 +373,9 @@ export function commandCodeEventToOpenAIChunk(
                 tool_calls: [
                     {
                         index: idx,
-                        function: { arguments: event.delta || event.inputTextDelta || "" },
-                    },
-                ],
+                        function: { arguments: event.delta || event.inputTextDelta || "" }
+                    }
+                ]
             };
             out.push(makeChunk(state, delta));
             break;
@@ -394,9 +394,9 @@ export function commandCodeEventToOpenAIChunk(
                         index: idx,
                         id,
                         type: "function",
-                        function: { name: event.toolName || "", arguments: argsStr },
-                    },
-                ],
+                        function: { name: event.toolName || "", arguments: argsStr }
+                    }
+                ]
             };
             state.chunkIndex++;
             out.push(makeChunk(state, delta));
@@ -450,7 +450,7 @@ function toOpenAIUsage(raw: unknown): UsageInfo | null {
 // Accumulate streamed OpenAI chunks into a single non-streaming ChatCompletionResponse.
 export function accumulateChunks(
     chunks: ChatCompletionChunk[],
-    model: string,
+    model: string
 ): ChatCompletionResponse {
     let content = "";
     const toolCalls: ToolCall[] = [];
@@ -476,7 +476,7 @@ export function accumulateChunks(
         toolCalls.push({
             id: entry.id,
             type: "function",
-            function: { name: entry.name, arguments: entry.args },
+            function: { name: entry.name, arguments: entry.args }
         });
     }
 
@@ -494,11 +494,11 @@ export function accumulateChunks(
                 message: {
                     role: "assistant",
                     content: content || null,
-                    ...(toolCalls.length ? { tool_calls: toolCalls } : {}),
+                    ...(toolCalls.length ? { tool_calls: toolCalls } : {})
                 },
-                finish_reason: finishReason,
-            },
+                finish_reason: finishReason
+            }
         ],
-        ...(usage ? { usage } : {}),
+        ...(usage ? { usage } : {})
     };
 }

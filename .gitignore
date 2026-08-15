@@ -36,6 +36,7 @@ pnpm-debug.log*
 Thumbs.db
 .idea/
 .vscode/*
+!.vscode/settings.json
 !.vscode/launch.json
 !.vscode/*.code-snippets
 

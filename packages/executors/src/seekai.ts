@@ -10,7 +10,7 @@ export class SeekAIExecutor extends OpenAIExecutor {
             name: options.name ?? "SeekAI",
             baseUrl: options.baseUrl ?? SEEKAI_BASE_URL,
             apiKey: options.apiKey,
-            accessToken: options.accessToken,
+            accessToken: options.accessToken
         });
     }
 }

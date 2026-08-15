@@ -19,7 +19,7 @@ export interface RefreshResult {
 
 type OAuthClient = {
     refreshTokens(
-        refreshToken: string,
+        refreshToken: string
     ): Promise<{ accessToken: string; refreshToken?: string; expiresIn?: number }>;
 };
 
@@ -81,7 +81,7 @@ async function refreshProviderTokenOnce(providerId: string): Promise<RefreshResu
     if (!oauthClient) {
         return {
             success: false,
-            error: `No OAuth client for provider type ${provider.providerId}`,
+            error: `No OAuth client for provider type ${provider.providerId}`
         };
     }
 
@@ -96,7 +96,7 @@ async function refreshProviderTokenOnce(providerId: string): Promise<RefreshResu
             accessToken: tokens.accessToken,
             refreshToken: nextRefreshToken,
             tokenExpiresAt: expiresAt,
-            lastRefreshedAt: refreshedAt,
+            lastRefreshedAt: refreshedAt
         });
 
         const instance = registry.getProvider(providerId) as
@@ -107,7 +107,7 @@ async function refreshProviderTokenOnce(providerId: string): Promise<RefreshResu
     } catch (error) {
         return {
             success: false,
-            error: error instanceof Error ? error.message : String(error),
+            error: error instanceof Error ? error.message : String(error)
         };
     }
 }
@@ -130,7 +130,7 @@ export async function sweepExpiredTokens(): Promise<RefreshResult[]> {
             console.log(`[TokenRefresh] Refreshed ${provider.id} (${provider.providerId})`);
         } else {
             console.warn(
-                `[TokenRefresh] Refresh failed for ${provider.id} (${provider.providerId}): ${result.error}`,
+                `[TokenRefresh] Refresh failed for ${provider.id} (${provider.providerId}): ${result.error}`
             );
         }
     }
@@ -182,7 +182,7 @@ export async function ensureFreshToken(alias: string): Promise<void> {
 
     const due = getAllProvidersDB().filter(
         (provider) =>
-            provider.enabled && provider.providerId === providerType && isDueForRefresh(provider),
+            provider.enabled && provider.providerId === providerType && isDueForRefresh(provider)
     );
     await Promise.all(due.map((provider) => refreshProviderToken(provider.id)));
 }

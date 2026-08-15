@@ -13,7 +13,7 @@ import type {
     ChatMessageContentPart,
     FinishReason,
     ToolCall,
-    ToolDefinition,
+    ToolDefinition
 } from "@srouter/types";
 
 /**
@@ -42,7 +42,7 @@ export function anthropicToOpenAIRequest(req: AnthropicMessageRequest): ChatComp
         if (typeof msg.content === "string") {
             messages.push({
                 role: msg.role,
-                content: msg.content,
+                content: msg.content
             });
             continue;
         }
@@ -63,8 +63,8 @@ export function anthropicToOpenAIRequest(req: AnthropicMessageRequest): ChatComp
                 textAndImageParts.push({
                     type: "image_url",
                     image_url: {
-                        url: `data:${block.source.media_type};base64,${block.source.data}`,
-                    },
+                        url: `data:${block.source.media_type};base64,${block.source.data}`
+                    }
                 });
             } else if (block.type === "tool_use") {
                 toolCalls.push({
@@ -75,8 +75,8 @@ export function anthropicToOpenAIRequest(req: AnthropicMessageRequest): ChatComp
                         arguments:
                             typeof block.input === "string"
                                 ? block.input
-                                : JSON.stringify(block.input || {}),
-                    },
+                                : JSON.stringify(block.input || {})
+                    }
                 });
             } else if (block.type === "tool_result") {
                 toolResults.push(block);
@@ -97,7 +97,7 @@ export function anthropicToOpenAIRequest(req: AnthropicMessageRequest): ChatComp
             messages.push({
                 role: "assistant",
                 content: contentStr ?? (toolCalls.length > 0 ? null : ""),
-                tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
+                tool_calls: toolCalls.length > 0 ? toolCalls : undefined
             });
         } else if (msg.role === "user") {
             // Check if this user message contains tool results
@@ -115,7 +115,7 @@ export function anthropicToOpenAIRequest(req: AnthropicMessageRequest): ChatComp
                     messages.push({
                         role: "tool",
                         tool_call_id: tr.tool_use_id || "",
-                        content: resultText,
+                        content: resultText
                     });
                 }
             }
@@ -124,12 +124,12 @@ export function anthropicToOpenAIRequest(req: AnthropicMessageRequest): ChatComp
             if (textAndImageParts.length === 1 && textAndImageParts[0]?.type === "text") {
                 messages.push({
                     role: "user",
-                    content: textAndImageParts[0].text || "",
+                    content: textAndImageParts[0].text || ""
                 });
             } else if (textAndImageParts.length > 0) {
                 messages.push({
                     role: "user",
-                    content: textAndImageParts,
+                    content: textAndImageParts
                 });
             }
         }
@@ -149,9 +149,9 @@ export function anthropicToOpenAIRequest(req: AnthropicMessageRequest): ChatComp
                         description: antTool.description,
                         parameters: {
                             type: "object",
-                            ...(typeof schema === "object" ? schema : {}),
-                        },
-                    },
+                            ...(typeof schema === "object" ? schema : {})
+                        }
+                    }
                 } as ToolDefinition;
             }
             return t as ToolDefinition;
@@ -168,7 +168,7 @@ export function anthropicToOpenAIRequest(req: AnthropicMessageRequest): ChatComp
         } else if (req.tool_choice.type === "tool" && req.tool_choice.name) {
             tool_choice = {
                 type: "function",
-                function: { name: req.tool_choice.name },
+                function: { name: req.tool_choice.name }
             };
         }
     }
@@ -182,12 +182,12 @@ export function anthropicToOpenAIRequest(req: AnthropicMessageRequest): ChatComp
         stop: req.stop_sequences,
         tools,
         tool_choice,
-        stream: req.stream ?? false,
+        stream: req.stream ?? false
     };
 }
 
 function mapFinishReason(
-    finishReason?: FinishReason | null,
+    finishReason?: FinishReason | null
 ): "end_turn" | "max_tokens" | "stop_sequence" | "tool_use" {
     if (finishReason === "tool_calls" || (finishReason as string) === "function_call") {
         return "tool_use";
@@ -206,7 +206,7 @@ function mapFinishReason(
  */
 export function openAIToAnthropicResponse(
     res: ChatCompletionResponse,
-    originalModel: string,
+    originalModel: string
 ): AnthropicMessageResponse {
     const choice = res.choices?.[0];
     const contentBlocks: AnthropicContentBlock[] = [];
@@ -219,7 +219,7 @@ export function openAIToAnthropicResponse(
         if (reasoning) {
             contentBlocks.push({
                 type: "thinking",
-                thinking: reasoning,
+                thinking: reasoning
             });
         }
 
@@ -227,14 +227,14 @@ export function openAIToAnthropicResponse(
         if (typeof msg.content === "string") {
             contentBlocks.push({
                 type: "text",
-                text: msg.content,
+                text: msg.content
             });
         } else if (Array.isArray(msg.content)) {
             const text = msg.content.map((p) => (p.type === "text" ? p.text : "")).join("\n");
             if (text) {
                 contentBlocks.push({
                     type: "text",
-                    text,
+                    text
                 });
             }
         }
@@ -255,7 +255,7 @@ export function openAIToAnthropicResponse(
                     type: "tool_use",
                     id: tc.id,
                     name: tc.function.name,
-                    input: parsedInput,
+                    input: parsedInput
                 });
             }
         }
@@ -271,8 +271,8 @@ export function openAIToAnthropicResponse(
         stop_sequence: null,
         usage: {
             input_tokens: res.usage?.prompt_tokens ?? 0,
-            output_tokens: res.usage?.completion_tokens ?? 0,
-        },
+            output_tokens: res.usage?.completion_tokens ?? 0
+        }
     };
 }
 
@@ -281,7 +281,7 @@ export function openAIToAnthropicResponse(
  */
 export async function* openAIToAnthropicStream(
     stream: AsyncGenerator<ChatCompletionChunk>,
-    originalModel: string,
+    originalModel: string
 ): AsyncGenerator<AnthropicStreamEvent> {
     const messageId = `msg_${randomUUID().replace(/-/g, "").slice(0, 24)}`;
     let hasStarted = false;
@@ -308,9 +308,9 @@ export async function* openAIToAnthropicStream(
                     stop_sequence: null,
                     usage: {
                         input_tokens: chunk.usage?.prompt_tokens ?? 0,
-                        output_tokens: 1,
-                    },
-                },
+                        output_tokens: 1
+                    }
+                }
             };
         }
 
@@ -337,7 +337,7 @@ export async function* openAIToAnthropicStream(
                 yield {
                     type: "content_block_start",
                     index: currentBlockIndex,
-                    content_block: { type: "thinking", thinking: "" },
+                    content_block: { type: "thinking", thinking: "" }
                 };
             }
             outputTokensCount++;
@@ -346,8 +346,8 @@ export async function* openAIToAnthropicStream(
                 index: currentBlockIndex,
                 delta: {
                     type: "thinking_delta",
-                    thinking: reasoning,
-                },
+                    thinking: reasoning
+                }
             };
         }
 
@@ -362,7 +362,7 @@ export async function* openAIToAnthropicStream(
                 yield {
                     type: "content_block_start",
                     index: currentBlockIndex,
-                    content_block: { type: "text", text: "" },
+                    content_block: { type: "text", text: "" }
                 };
             }
             outputTokensCount++;
@@ -371,8 +371,8 @@ export async function* openAIToAnthropicStream(
                 index: currentBlockIndex,
                 delta: {
                     type: "text_delta",
-                    text: delta.content,
-                },
+                    text: delta.content
+                }
             };
         }
 
@@ -391,7 +391,7 @@ export async function* openAIToAnthropicStream(
                     existingTool = {
                         anthropicIndex: currentBlockIndex,
                         id: tc.id || `toolu_${randomUUID().replace(/-/g, "").slice(0, 24)}`,
-                        name: tc.function?.name || "",
+                        name: tc.function?.name || ""
                     };
                     toolMap.set(chunkIndex, existingTool);
 
@@ -402,8 +402,8 @@ export async function* openAIToAnthropicStream(
                             type: "tool_use",
                             id: existingTool.id,
                             name: existingTool.name,
-                            input: {},
-                        },
+                            input: {}
+                        }
                     };
                 }
 
@@ -414,8 +414,8 @@ export async function* openAIToAnthropicStream(
                         index: existingTool.anthropicIndex,
                         delta: {
                             type: "input_json_delta",
-                            partial_json: tc.function.arguments,
-                        },
+                            partial_json: tc.function.arguments
+                        }
                     };
                 }
             }
@@ -426,7 +426,7 @@ export async function* openAIToAnthropicStream(
     if (currentBlockType !== null) {
         yield {
             type: "content_block_stop",
-            index: currentBlockIndex,
+            index: currentBlockIndex
         };
     }
 
@@ -435,15 +435,15 @@ export async function* openAIToAnthropicStream(
         type: "message_delta",
         delta: {
             stop_reason: mapFinishReason(finishReason),
-            stop_sequence: null,
+            stop_sequence: null
         },
         usage: {
-            output_tokens: Math.max(outputTokensCount, 1),
-        },
+            output_tokens: Math.max(outputTokensCount, 1)
+        }
     };
 
     // Message stop
     yield {
-        type: "message_stop",
+        type: "message_stop"
     };
 }

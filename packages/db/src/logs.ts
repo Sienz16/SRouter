@@ -2,7 +2,7 @@ import type {
     ModelUsageSummaryRow,
     RequestLogEntry,
     UsageByModelRow,
-    UsageSummary,
+    UsageSummary
 } from "@srouter/types";
 import { db } from "./db.js";
 
@@ -29,13 +29,13 @@ export function logRequestDB(entry: Omit<RequestLogEntry, "id" | "createdAt">): 
         entry.cacheCreationTokens ?? 0,
         entry.reasoningTokens ?? 0,
         entry.estimatedCost ?? 0,
-        createdAt,
+        createdAt
     );
 
     return {
         id,
         ...entry,
-        createdAt,
+        createdAt
     };
 }
 
@@ -57,7 +57,7 @@ export function getRecentLogsDB(limit = 50): RequestLogEntry[] {
         cacheCreationTokens: Number(row.cache_creation_tokens ?? 0),
         reasoningTokens: Number(row.reasoning_tokens ?? 0),
         estimatedCost: Number(row.estimated_cost ?? 0),
-        createdAt: Number(row.created_at ?? 0),
+        createdAt: Number(row.created_at ?? 0)
     }));
 }
 
@@ -87,7 +87,7 @@ export function getUsageSummaryDB(): UsageSummary {
         totalReasoningTokens: Number(result?.totalReasoningTokens ?? 0),
         totalEstimatedCost: Number(result?.totalEstimatedCost ?? 0),
         totalInputTokens: Number(result?.totalPromptTokens ?? 0),
-        totalOutputTokens: Number(result?.totalCompletionTokens ?? 0),
+        totalOutputTokens: Number(result?.totalCompletionTokens ?? 0)
     };
 }
 
@@ -118,7 +118,7 @@ export function getProviderUsageSummaryDB(providerId: string): UsageSummary {
         totalReasoningTokens: Number(result?.totalReasoningTokens ?? 0),
         totalEstimatedCost: Number(result?.totalEstimatedCost ?? 0),
         totalInputTokens: Number(result?.totalPromptTokens ?? 0),
-        totalOutputTokens: Number(result?.totalCompletionTokens ?? 0),
+        totalOutputTokens: Number(result?.totalCompletionTokens ?? 0)
     };
 }
 
@@ -149,7 +149,7 @@ export function getProviderModelUsageDB(providerId: string): ModelUsageSummaryRo
         completionTokens: Number(row.completionTokens ?? 0),
         cachedTokens: Number(row.cachedTokens ?? 0),
         estimatedCost: Number(row.estimatedCost ?? 0),
-        lastUsedAt: row.lastUsedAt ? Number(row.lastUsedAt) : null,
+        lastUsedAt: row.lastUsedAt ? Number(row.lastUsedAt) : null
     }));
 }
 
@@ -175,6 +175,6 @@ export function getUsageByModelDB(): UsageByModelRow[] {
         totalInputTokens: Number(row.totalInputTokens ?? 0),
         totalOutputTokens: Number(row.totalOutputTokens ?? 0),
         totalCachedTokens: Number(row.totalCachedTokens ?? 0),
-        estCost: Number(row.estCost ?? 0),
+        estCost: Number(row.estCost ?? 0)
     }));
 }

@@ -5,7 +5,7 @@ import {
     SheetContent,
     SheetHeader,
     SheetTitle,
-    SheetDescription,
+    SheetDescription
 } from "@/components/ui/sheet";
 
 interface LogDetailSheetProps {

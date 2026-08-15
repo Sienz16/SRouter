@@ -238,12 +238,12 @@ import OpenAI from "openai";
 
 const openai = new OpenAI({
     baseURL: "http://localhost:3000/v1",
-    apiKey: process.env.SROUTER_API_KEY || "sr-live-dev-key",
+    apiKey: process.env.SROUTER_API_KEY || "sr-live-dev-key"
 });
 
 const completion = await openai.chat.completions.create({
     model: "openai_codex/gpt-4o",
-    messages: [{ role: "user", content: "Write a quicksort in TypeScript." }],
+    messages: [{ role: "user", content: "Write a quicksort in TypeScript." }]
 });
 
 console.log(completion.choices[0].message.content);

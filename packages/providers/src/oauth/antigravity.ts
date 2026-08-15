@@ -5,7 +5,7 @@ import {
     ANTIGRAVITY_OAUTH_PROMPT,
     ANTIGRAVITY_OAUTH_REDIRECT_URI,
     ANTIGRAVITY_OAUTH_SCOPE,
-    ANTIGRAVITY_OAUTH_TOKEN_URL,
+    ANTIGRAVITY_OAUTH_TOKEN_URL
 } from "@srouter/constants";
 import type { OAuthTokenResponse, PKCEPair } from "./base.js";
 
@@ -51,7 +51,7 @@ export class AntigravityOAuth {
             code_challenge: pkce.codeChallenge,
             code_challenge_method: "S256",
             state: pkce.state,
-            access_type: "offline",
+            access_type: "offline"
         };
 
         if (this.prompt) {
@@ -74,7 +74,7 @@ export class AntigravityOAuth {
             client_id: this.clientId,
             code,
             code_verifier: codeVerifier,
-            redirect_uri: this.redirectUri,
+            redirect_uri: this.redirectUri
         };
 
         if (this.clientSecret) {
@@ -84,9 +84,9 @@ export class AntigravityOAuth {
         const res = await fetch(this.tokenUrl, {
             method: "POST",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
+                "Content-Type": "application/x-www-form-urlencoded"
             },
-            body: new URLSearchParams(params),
+            body: new URLSearchParams(params)
         });
 
         if (!res.ok) {
@@ -107,7 +107,7 @@ export class AntigravityOAuth {
             refreshToken: data.refresh_token,
             idToken: data.id_token,
             expiresIn: data.expires_in,
-            tokenType: data.token_type ?? "Bearer",
+            tokenType: data.token_type ?? "Bearer"
         };
     }
 
@@ -118,7 +118,7 @@ export class AntigravityOAuth {
         const params: Record<string, string> = {
             grant_type: "refresh_token",
             client_id: this.clientId,
-            refresh_token: refreshToken,
+            refresh_token: refreshToken
         };
 
         if (this.clientSecret) {
@@ -128,9 +128,9 @@ export class AntigravityOAuth {
         const res = await fetch(this.tokenUrl, {
             method: "POST",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
+                "Content-Type": "application/x-www-form-urlencoded"
             },
-            body: new URLSearchParams(params),
+            body: new URLSearchParams(params)
         });
 
         if (!res.ok) {
@@ -149,7 +149,7 @@ export class AntigravityOAuth {
             accessToken: data.access_token,
             refreshToken: data.refresh_token ?? refreshToken,
             expiresIn: data.expires_in,
-            tokenType: data.token_type ?? "Bearer",
+            tokenType: data.token_type ?? "Bearer"
         };
     }
 }

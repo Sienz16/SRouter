@@ -11,7 +11,7 @@ function executor(): SeekAIExecutor {
         id: "seekai",
         name: "SeekAI",
         baseUrl: "https://seekai.cc/v1",
-        accessToken: fixtureKey,
+        accessToken: fixtureKey
     });
 }
 
@@ -31,16 +31,14 @@ test("SeekAI lists namespaced live models with bearer auth", async () => {
         const auth = new Headers(init?.headers).get("authorization") ?? "";
         authorized = auth.startsWith("Bearer ") && auth.endsWith(fixtureKey);
         return Response.json({
-            data: [{ id: "gpt-5-5", object: "model", owned_by: "seekai" }],
+            data: [{ id: "gpt-5-5", object: "model", owned_by: "seekai" }]
         });
     };
 
     const models = await executor().listModels();
     assert.equal(url, "https://seekai.cc/v1/models");
     assert.equal(authorized, true);
-    assert.deepEqual(models, [
-        { id: "seekai/gpt-5-5", object: "model", owned_by: "seekai" },
-    ]);
+    assert.deepEqual(models, [{ id: "seekai/gpt-5-5", object: "model", owned_by: "seekai" }]);
 });
 
 test("SeekAI chat sends bare model and preserves nested upstream IDs", async () => {
@@ -52,7 +50,7 @@ test("SeekAI chat sends bare model and preserves nested upstream IDs", async () 
             object: "chat.completion",
             created: 1,
             model: "test",
-            choices: [],
+            choices: []
         });
     };
 
@@ -73,21 +71,21 @@ test("SeekAI streaming preserves tools and yields tool-call deltas", async () =>
             {
                 index: 0,
                 delta: {
-                    content: "Hello world from SeekAI",
+                    content: "Hello world from SeekAI"
                 },
-                finish_reason: null,
-            },
-        ],
+                finish_reason: null
+            }
+        ]
     };
     globalThis.fetch = async (_input, init) => {
         body = JSON.parse(String(init?.body)) as Record<string, unknown>;
         const stream = new ReadableStream({
             start(controller) {
                 controller.enqueue(
-                    new TextEncoder().encode(`data: ${JSON.stringify(chunk)}\n\ndata: [DONE]\n\n`),
+                    new TextEncoder().encode(`data: ${JSON.stringify(chunk)}\n\ndata: [DONE]\n\n`)
                 );
                 controller.close();
-            },
+            }
         });
         return new Response(stream, { headers: { "content-type": "text/event-stream" } });
     };
@@ -108,6 +106,6 @@ test("SeekAI upstream errors do not expose credentials", async () => {
         (error: Error) =>
             error.message.includes("503") &&
             error.message.includes("upstream unavailable") &&
-            !error.message.includes(fixtureKey),
+            !error.message.includes(fixtureKey)
     );
 });

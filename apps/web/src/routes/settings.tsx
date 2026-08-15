@@ -25,7 +25,7 @@ import {
     Terminal,
     Trash2,
     Unlock,
-    Zap,
+    Zap
 } from "lucide-react";
 import { toast } from "sonner";
 import { api, getGatewayBaseUrl } from "@/lib/api";
@@ -34,7 +34,7 @@ import { useSettings } from "@/hooks/useSettings";
 
 export const Route = createFileRoute("/settings")({
     staticData: { title: "Settings" },
-    component: SettingsPage,
+    component: SettingsPage
 });
 
 type SettingsTab =
@@ -58,8 +58,8 @@ function SettingsPage() {
     const { data: serverSettings, isLoading: isSettingsLoading } = useQuery<ServerSettingsResponse>(
         {
             queryKey: ["server_settings"],
-            queryFn: () => api.get<ServerSettingsResponse>("/v1/settings"),
-        },
+            queryFn: () => api.get<ServerSettingsResponse>("/v1/settings")
+        }
     );
 
     const [requireApiKey, setRequireApiKey] = useState<boolean>(false);
@@ -83,15 +83,15 @@ function SettingsPage() {
                 {
                     description: newRequireApiKey
                         ? "Gateway endpoints will reject unauthenticated requests with HTTP 401."
-                        : "Public access enabled for localhost development and clients.",
-                },
+                        : "Public access enabled for localhost development and clients."
+                }
             );
         },
         onError: (err) => {
             toast.error("Failed to update security setting", {
-                description: err instanceof Error ? err.message : "Unknown error",
+                description: err instanceof Error ? err.message : "Unknown error"
             });
-        },
+        }
     });
 
     const handleToggleRequireApiKey = (value: boolean) => {
@@ -106,7 +106,7 @@ function SettingsPage() {
         { id: "logging", label: "Logging & Privacy", icon: Shield },
         { id: "playground", label: "Playground Defaults", icon: Terminal },
         { id: "data", label: "Data & Storage", icon: Database },
-        { id: "system", label: "System Info", icon: Cpu },
+        { id: "system", label: "System Info", icon: Cpu }
     ];
 
     return (
@@ -487,18 +487,18 @@ function SettingsPage() {
                                         {
                                             id: "full",
                                             title: "Full Body",
-                                            desc: "Log messages & responses",
+                                            desc: "Log messages & responses"
                                         },
                                         {
                                             id: "metadata",
                                             title: "Metadata Only",
-                                            desc: "Model, latency, tokens",
+                                            desc: "Model, latency, tokens"
                                         },
                                         {
                                             id: "disabled",
                                             title: "Disabled",
-                                            desc: "Do not write request logs",
-                                        },
+                                            desc: "Do not write request logs"
+                                        }
                                     ].map(({ id, title, desc }) => (
                                         <button
                                             key={id}
@@ -579,7 +579,7 @@ function SettingsPage() {
                                     onChange={(e) =>
                                         updateSetting(
                                             "defaultTemperature",
-                                            parseFloat(e.target.value),
+                                            parseFloat(e.target.value)
                                         )
                                     }
                                     className="w-full accent-amber-500 cursor-pointer"

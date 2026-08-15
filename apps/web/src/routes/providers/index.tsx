@@ -10,7 +10,7 @@ import { CatalogToolbar } from "@/components/providers/CatalogToolbar";
 
 export const Route = createFileRoute("/providers/")({
     staticData: { title: "Providers" },
-    component: ProvidersPage,
+    component: ProvidersPage
 });
 
 function ProvidersPage() {

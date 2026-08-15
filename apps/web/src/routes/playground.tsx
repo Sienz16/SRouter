@@ -12,9 +12,9 @@ import { MessageComposer } from "@/components/playground/MessageComposer";
 export const Route = createFileRoute("/playground")({
     staticData: { title: "Playground" },
     validateSearch: (search: Record<string, unknown>) => ({
-        model: (search.model as string) || "",
+        model: (search.model as string) || ""
     }),
-    component: PlaygroundPage,
+    component: PlaygroundPage
 });
 
 function PlaygroundPage() {
@@ -25,10 +25,10 @@ function PlaygroundPage() {
         isPending: modelsPending,
         isError: modelsError,
         error: modelsQueryError,
-        refetch: refetchModels,
+        refetch: refetchModels
     } = useQuery({
         queryKey: ["models"],
-        queryFn: () => api.get<ModelListResponse>("/v1/models"),
+        queryFn: () => api.get<ModelListResponse>("/v1/models")
     });
 
     const models = modelsData?.data ?? [];

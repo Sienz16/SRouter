@@ -8,18 +8,18 @@ export default defineConfig({
     plugins: [
         TanStackRouterVite({ target: "react", autoCodeSplitting: true }),
         react(),
-        tailwindcss(),
+        tailwindcss()
     ],
     resolve: {
         alias: {
-            "@": path.resolve(__dirname, "./src"),
-        },
+            "@": path.resolve(__dirname, "./src")
+        }
     },
     server: {
         port: 5173,
         proxy: {
             "/v1": "http://localhost:3000",
-            "/health": "http://localhost:3000",
-        },
-    },
+            "/health": "http://localhost:3000"
+        }
+    }
 });

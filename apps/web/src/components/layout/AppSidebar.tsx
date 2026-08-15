@@ -7,7 +7,7 @@ import {
     ScrollText,
     Settings,
     Terminal,
-    Zap,
+    Zap
 } from "lucide-react";
 import {
     Sidebar,
@@ -20,19 +20,19 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
-    SidebarRail,
+    SidebarRail
 } from "@/components/ui/sidebar";
 
 const mainNavItems = [
     { to: "/", label: "Dashboard", icon: LayoutDashboard },
     { to: "/playground", label: "Playground", icon: Terminal },
-    { to: "/keys", label: "API Keys", icon: KeyRound },
+    { to: "/keys", label: "API Keys", icon: KeyRound }
 ] as const;
 
 const routingNavItems = [
     { to: "/providers", label: "Providers", icon: Boxes },
     { to: "/quota", label: "Quotas", icon: Gauge },
-    { to: "/logs", label: "Logs", icon: ScrollText },
+    { to: "/logs", label: "Logs", icon: ScrollText }
 ] as const;
 
 export function AppSidebar() {
@@ -74,11 +74,11 @@ export function AppSidebar() {
                                                     activeProps={{
                                                         className:
                                                             "border-foreground bg-sidebar-accent/60 text-foreground",
-                                                        "aria-current": "page",
+                                                        "aria-current": "page"
                                                     }}
                                                     inactiveProps={{
                                                         className:
-                                                            "border-transparent text-muted-foreground hover:border-sidebar-border hover:bg-transparent hover:text-foreground",
+                                                            "border-transparent text-muted-foreground hover:border-sidebar-border hover:bg-transparent hover:text-foreground"
                                                     }}
                                                 />
                                             }
@@ -114,11 +114,11 @@ export function AppSidebar() {
                                                     activeProps={{
                                                         className:
                                                             "border-foreground bg-sidebar-accent/60 text-foreground",
-                                                        "aria-current": "page",
+                                                        "aria-current": "page"
                                                     }}
                                                     inactiveProps={{
                                                         className:
-                                                            "border-transparent text-muted-foreground hover:border-sidebar-border hover:bg-transparent hover:text-foreground",
+                                                            "border-transparent text-muted-foreground hover:border-sidebar-border hover:bg-transparent hover:text-foreground"
                                                     }}
                                                 />
                                             }
@@ -151,11 +151,11 @@ export function AppSidebar() {
                                     activeProps={{
                                         className:
                                             "border-foreground bg-sidebar-accent/60 text-foreground",
-                                        "aria-current": "page",
+                                        "aria-current": "page"
                                     }}
                                     inactiveProps={{
                                         className:
-                                            "border-transparent text-muted-foreground hover:border-sidebar-border hover:bg-transparent hover:text-foreground",
+                                            "border-transparent text-muted-foreground hover:border-sidebar-border hover:bg-transparent hover:text-foreground"
                                     }}
                                 />
                             }

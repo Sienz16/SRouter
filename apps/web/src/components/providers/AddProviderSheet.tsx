@@ -12,7 +12,7 @@ import {
     SheetDescription,
     SheetFooter,
     SheetHeader,
-    SheetTitle,
+    SheetTitle
 } from "@/components/ui/sheet";
 
 type AddProviderSheetProps = {
@@ -81,7 +81,7 @@ export function AddProviderSheet({ open, onOpenChange }: AddProviderSheetProps) 
             const msg = error.message || "Failed to add provider.";
             setFormError(msg);
             toast.error(msg);
-        },
+        }
     });
 
     function handleSubmit(event: React.FormEvent) {
@@ -97,7 +97,7 @@ export function AddProviderSheet({ open, onOpenChange }: AddProviderSheetProps) 
             category,
             protocol,
             baseUrl: baseUrl.trim() || undefined,
-            apiKey: apiKey.trim() || undefined,
+            apiKey: apiKey.trim() || undefined
         });
     }
 

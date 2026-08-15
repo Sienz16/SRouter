@@ -8,7 +8,7 @@ import {
     isDueForRefresh,
     refreshProviderToken,
     startTokenRefreshSweeper,
-    stopTokenRefreshSweeper,
+    stopTokenRefreshSweeper
 } from "../src/services/tokenRefresh.js";
 
 const originalFetch = globalThis.fetch;
@@ -31,7 +31,7 @@ function oauthProvider(overrides: Partial<ProviderConfig> = {}): ProviderConfig 
         refreshToken: "old-refresh",
         enabled: true,
         createdAt: Date.now(),
-        ...overrides,
+        ...overrides
     };
 }
 
@@ -42,9 +42,9 @@ test("isDueForRefresh respects expiry lead time and stale missing expiry", () =>
     assert.equal(
         isDueForRefresh(
             oauthProvider({ tokenExpiresAt: undefined, lastRefreshedAt: now - 13 * 60 * 60_000 }),
-            now,
+            now
         ),
-        true,
+        true
     );
     assert.equal(isDueForRefresh(oauthProvider({ refreshToken: undefined }), now), false);
 });
@@ -58,7 +58,7 @@ test("refreshProviderToken deduplicates concurrent refreshes and updates DB plus
     const executor = new CodexExecutor({
         id,
         accessToken: config.accessToken,
-        refreshToken: config.refreshToken,
+        refreshToken: config.refreshToken
     });
     registry.registerProvider(executor);
 
@@ -70,7 +70,7 @@ test("refreshProviderToken deduplicates concurrent refreshes and updates DB plus
             modelAuthorization = new Headers(init?.headers).get("Authorization") ?? "";
             return new Response(JSON.stringify({ models: [] }), {
                 status: 200,
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json" }
             });
         }
 
@@ -81,9 +81,9 @@ test("refreshProviderToken deduplicates concurrent refreshes and updates DB plus
                 access_token: "new-access",
                 refresh_token: "new-refresh",
                 expires_in: 3600,
-                token_type: "Bearer",
+                token_type: "Bearer"
             }),
-            { status: 200, headers: { "Content-Type": "application/json" } },
+            { status: 200, headers: { "Content-Type": "application/json" } }
         );
     };
 

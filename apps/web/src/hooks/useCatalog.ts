@@ -9,7 +9,7 @@ import {
     buildSummaryItems,
     matchesProvider,
     type CatalogSummary,
-    type FilterValue,
+    type FilterValue
 } from "@/utils/catalog.utils";
 
 const STATIC_DEFAULT_PROVIDERS: ProviderDefinition[] = KNOWN_PROVIDERS.map((kp) => ({
@@ -24,10 +24,10 @@ const STATIC_DEFAULT_PROVIDERS: ProviderDefinition[] = KNOWN_PROVIDERS.map((kp) 
     status: {
         state: "no_connections",
         message: kp.statusMessage,
-        connectedCount: 0,
+        connectedCount: 0
     },
     models: [],
-    connections: [],
+    connections: []
 }));
 
 export function useCatalog() {
@@ -36,7 +36,7 @@ export function useCatalog() {
 
     const query = useQuery({
         queryKey: ["providers", "catalog"],
-        queryFn: () => api.get<CatalogSummary>("/v1/providers/catalog"),
+        queryFn: () => api.get<CatalogSummary>("/v1/providers/catalog")
     });
 
     const liveData = query.data;
@@ -60,7 +60,7 @@ export function useCatalog() {
                             ...live,
                             name: existing.name,
                             category: existing.category,
-                            protocol: existing.protocol,
+                            protocol: existing.protocol
                         });
                     } else {
                         // User-created custom provider
@@ -78,7 +78,7 @@ export function useCatalog() {
     const matches = useMemo(
         () =>
             allProviders.filter((provider) => matchesProvider(provider, filter, normalizedSearch)),
-        [allProviders, filter, normalizedSearch],
+        [allProviders, filter, normalizedSearch]
     );
 
     const syntheticCatalogSummary: CatalogSummary = useMemo(() => {
@@ -86,22 +86,22 @@ export function useCatalog() {
             oauth: allProviders.filter((p) => p.category === "oauth"),
             api_key: allProviders.filter((p) => p.category === "api_key"),
             free_tier: allProviders.filter((p) => p.category === "free_tier"),
-            custom: allProviders.filter((p) => p.category === "custom"),
+            custom: allProviders.filter((p) => p.category === "custom")
         };
         return {
             total: allProviders.length,
-            categories: categories as CatalogSummary["categories"],
+            categories: categories as CatalogSummary["categories"]
         };
     }, [allProviders]);
 
     const summaryItems = useMemo(
         () => buildSummaryItems(syntheticCatalogSummary, allProviders),
-        [syntheticCatalogSummary, allProviders],
+        [syntheticCatalogSummary, allProviders]
     );
 
     const filterOptions = useMemo(
         () => buildFilterOptions(syntheticCatalogSummary, allProviders),
-        [syntheticCatalogSummary, allProviders],
+        [syntheticCatalogSummary, allProviders]
     );
 
     const groups = useMemo(() => buildGroups(matches, filter), [matches, filter]);
@@ -118,6 +118,6 @@ export function useCatalog() {
         matches,
         summaryItems,
         filterOptions,
-        groups,
+        groups
     };
 }

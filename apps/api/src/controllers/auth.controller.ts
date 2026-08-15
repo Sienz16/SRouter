@@ -12,7 +12,7 @@ import {
     tabiTokenAuthHandler,
     type AuthProviderHandler,
     type OAuthLoginParams,
-    type TokenImportParams,
+    type TokenImportParams
 } from "@/logic/auth.providers.js";
 import { err, ok } from "@/utils/response.js";
 
@@ -63,7 +63,7 @@ function renderOAuthSuccessHTML(providerName: string): Response {
 </body>
 </html>`;
     return new Response(html, {
-        headers: { "Content-Type": "text/html; charset=utf-8" },
+        headers: { "Content-Type": "text/html; charset=utf-8" }
     });
 }
 
@@ -79,7 +79,7 @@ function loginFor(
     handler: AuthProviderHandler,
     initiate: (params: OAuthLoginParams) => ReturnType<typeof AuthLogic.initiateOAuthPKCE>,
     c: Context,
-    handleErrors: boolean,
+    handleErrors: boolean
 ): Response {
     const clientId = c.req.query("client_id") || undefined;
     const redirectUri = c.req.query("redirect_uri") || undefined;
@@ -107,7 +107,7 @@ function loginFor(
 async function handleOAuthCallbackFor(
     handler: AuthProviderHandler,
     processCallback: (code: string, state: string) => Promise<unknown>,
-    c: Context,
+    c: Context
 ): Promise<Response> {
     let code = c.req.query("code") || undefined;
     let state = c.req.query("state") || undefined;
@@ -133,7 +133,7 @@ async function handleOAuthCallbackFor(
 
     if (!code || !state) {
         return err(c, "Missing required 'code' or 'state' parameters in OAuth callback", 400, {
-            type: "invalid_request_error",
+            type: "invalid_request_error"
         });
     }
 
@@ -146,7 +146,7 @@ async function handleOAuthCallbackFor(
             return ok(c, {
                 success: true,
                 message: handler.oauthSuccessMessage,
-                provider: providerConfig,
+                provider: providerConfig
             });
         }
 
@@ -163,7 +163,7 @@ async function handleOAuthCallbackFor(
 async function importTokenFor(
     handler: AuthProviderHandler,
     importLogic: (body: TokenImportParams) => unknown,
-    c: Context,
+    c: Context
 ): Promise<Response> {
     let body: TokenImportBody;
     try {
@@ -183,9 +183,9 @@ async function importTokenFor(
         {
             success: true,
             message: handler.tokenImportMessage,
-            provider: providerConfig,
+            provider: providerConfig
         },
-        201,
+        201
     );
 }
 
@@ -201,7 +201,7 @@ export class AuthController {
         return handleOAuthCallbackFor(
             openaiCodexAuthHandler,
             (code, state) => AuthLogic.processOAuthCallback(code, state),
-            c,
+            c
         );
     }
 
@@ -215,7 +215,7 @@ export class AuthController {
             antigravityAuthHandler,
             (p) => AuthLogic.initiateAntigravityOAuthPKCE(p),
             c,
-            true,
+            true
         );
     }
 
@@ -223,7 +223,7 @@ export class AuthController {
         return handleOAuthCallbackFor(
             antigravityAuthHandler,
             (code, state) => AuthLogic.processAntigravityOAuthCallback(code, state),
-            c,
+            c
         );
     }
 
@@ -231,7 +231,7 @@ export class AuthController {
         return importTokenFor(
             antigravityAuthHandler,
             (b) => AuthLogic.processAntigravityTokenImport(b),
-            c,
+            c
         );
     }
 
@@ -240,7 +240,7 @@ export class AuthController {
         return importTokenFor(
             commandCodeAuthHandler,
             (b) => AuthLogic.processCommandCodeTokenImport(b),
-            c,
+            c
         );
     }
 
@@ -249,7 +249,7 @@ export class AuthController {
         return importTokenFor(
             anthropicAuthHandler,
             (b) => AuthLogic.processAnthropicTokenImport(b),
-            c,
+            c
         );
     }
 
@@ -258,7 +258,7 @@ export class AuthController {
         return importTokenFor(
             goRouterAuthHandler,
             (b) => AuthLogic.processGoRouterTokenImport(b),
-            c,
+            c
         );
     }
 
@@ -267,17 +267,13 @@ export class AuthController {
         return importTokenFor(
             bluesMindsAuthHandler,
             (b) => AuthLogic.processBluesMindsTokenImport(b),
-            c,
+            c
         );
     }
 
     // SeekAI Provider (API key)
     public static async importSeekAIToken(c: Context): Promise<Response> {
-        return importTokenFor(
-            seekAIAuthHandler,
-            (b) => AuthLogic.processSeekAITokenImport(b),
-            c,
-        );
+        return importTokenFor(seekAIAuthHandler, (b) => AuthLogic.processSeekAITokenImport(b), c);
     }
 
     // TabiToken Provider (API key)
@@ -285,7 +281,7 @@ export class AuthController {
         return importTokenFor(
             tabiTokenAuthHandler,
             (b) => AuthLogic.processTabiTokenTokenImport(b),
-            c,
+            c
         );
     }
 
@@ -298,7 +294,7 @@ export class AuthController {
         return handleOAuthCallbackFor(
             qoderAuthHandler,
             (code, state) => AuthLogic.processQoderOAuthCallback(code, state),
-            c,
+            c
         );
     }
 

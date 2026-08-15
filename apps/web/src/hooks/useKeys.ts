@@ -48,7 +48,7 @@ export function useKeys() {
                 setCreating(false);
             }
         },
-        [],
+        []
     );
 
     const deleteKey = useCallback(async (id: string) => {
@@ -76,6 +76,6 @@ export function useKeys() {
         setNewlyCreatedKey,
         fetchKeys,
         createKey,
-        deleteKey,
+        deleteKey
     };
 }

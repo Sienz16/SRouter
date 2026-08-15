@@ -24,7 +24,7 @@ function DialogOverlay({ className, ...props }: DialogPrimitive.Backdrop.Props) 
             data-slot="dialog-overlay"
             className={cn(
                 "fixed inset-0 z-50 bg-black/60 backdrop-blur-xs transition-opacity duration-150 data-ending-style:opacity-0 data-starting-style:opacity-0",
-                className,
+                className
             )}
             {...props}
         />
@@ -39,7 +39,7 @@ function DialogContent({ className, children, ...props }: DialogPrimitive.Popup.
                 data-slot="dialog-content"
                 className={cn(
                     "fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-5 text-[var(--ink)] shadow-2xl transition duration-150 data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0 outline-none",
-                    className,
+                    className
                 )}
                 {...props}
             >
@@ -75,7 +75,7 @@ function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
             data-slot="dialog-title"
             className={cn(
                 "text-base font-semibold leading-none tracking-tight text-[var(--ink)]",
-                className,
+                className
             )}
             {...props}
         />
@@ -102,5 +102,5 @@ export {
     DialogHeader,
     DialogFooter,
     DialogTitle,
-    DialogDescription,
+    DialogDescription
 };

@@ -10,7 +10,7 @@ import {
     List,
     Plus,
     RotateCcw,
-    Search,
+    Search
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,7 @@ import { ProviderModelTable } from "@/components/providers/ProviderModelTable";
 import { CATEGORY_LABELS, getProviderWebsiteUrl } from "@srouter/constants";
 
 export const Route = createFileRoute("/providers/$providerId")({
-    component: ProviderDetailPage,
+    component: ProviderDetailPage
 });
 
 function ProviderDetailPage() {
@@ -37,7 +37,7 @@ function ProviderDetailPage() {
         error,
         refetch,
         addMutation,
-        deleteMutation,
+        deleteMutation
     } = useProvider(providerId);
 
     const [modelSearch, setModelSearch] = useState("");
@@ -92,7 +92,7 @@ function ProviderDetailPage() {
             category: provider.category,
             protocol: provider.protocol,
             baseUrl: input.baseUrl || provider.defaultBaseUrl || undefined,
-            apiKey: input.apiKey,
+            apiKey: input.apiKey
         };
 
         setFormError("");
@@ -106,7 +106,7 @@ function ProviderDetailPage() {
                 const msg = err.message || "Failed to add connection";
                 setFormError(msg);
                 toast.error(msg);
-            },
+            }
         });
     };
 
@@ -147,7 +147,7 @@ function ProviderDetailPage() {
     const activeConnectionsCount = connections.filter((c) => c.enabled).length;
     const activeModels = provider.models.filter((m) => !deletedModelIds.includes(m.id));
     const filteredModels = activeModels.filter((m) =>
-        m.id.toLowerCase().includes(modelSearch.toLowerCase()),
+        m.id.toLowerCase().includes(modelSearch.toLowerCase())
     );
 
     const websiteUrl = getProviderWebsiteUrl(provider.id, provider.defaultBaseUrl);
@@ -265,8 +265,7 @@ function ProviderDetailPage() {
                 onDelete={(connectionId) =>
                     deleteMutation.mutate(connectionId, {
                         onSuccess: () => toast.success("Connection deleted successfully"),
-                        onError: (err) =>
-                            toast.error(err.message || "Failed to delete connection"),
+                        onError: (err) => toast.error(err.message || "Failed to delete connection")
                     })
                 }
             />

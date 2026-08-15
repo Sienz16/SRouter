@@ -11,7 +11,7 @@ function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) 
             await navigator.clipboard.writeText(text);
             setCopied(true);
             toast.success("Base URL copied", {
-                description: "Compatible with OpenAI and Anthropic clients.",
+                description: "Compatible with OpenAI and Anthropic clients."
             });
             setTimeout(() => setCopied(false), 1500);
         } catch {

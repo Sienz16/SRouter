@@ -29,7 +29,7 @@ export async function apiKeyAuth(c: Context, next: Next) {
             if (!apiKeyRow.enabled) {
                 return err(c, "The provided SRouter API Key is disabled", 401, {
                     type: "invalid_request_error",
-                    code: "api_key_disabled",
+                    code: "api_key_disabled"
                 });
             }
             c.set("apiKeyRow", apiKeyRow);
@@ -40,7 +40,7 @@ export async function apiKeyAuth(c: Context, next: Next) {
         if (isRequired) {
             return err(c, "Invalid SRouter API Key", 401, {
                 type: "invalid_request_error",
-                code: "invalid_api_key",
+                code: "invalid_api_key"
             });
         }
     }
@@ -52,8 +52,8 @@ export async function apiKeyAuth(c: Context, next: Next) {
             401,
             {
                 type: "invalid_request_error",
-                code: "missing_api_key",
-            },
+                code: "missing_api_key"
+            }
         );
     }
 

@@ -10,7 +10,7 @@ const DEFAULT_FOLLOW_UPS = [
     "Can you provide unit tests for this implementation?",
     "Explain the performance trade-offs and complexity.",
     "Refactor this into a more modular structure.",
-    "How would you handle edge cases and error recovery?",
+    "How would you handle edge cases and error recovery?"
 ];
 
 export function ResponseFollowUps({ onSelectFollowUp }: ResponseFollowUpsProps) {

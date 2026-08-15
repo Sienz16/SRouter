@@ -12,7 +12,7 @@ const provider: AIProvider = {
     },
     chatCompletionStream: async function* () {
         throw new Error("not used");
-    },
+    }
 };
 
 test("unregisterProvider removes a deleted runtime connection", () => {
@@ -66,7 +66,7 @@ test("getProviderForModel resolves provider with alias and full name prefixes", 
         },
         chatCompletionStream: async function* () {
             throw new Error("not used");
-        },
+        }
     };
     registry.registerProvider(qoderProvider);
 
@@ -81,6 +81,6 @@ test("getProviderForModel resolves provider with alias and full name prefixes", 
     // Unregistered provider throws descriptive error
     await assert.rejects(
         () => registry.getProviderForModel("unregistered/model"),
-        /No active provider connection found for model "unregistered\/model"/,
+        /No active provider connection found for model "unregistered\/model"/
     );
 });

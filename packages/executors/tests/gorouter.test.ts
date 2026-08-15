@@ -11,7 +11,7 @@ function executor(): GoRouterExecutor {
         id: "gorouter",
         name: "GoRouter",
         baseUrl: "https://gorouter.app/v1",
-        accessToken: fixtureKey,
+        accessToken: fixtureKey
     });
 }
 
@@ -31,7 +31,7 @@ test("GoRouter lists namespaced live models with bearer auth", async () => {
         const auth = new Headers(init?.headers).get("authorization") ?? "";
         authorized = auth.startsWith("Bearer ") && auth.endsWith(fixtureKey);
         return Response.json({
-            data: [{ id: "claude-3-5-sonnet", object: "model", owned_by: "gorouter" }],
+            data: [{ id: "claude-3-5-sonnet", object: "model", owned_by: "gorouter" }]
         });
     };
 
@@ -39,7 +39,7 @@ test("GoRouter lists namespaced live models with bearer auth", async () => {
     assert.equal(url, "https://gorouter.app/v1/models");
     assert.equal(authorized, true);
     assert.deepEqual(models, [
-        { id: "gorouter/claude-3-5-sonnet", object: "model", owned_by: "gorouter" },
+        { id: "gorouter/claude-3-5-sonnet", object: "model", owned_by: "gorouter" }
     ]);
 });
 
@@ -52,7 +52,7 @@ test("GoRouter chat sends bare model and preserves nested upstream IDs", async (
             object: "chat.completion",
             created: 1,
             model: "test",
-            choices: [],
+            choices: []
         });
     };
 
@@ -80,23 +80,23 @@ test("GoRouter streaming preserves tools and yields tool-call deltas", async () 
                             index: 0,
                             id: "call_1",
                             type: "function",
-                            function: { name: "weather", arguments: "{}" },
-                        },
-                    ],
+                            function: { name: "weather", arguments: "{}" }
+                        }
+                    ]
                 },
-                finish_reason: null,
-            },
-        ],
+                finish_reason: null
+            }
+        ]
     };
     globalThis.fetch = async (_input, init) => {
         body = JSON.parse(String(init?.body)) as Record<string, unknown>;
         const stream = new ReadableStream({
             start(controller) {
                 controller.enqueue(
-                    new TextEncoder().encode(`data: ${JSON.stringify(chunk)}\n\ndata: [DONE]\n\n`),
+                    new TextEncoder().encode(`data: ${JSON.stringify(chunk)}\n\ndata: [DONE]\n\n`)
                 );
                 controller.close();
-            },
+            }
         });
         return new Response(stream, { headers: { "content-type": "text/event-stream" } });
     };
@@ -107,14 +107,14 @@ test("GoRouter streaming preserves tools and yields tool-call deltas", async () 
             function: {
                 name: "weather",
                 description: "Weather",
-                parameters: { type: "object", properties: {} },
-            },
-        },
+                parameters: { type: "object", properties: {} }
+            }
+        }
     ];
     const output = [];
     for await (const item of executor().chatCompletionStream({
         ...request("gorouter/claude-3-5-sonnet"),
-        tools,
+        tools
     }))
         output.push(item);
 
@@ -130,6 +130,6 @@ test("GoRouter upstream errors do not expose credentials", async () => {
         (error: Error) =>
             error.message.includes("503") &&
             error.message.includes("upstream unavailable") &&
-            !error.message.includes(fixtureKey),
+            !error.message.includes(fixtureKey)
     );
 });

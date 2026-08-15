@@ -11,7 +11,7 @@ import {
     Plus,
     RefreshCw,
     Shield,
-    Zap,
+    Zap
 } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,7 +22,7 @@ import type { LiveModelQuotaItem, ProviderUsageMetric } from "@srouter/types";
 
 export const Route = createFileRoute("/quota")({
     staticData: { title: "Quotas & Limits" },
-    component: QuotaPage,
+    component: QuotaPage
 });
 
 function formatResetTime(isoStr?: string): string {
@@ -33,11 +33,11 @@ function formatResetTime(isoStr?: string): string {
         const timeStr = d.toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
-            second: "2-digit",
+            second: "2-digit"
         });
         const dateStr = d.toLocaleDateString([], {
             month: "short",
-            day: "numeric",
+            day: "numeric"
         });
         return `${timeStr} (${dateStr})`;
     } catch {
@@ -167,7 +167,7 @@ function QuotaPage() {
     const toggleCollapse = (id: string) => {
         setCollapsedMap((prev) => ({
             ...prev,
-            [id]: !prev[id],
+            [id]: !prev[id]
         }));
     };
 
@@ -179,8 +179,8 @@ function QuotaPage() {
             toast.success(
                 accountName ? `Quota refreshed for ${accountName}` : "Quotas & limits updated",
                 {
-                    description: "Fetched latest live limits from upstream providers.",
-                },
+                    description: "Fetched latest live limits from upstream providers."
+                }
             );
         } catch {
             toast.error("Failed to refresh quotas");
@@ -222,7 +222,7 @@ function QuotaPage() {
     const allProviders = data.providers ?? [];
     // Only display provider cards that actually have live quotas or recorded usage metrics
     const activeProviders = allProviders.filter(
-        (p) => (p.quotas && p.quotas.length > 0) || (p.usageMetrics && p.usageMetrics.length > 0),
+        (p) => (p.quotas && p.quotas.length > 0) || (p.usageMetrics && p.usageMetrics.length > 0)
     );
 
     const isAllCollapsed =
@@ -247,7 +247,7 @@ function QuotaPage() {
         if (p.quotas) {
             totalLiveQuotas += p.quotas.length;
             exhaustedQuotas += p.quotas.filter(
-                (q) => q.status === "exhausted" || q.percentageValue <= 5,
+                (q) => q.status === "exhausted" || q.percentageValue <= 5
             ).length;
         }
         if (p.usageMetrics) {
@@ -287,7 +287,7 @@ function QuotaPage() {
                         {lastUpdated.toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
-                            second: "2-digit",
+                            second: "2-digit"
                         })}
                     </span>
 
