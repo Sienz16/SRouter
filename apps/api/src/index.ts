@@ -9,6 +9,7 @@ import {
 import { chatRoute } from "@/routes/v1/chat.js";
 import { keysRoute } from "@/routes/v1/keys.js";
 import { logsRoute } from "@/routes/v1/logs.js";
+import { messagesRoute } from "@/routes/v1/messages.js";
 import { modelsRoute } from "@/routes/v1/models.js";
 import { providersRoute } from "@/routes/v1/providers.js";
 import { quotaRoute } from "@/routes/v1/quota.js";
@@ -48,12 +49,16 @@ app.get("/health", (c) => {
 // Mount OpenAI & Anthropic v1 API routes
 app.route("/v1", modelsRoute);
 app.route("/v1", chatRoute);
+app.route("/v1", messagesRoute);
 app.route("/v1", providersRoute);
 app.route("/v1", keysRoute);
 app.route("/v1", logsRoute);
 app.route("/v1", authRoute);
 app.route("/v1", quotaRoute);
 app.route("/v1", settingsRoute);
+
+// Also mount root-level /messages for Anthropic clients sending to base URL directly
+app.route("/", messagesRoute);
 
 const port = Number(process.env.PORT) || 3000;
 
@@ -67,7 +72,7 @@ serve(
     },
 );
 
-// Secondary listener on Port 1455 for OAuth callbacks
+// Secondary listener on Port 1455 for OAuth callbacks and local Anthropic proxy
 const oauthApp = new Hono();
 oauthApp.get("/auth/callback", (c) => handleOAuthCallback(c));
 oauthApp.post("/auth/callback", (c) => handleOAuthCallback(c));
@@ -75,6 +80,10 @@ oauthApp.get("/auth/antigravity/callback", (c) => handleAntigravityOAuthCallback
 oauthApp.post("/auth/antigravity/callback", (c) => handleAntigravityOAuthCallback(c));
 oauthApp.get("/auth/qoder/callback", (c) => handleQoderOAuthCallback(c));
 oauthApp.post("/auth/qoder/callback", (c) => handleQoderOAuthCallback(c));
+oauthApp.route("/v1", messagesRoute);
+oauthApp.route("/", messagesRoute);
+oauthApp.route("/v1", chatRoute);
+oauthApp.route("/v1", modelsRoute);
 
 const oauthPort = Number(process.env.OAUTH_PORT) || 1455;
 
