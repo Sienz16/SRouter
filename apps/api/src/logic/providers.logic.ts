@@ -194,7 +194,7 @@ export class ProvidersLogic {
 
         if (registeredProvider) {
             try {
-                const fetched = await registeredProvider.listModels();
+                const fetched = await registry.getProviderModels(registeredProvider);
                 if (fetched.length > 0) {
                     liveModels = fetched;
                 }

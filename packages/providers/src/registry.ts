@@ -28,11 +28,22 @@ function stripModelPrefix(modelId: string, alias: string, providerId: string): s
     return modelId;
 }
 
+interface CachedProviderModels {
+    models: ModelObject[];
+    cachedAt: number;
+}
+
 export class ProviderRegistry {
     private providers: Map<string, AIProvider> = new Map();
     private defaultProvider: AIProvider;
+    private modelsCache: Map<string, CachedProviderModels> = new Map();
+    private modelsInflight: Map<string, Promise<ModelObject[]>> = new Map();
+    private modelsTtlMs: number = 5 * 60 * 1000; // 5 minutes default TTL
 
-    constructor(defaultProvider?: AIProvider) {
+    constructor(defaultProvider?: AIProvider, modelsTtlMs?: number) {
+        if (modelsTtlMs !== undefined) {
+            this.modelsTtlMs = modelsTtlMs;
+        }
         this.defaultProvider = defaultProvider ?? {
             id: "default",
             name: "Default Provider",
@@ -55,11 +66,65 @@ export class ProviderRegistry {
         this.registerProvider(this.defaultProvider);
     }
 
+    setModelsTtlMs(ttlMs: number): void {
+        this.modelsTtlMs = ttlMs;
+    }
+
+    clearModelsCache(providerId?: string): void {
+        if (providerId) {
+            this.modelsCache.delete(providerId);
+            this.modelsInflight.delete(providerId);
+        } else {
+            this.modelsCache.clear();
+            this.modelsInflight.clear();
+        }
+    }
+
+    async getProviderModels(provider: AIProvider, forceRefresh = false): Promise<ModelObject[]> {
+        if (!provider || provider.id === "default") return [];
+
+        const now = Date.now();
+        const cached = this.modelsCache.get(provider.id);
+
+        if (!forceRefresh && cached && now - cached.cachedAt < this.modelsTtlMs) {
+            return cached.models;
+        }
+
+        const inflight = this.modelsInflight.get(provider.id);
+        if (inflight && !forceRefresh) {
+            return inflight;
+        }
+
+        const fetchPromise = (async () => {
+            try {
+                const models = await provider.listModels();
+                const safeModels = Array.isArray(models) ? models : [];
+                this.modelsCache.set(provider.id, {
+                    models: safeModels,
+                    cachedAt: Date.now()
+                });
+                return safeModels;
+            } catch (err) {
+                if (cached) {
+                    return cached.models;
+                }
+                return [];
+            } finally {
+                this.modelsInflight.delete(provider.id);
+            }
+        })();
+
+        this.modelsInflight.set(provider.id, fetchPromise);
+        return fetchPromise;
+    }
+
     registerProvider(provider: AIProvider): void {
         this.providers.set(provider.id, provider);
+        this.clearModelsCache(provider.id);
     }
 
     unregisterProvider(providerId: string): boolean {
+        this.clearModelsCache(providerId);
         return this.providers.delete(providerId);
     }
 
@@ -107,12 +172,21 @@ export class ProviderRegistry {
     async getProviderForModel(modelId: string): Promise<AIProvider> {
         const candidates: AIProvider[] = [];
 
-        // 1. Direct match from registered providers' listModels()
-        for (const provider of this.providers.values()) {
-            if (provider.id === "default") continue;
+        // 1. Direct match from registered providers' listModels() (cached)
+        const activeProviders = Array.from(this.providers.values()).filter(
+            (p) => p.id !== "default"
+        );
+
+        const modelLists = await Promise.all(
+            activeProviders.map(async (provider) => {
+                const models = await this.getProviderModels(provider);
+                return { provider, models };
+            })
+        );
+
+        for (const { provider, models } of modelLists) {
             const alias = getProviderAlias(provider.id);
             const baseId = providerBaseId(provider.id);
-            const models = await provider.listModels();
             if (
                 models.some((m) => {
                     const bareId = stripModelPrefix(m.id, alias, provider.id);
@@ -162,7 +236,7 @@ export class ProviderRegistry {
         );
     }
 
-    async listAllModels(providerFilter?: string): Promise<ModelObject[]> {
+    async listAllModels(providerFilter?: string, forceRefresh = false): Promise<ModelObject[]> {
         const allModels: ModelObject[] = [];
         const seenIds = new Set<string>();
 
@@ -182,16 +256,22 @@ export class ProviderRegistry {
             }
         };
 
-        // Models from registered/connected providers ONLY
-        for (const provider of this.providers.values()) {
-            if (provider.id === "default") continue;
+        const activeProviders = Array.from(this.providers.values()).filter(
+            (p) => p.id !== "default"
+        );
 
-            const alias = getProviderAlias(provider.id);
+        // Fetch / retrieve cached models concurrently across all active providers
+        const results = await Promise.all(
+            activeProviders.map(async (provider) => {
+                const alias = getProviderAlias(provider.id);
+                const liveModels = await this.getProviderModels(provider, forceRefresh);
+                return { providerId: provider.id, alias, liveModels };
+            })
+        );
 
-            // Fetch live models from provider endpoint using its accessToken / apiKey
-            const liveModels = await provider.listModels();
+        for (const { providerId, alias, liveModels } of results) {
             for (const model of liveModels) {
-                addModel(model, alias, provider.id);
+                addModel(model, alias, providerId);
             }
         }
 

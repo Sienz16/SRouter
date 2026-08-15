@@ -84,3 +84,74 @@ test("getProviderForModel resolves provider with alias and full name prefixes", 
         /No active provider connection found for model "unregistered\/model"/
     );
 });
+
+test("ProviderRegistry caches listModels responses across multiple calls within TTL", async () => {
+    let callCount = 0;
+    const testProvider: AIProvider = {
+        id: "test_cached_provider",
+        name: "Test Cached Provider",
+        listModels: async () => {
+            callCount++;
+            return [{ id: "test_cached_provider/model-1", object: "model" }];
+        },
+        chatCompletion: async () => {
+            throw new Error("not used");
+        },
+        chatCompletionStream: async function* () {
+            throw new Error("not used");
+        }
+    };
+
+    const registry = new ProviderRegistry();
+    registry.registerProvider(testProvider);
+
+    // Initial call fetches models
+    const models1 = await registry.listAllModels();
+    assert.equal(callCount, 1);
+    assert.equal(models1.length, 1);
+    assert.equal(models1[0]?.id, "test/model-1");
+
+    // Second call within TTL hits cache (callCount remains 1)
+    const models2 = await registry.listAllModels();
+    assert.equal(callCount, 1);
+    assert.deepEqual(models2, models1);
+
+    // forceRefresh bypasses cache (callCount increments)
+    const models3 = await registry.listAllModels(undefined, true);
+    assert.equal(callCount, 2);
+    assert.deepEqual(models3, models1);
+});
+
+test("ProviderRegistry invalidates cache on register and unregister", async () => {
+    let callCount = 0;
+    const testProvider: AIProvider = {
+        id: "test_invalidation_provider",
+        name: "Test Invalidation Provider",
+        listModels: async () => {
+            callCount++;
+            return [{ id: "test_invalidation_provider/alpha", object: "model" }];
+        },
+        chatCompletion: async () => {
+            throw new Error("not used");
+        },
+        chatCompletionStream: async function* () {
+            throw new Error("not used");
+        }
+    };
+
+    const registry = new ProviderRegistry();
+    registry.registerProvider(testProvider);
+
+    await registry.listAllModels();
+    assert.equal(callCount, 1);
+
+    // Re-registering the provider clears cache
+    registry.registerProvider(testProvider);
+    await registry.listAllModels();
+    assert.equal(callCount, 2);
+
+    // Unregistering removes provider and clears cache
+    registry.unregisterProvider(testProvider.id);
+    const models = await registry.listAllModels();
+    assert.equal(models.length, 0);
+});

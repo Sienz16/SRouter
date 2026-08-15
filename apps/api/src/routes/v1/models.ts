@@ -8,5 +8,5 @@ modelsRoute.use("/*", apiKeyAuth);
 // GET /v1/models
 modelsRoute.get("/models", ModelsController.listModels);
 
-// GET /v1/models/:model
-modelsRoute.get("/models/:model", ModelsController.getModelById);
+// GET /v1/models/:model (supports slashes in namespaced model IDs)
+modelsRoute.get("/models/:model{.+}", ModelsController.getModelById);
