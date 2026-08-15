@@ -291,11 +291,20 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                 createdAt: startTime,
             };
 
+            const initialAssistantMessage: PlaygroundMessage = {
+                id: assistantMsgId,
+                role: "assistant",
+                content: "",
+                createdAt: startTime,
+                durationMs: 0,
+            };
+
             const updatedMessages = [...messages, userMessage];
             const controller = new AbortController();
             abortRef.current = controller;
 
-            setMessages(updatedMessages);
+            // Immediately show user message + assistant card (0ms instant response)
+            setMessages([...updatedMessages, initialAssistantMessage]);
             if (!customPrompt) setInput("");
             setStreaming(true);
             setStatusMessage("Generating response.");
@@ -418,7 +427,14 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
                         };
                     }
 
-                    const delta = payload.choices?.[0]?.delta?.content ?? "";
+                    const delta =
+                        payload.choices?.[0]?.delta?.content ??
+                        (payload.choices?.[0]?.delta as unknown as { reasoning_content?: string })
+                            ?.reasoning_content ??
+                        (payload.choices?.[0]?.delta as unknown as { thought?: string })?.thought ??
+                        (payload.choices?.[0]?.delta as unknown as { thinking?: string })
+                            ?.thinking ??
+                        "";
                     if (delta) updateAssistant(assistantText + delta, false, assistantUsage);
                     return "continue";
                 };

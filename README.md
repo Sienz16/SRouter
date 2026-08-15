@@ -78,6 +78,9 @@ graph TD
         Codex["OpenAI Codex / ChatGPT<br/>(GPT-4o, o3-mini)"]
         Anthropic["Anthropic Claude<br/>(Claude 3.7 Sonnet)"]
         Neosantara["Neosantara AI<br/>(Multi-Model Proxy)"]
+        GoRouter["GoRouter<br/>(API Key Provider)"]
+        BluesMinds["BluesMinds<br/>(API Key Provider)"]
+        SeekAI["SeekAI<br/>(API Key Provider)"]
         Kiro["Kiro / Amazon Q<br/>(CodeWhisperer / Bedrock)"]
         CommandCode["Command Code<br/>(API Key Provider)"]
     end
@@ -91,6 +94,9 @@ graph TD
     Registry -->|OAuth Bearer| Codex
     Registry -->|API Key / OAuth| Anthropic
     Registry -->|Bearer Key| Neosantara
+    Registry -->|Bearer Key| GoRouter
+    Registry -->|Bearer Key| BluesMinds
+    Registry -->|Bearer Key| SeekAI
     Registry -->|SigV4 / Bearer| Kiro
     Registry -->|Bearer Key| CommandCode
 ```
@@ -194,6 +200,7 @@ docker compose down
 | **Neosantara**             | Bearer API Key  | `neosantara/*`   |      ✅       |          ✅          |     ✅     |
 | **Kiro (Amazon Q)**        | AWS SigV4 / Key | `kiro/*`         |      ✅       | ✅ (Thinking Suffix) |     ✅     |
 | **Command Code**           | Bearer API Key  | `commandcode/*`  |      ✅       |          ✅          |     ✅     |
+| **GoRouter**               | Bearer API Key  | `gorouter/*`     |      ✅       |          ✅          |     ✅     |
 
 ---
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TriangleAlert } from "lucide-react";
+import { toast } from "sonner";
 import { api } from "@/lib/api";
 import type { ProviderCategory, ProviderDefinition, ProviderProtocol } from "@srouter/types";
 import { Button } from "@/components/ui/button";
@@ -66,7 +67,7 @@ export function AddProviderSheet({ open, onOpenChange }: AddProviderSheetProps) 
     const addMutation = useMutation({
         mutationFn: (payload: CreateProviderPayload) =>
             api.post<ProviderDefinition>("/v1/providers", payload),
-        onSuccess: () => {
+        onSuccess: (_data, variables) => {
             void queryClient.invalidateQueries({ queryKey: ["providers"] });
             setName("");
             setId("");
@@ -74,9 +75,12 @@ export function AddProviderSheet({ open, onOpenChange }: AddProviderSheetProps) 
             setApiKey("");
             setFormError("");
             onOpenChange(false);
+            toast.success(`Provider "${variables.name}" added successfully`);
         },
         onError: (error: Error) => {
-            setFormError(error.message || "Failed to add provider.");
+            const msg = error.message || "Failed to add provider.";
+            setFormError(msg);
+            toast.error(msg);
         },
     });
 
@@ -143,9 +147,9 @@ export function AddProviderSheet({ open, onOpenChange }: AddProviderSheetProps) 
                                     }
                                     className={selectClassName}
                                 >
-                                    <option value="custom">Custom</option>
-                                    <option value="api_key">API key</option>
-                                    <option value="free_tier">Free tier</option>
+                                    <option value="custom">Custom Provider</option>
+                                    <option value="api_key">API Key Provider</option>
+                                    <option value="free_tier">Free Tier Provider</option>
                                 </select>
                             </Field>
 

@@ -5,6 +5,9 @@ import type { ProviderCategory, ProviderProtocol } from "@srouter/types";
 export const OPENAI_BASE_URL = "https://api.openai.com/v1";
 export const ANTHROPIC_BASE_URL = "https://api.anthropic.com/v1";
 export const NEOSANTARA_BASE_URL = "https://api.neosantara.xyz/v1";
+export const GOROUTER_BASE_URL = "https://gorouter.app/v1";
+export const BLUESMINDS_BASE_URL = "https://api.bluesminds.com/v1";
+export const SEEKAI_BASE_URL = "https://seekai.cc/v1";
 export const COMMANDCODE_BASE_URL = "https://api.commandcode.ai/alpha/generate";
 export const CODEX_BASE_URL = "https://chatgpt.com/backend-api/codex/responses";
 export const CODEX_MODELS_URL = "https://chatgpt.com/backend-api/codex/models";
@@ -45,10 +48,10 @@ export const PROVIDER_CATEGORIES: ProviderCategory[] = ["custom", "oauth", "free
 export const CATEGORY_ORDER: ProviderCategory[] = ["oauth", "api_key", "free_tier", "custom"];
 
 export const CATEGORY_LABELS: Record<ProviderCategory, string> = {
-    oauth: "OAuth session",
-    api_key: "API key",
-    free_tier: "Free tier",
-    custom: "Custom",
+    oauth: "OAuth Provider",
+    api_key: "API Key Provider",
+    free_tier: "Free Tier Provider",
+    custom: "Custom Provider",
 };
 
 export const CATEGORY_DESCRIPTIONS: Record<ProviderCategory, string> = {
@@ -76,6 +79,7 @@ export interface KnownProvider {
     category: ProviderCategory;
     protocol: ProviderProtocol;
     baseUrl?: string;
+    websiteUrl?: string;
     /** Model-id prefix override (e.g. openai_codex → "openai"). Defaults to id. */
     alias?: string;
     requiresApiKey: boolean;
@@ -91,6 +95,7 @@ export const KNOWN_PROVIDERS: KnownProvider[] = [
         name: "Kiro",
         category: "api_key",
         protocol: "custom",
+        websiteUrl: "https://aws.amazon.com/q/",
         requiresApiKey: true,
         supportsCustomUrl: true,
         statusMessage: "Kiro credential missing",
@@ -101,9 +106,43 @@ export const KNOWN_PROVIDERS: KnownProvider[] = [
         category: "api_key",
         protocol: "openai",
         baseUrl: NEOSANTARA_BASE_URL,
+        websiteUrl: "https://neosantara.xyz",
         requiresApiKey: true,
         supportsCustomUrl: true,
         statusMessage: "Neosantara API key missing",
+    },
+    {
+        id: "gorouter",
+        name: "GoRouter",
+        category: "api_key",
+        protocol: "openai",
+        baseUrl: GOROUTER_BASE_URL,
+        websiteUrl: "https://gorouter.app/sign-up?aff=cJJn",
+        requiresApiKey: true,
+        supportsCustomUrl: true,
+        statusMessage: "GoRouter API key missing",
+    },
+    {
+        id: "bluesminds",
+        name: "BluesMinds",
+        category: "api_key",
+        protocol: "openai",
+        baseUrl: BLUESMINDS_BASE_URL,
+        websiteUrl: "https://api.bluesminds.com/sign-up?aff=nCAw",
+        requiresApiKey: true,
+        supportsCustomUrl: true,
+        statusMessage: "BluesMinds API key missing",
+    },
+    {
+        id: "seekai",
+        name: "SeekAI",
+        category: "api_key",
+        protocol: "openai",
+        baseUrl: SEEKAI_BASE_URL,
+        websiteUrl: "https://seekai.cc/sign-up?aff=UU0C",
+        requiresApiKey: true,
+        supportsCustomUrl: true,
+        statusMessage: "SeekAI API key missing",
     },
     {
         id: "openai_codex",
@@ -111,6 +150,7 @@ export const KNOWN_PROVIDERS: KnownProvider[] = [
         category: "oauth",
         protocol: "openai",
         alias: "openai",
+        websiteUrl: "https://chatgpt.com",
         requiresApiKey: false,
         requiresOAuth: true,
         statusMessage: "OAuth token missing",
@@ -121,6 +161,7 @@ export const KNOWN_PROVIDERS: KnownProvider[] = [
         category: "oauth",
         protocol: "anthropic",
         alias: "claude",
+        websiteUrl: "https://claude.ai",
         requiresApiKey: false,
         requiresOAuth: true,
         statusMessage: "OAuth token missing",
@@ -131,6 +172,7 @@ export const KNOWN_PROVIDERS: KnownProvider[] = [
         category: "oauth",
         protocol: "openai",
         baseUrl: ANTIGRAVITY_BASE_URL,
+        websiteUrl: "https://ai.google.dev",
         requiresApiKey: false,
         requiresOAuth: true,
         statusMessage: "Antigravity OAuth token missing",
@@ -141,6 +183,7 @@ export const KNOWN_PROVIDERS: KnownProvider[] = [
         category: "api_key",
         protocol: "openai",
         baseUrl: COMMANDCODE_BASE_URL,
+        websiteUrl: "https://commandcode.ai",
         requiresApiKey: true,
         supportsCustomUrl: true,
         statusMessage: "Command Code API key missing",
@@ -152,6 +195,7 @@ export const KNOWN_PROVIDERS: KnownProvider[] = [
         protocol: "openai",
         alias: "qd",
         baseUrl: QODER_CHAT_URL_ENCODED,
+        websiteUrl: "https://qoder.com",
         requiresApiKey: false,
         requiresOAuth: true,
         supportsCustomUrl: true,
@@ -200,4 +244,26 @@ export function providerTypeForAlias(alias: string): string | null {
     if (alias === "claude") return "claude";
     const provider = KNOWN_PROVIDERS.find((p) => p.alias === alias || p.id === alias);
     return provider ? provider.id : null;
+}
+
+/**
+ * Returns the homepage / console URL for a given provider.
+ */
+export function getProviderWebsiteUrl(
+    providerId: string,
+    defaultBaseUrl?: string,
+): string | undefined {
+    const baseId = providerBaseId(providerId);
+    const known = KNOWN_PROVIDER_MAP[providerId] ?? KNOWN_PROVIDER_MAP[baseId];
+    if (known?.websiteUrl) return known.websiteUrl;
+
+    if (defaultBaseUrl) {
+        try {
+            const parsed = new URL(defaultBaseUrl);
+            return `${parsed.protocol}//${parsed.host}`;
+        } catch {
+            return undefined;
+        }
+    }
+    return undefined;
 }

@@ -3,9 +3,12 @@ import { AuthLogic } from "@/logic/auth.logic.js";
 import {
     anthropicAuthHandler,
     antigravityAuthHandler,
+    bluesMindsAuthHandler,
     commandCodeAuthHandler,
+    goRouterAuthHandler,
     openaiCodexAuthHandler,
     qoderAuthHandler,
+    seekAIAuthHandler,
     type AuthProviderHandler,
     type OAuthLoginParams,
     type TokenImportParams,
@@ -245,6 +248,33 @@ export class AuthController {
         return importTokenFor(
             anthropicAuthHandler,
             (b) => AuthLogic.processAnthropicTokenImport(b),
+            c,
+        );
+    }
+
+    // GoRouter Provider (API key)
+    public static async importGoRouterToken(c: Context): Promise<Response> {
+        return importTokenFor(
+            goRouterAuthHandler,
+            (b) => AuthLogic.processGoRouterTokenImport(b),
+            c,
+        );
+    }
+
+    // BluesMinds Provider (API key)
+    public static async importBluesMindsToken(c: Context): Promise<Response> {
+        return importTokenFor(
+            bluesMindsAuthHandler,
+            (b) => AuthLogic.processBluesMindsTokenImport(b),
+            c,
+        );
+    }
+
+    // SeekAI Provider (API key)
+    public static async importSeekAIToken(c: Context): Promise<Response> {
+        return importTokenFor(
+            seekAIAuthHandler,
+            (b) => AuthLogic.processSeekAITokenImport(b),
             c,
         );
     }

@@ -3,16 +3,22 @@ import {
     ANTIGRAVITY_OAUTH_CLIENT_ID,
     ANTIGRAVITY_OAUTH_REDIRECT_URI,
     ANTHROPIC_BASE_URL,
+    BLUESMINDS_BASE_URL,
     CODEX_OAUTH_CLIENT_ID,
     CODEX_OAUTH_REDIRECT_URI,
     COMMANDCODE_BASE_URL,
+    GOROUTER_BASE_URL,
+    SEEKAI_BASE_URL,
 } from "@srouter/constants";
 import {
     AntigravityExecutor,
     AnthropicExecutor,
+    BluesMindsExecutor,
     CodexExecutor,
     CommandCodeExecutor,
+    GoRouterExecutor,
     QoderExecutor,
+    SeekAIExecutor,
 } from "@srouter/executors";
 import { AntigravityOAuth, OpenAICodexOAuth, QoderOAuth } from "@srouter/providers";
 import type { AIProvider, ProviderCategory, ProviderProtocol } from "@srouter/types";
@@ -236,10 +242,67 @@ export const qoderAuthHandler: AuthProviderHandler = {
         new QoderExecutor({ id, name, baseUrl, apiKey, accessToken, refreshToken }),
 };
 
+export const goRouterAuthHandler: AuthProviderHandler = {
+    providerId: "gorouter",
+    displayName: "GoRouter",
+    category: "api_key",
+    protocol: "openai",
+    idPrefix: "gorouter",
+    baseUrl: () => GOROUTER_BASE_URL,
+    oauthSuccessMessage: "",
+    tokenImportMessage: "GoRouter API Key registered and saved directly to SQLite database!",
+    mapImportTokens: (params) => ({
+        apiKey: params.accessToken,
+        refreshToken: params.refreshToken,
+        baseUrl: params.baseUrl,
+    }),
+    buildExecutor: ({ id, name, baseUrl, apiKey }) =>
+        new GoRouterExecutor({ id, name, baseUrl: baseUrl || GOROUTER_BASE_URL, apiKey }),
+};
+
+export const bluesMindsAuthHandler: AuthProviderHandler = {
+    providerId: "bluesminds",
+    displayName: "BluesMinds",
+    category: "api_key",
+    protocol: "openai",
+    idPrefix: "bluesminds",
+    baseUrl: () => BLUESMINDS_BASE_URL,
+    oauthSuccessMessage: "",
+    tokenImportMessage: "BluesMinds API Key registered and saved directly to SQLite database!",
+    mapImportTokens: (params) => ({
+        apiKey: params.accessToken,
+        refreshToken: params.refreshToken,
+        baseUrl: params.baseUrl,
+    }),
+    buildExecutor: ({ id, name, baseUrl, apiKey }) =>
+        new BluesMindsExecutor({ id, name, baseUrl: baseUrl || BLUESMINDS_BASE_URL, apiKey }),
+};
+
+export const seekAIAuthHandler: AuthProviderHandler = {
+    providerId: "seekai",
+    displayName: "SeekAI",
+    category: "api_key",
+    protocol: "openai",
+    idPrefix: "seekai",
+    baseUrl: () => SEEKAI_BASE_URL,
+    oauthSuccessMessage: "",
+    tokenImportMessage: "SeekAI API Key registered and saved directly to SQLite database!",
+    mapImportTokens: (params) => ({
+        apiKey: params.accessToken,
+        refreshToken: params.refreshToken,
+        baseUrl: params.baseUrl,
+    }),
+    buildExecutor: ({ id, name, baseUrl, apiKey }) =>
+        new SeekAIExecutor({ id, name, baseUrl: baseUrl || SEEKAI_BASE_URL, apiKey }),
+};
+
 export const authProviderHandlers: Record<string, AuthProviderHandler> = {
     openai_codex: openaiCodexAuthHandler,
     antigravity: antigravityAuthHandler,
     commandcode: commandCodeAuthHandler,
     anthropic: anthropicAuthHandler,
     qoder: qoderAuthHandler,
+    gorouter: goRouterAuthHandler,
+    bluesminds: bluesMindsAuthHandler,
+    seekai: seekAIAuthHandler,
 };

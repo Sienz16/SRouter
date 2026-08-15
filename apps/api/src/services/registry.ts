@@ -1,19 +1,25 @@
 import {
+    BLUESMINDS_BASE_URL,
     DEFAULT_PROVIDERS,
+    GOROUTER_BASE_URL,
     isProviderBaseId,
     isSeedProvider,
     NEOSANTARA_BASE_URL,
     SEED_MARKER,
+    SEEKAI_BASE_URL,
 } from "@srouter/constants";
 import { deleteProviderDB, getAllProvidersDB, upsertProviderDB } from "@srouter/db";
 import {
     AntigravityExecutor,
     AnthropicExecutor,
+    BluesMindsExecutor,
     CodexExecutor,
     CommandCodeExecutor,
+    GoRouterExecutor,
     KiroExecutor,
     OpenAIExecutor,
     QoderExecutor,
+    SeekAIExecutor,
 } from "@srouter/executors";
 import { ProviderRegistry } from "@srouter/providers";
 
@@ -124,6 +130,39 @@ export function loadSavedProvidersFromDB(): void {
                         id: p.id || p.providerId,
                         name: p.name,
                         baseUrl: baseUrl || NEOSANTARA_BASE_URL,
+                        apiKey: p.apiKey,
+                        accessToken: p.accessToken,
+                    }),
+                );
+                break;
+            case isProviderBaseId(p.id, "gorouter"):
+                registry.registerProvider(
+                    new GoRouterExecutor({
+                        id: p.id || p.providerId,
+                        name: p.name,
+                        baseUrl: baseUrl || GOROUTER_BASE_URL,
+                        apiKey: p.apiKey,
+                        accessToken: p.accessToken,
+                    }),
+                );
+                break;
+            case isProviderBaseId(p.id, "bluesminds"):
+                registry.registerProvider(
+                    new BluesMindsExecutor({
+                        id: p.id || p.providerId,
+                        name: p.name,
+                        baseUrl: baseUrl || BLUESMINDS_BASE_URL,
+                        apiKey: p.apiKey,
+                        accessToken: p.accessToken,
+                    }),
+                );
+                break;
+            case isProviderBaseId(p.id, "seekai"):
+                registry.registerProvider(
+                    new SeekAIExecutor({
+                        id: p.id || p.providerId,
+                        name: p.name,
+                        baseUrl: baseUrl || SEEKAI_BASE_URL,
                         apiKey: p.apiKey,
                         accessToken: p.accessToken,
                     }),

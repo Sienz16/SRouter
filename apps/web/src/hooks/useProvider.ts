@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { toast } from "sonner";
 import type { ProviderCategory, ProviderDefinition, ProviderProtocol } from "@srouter/types";
 
 export interface AddConnectionPayload {
@@ -26,9 +27,13 @@ export function useProvider(providerId: string) {
     const addMutation = useMutation({
         mutationFn: (payload: AddConnectionPayload) =>
             api.post<ProviderDefinition>("/v1/providers", payload),
-        onSuccess: () => {
+        onSuccess: (_data, variables) => {
             void queryClient.invalidateQueries({ queryKey: ["providers", providerId] });
             void queryClient.invalidateQueries({ queryKey: ["providers", "catalog"] });
+            toast.success(`Connection "${variables.name}" saved successfully`);
+        },
+        onError: (err: Error) => {
+            toast.error(err.message || "Failed to save connection");
         },
     });
 
@@ -38,6 +43,10 @@ export function useProvider(providerId: string) {
         onSuccess: () => {
             void queryClient.invalidateQueries({ queryKey: ["providers", providerId] });
             void queryClient.invalidateQueries({ queryKey: ["providers", "catalog"] });
+            toast.success("Connection deleted successfully");
+        },
+        onError: (err: Error) => {
+            toast.error(err.message || "Failed to delete connection");
         },
     });
 

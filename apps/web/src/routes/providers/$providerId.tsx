@@ -3,16 +3,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
     AlertTriangle,
     ArrowLeft,
-    Bot,
     Check,
     Copy,
+    ExternalLink,
     LayoutGrid,
     List,
-    Lock,
     Plus,
     RotateCcw,
     Search,
-    ShieldCheck,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -20,11 +18,12 @@ import { ProviderIcon } from "@/components/ProviderIcon";
 import { ConnectOAuthModal } from "@/components/ui/ConnectOAuthModal";
 import { useProvider, type AddConnectionPayload } from "@/hooks/useProvider";
 import { useCopy } from "@/hooks/useCopy";
+import { toast } from "sonner";
 import { ConnectionCard } from "@/components/providers/ConnectionCard";
 import { ConnectionForm, type ConnectionFormInput } from "@/components/providers/ConnectionForm";
 import { ProviderModelCard } from "@/components/providers/ProviderModelCard";
 import { ProviderModelTable } from "@/components/providers/ProviderModelTable";
-import { CATEGORY_LABELS } from "@srouter/constants";
+import { CATEGORY_LABELS, getProviderWebsiteUrl } from "@srouter/constants";
 
 export const Route = createFileRoute("/providers/$providerId")({
     component: ProviderDetailPage,
@@ -89,10 +88,10 @@ function ProviderDetailPage() {
 
         const payload: AddConnectionPayload = {
             id: `${provider.id}-${Date.now()}`,
-            name: input.name,
+            name: input.name?.trim() || `${provider.name} Key`,
             category: provider.category,
             protocol: provider.protocol,
-            baseUrl: input.baseUrl,
+            baseUrl: input.baseUrl || provider.defaultBaseUrl || undefined,
             apiKey: input.apiKey,
         };
 
@@ -101,9 +100,12 @@ function ProviderDetailPage() {
             onSuccess: () => {
                 setIsAddOpen(false);
                 setFormError("");
+                toast.success(`API Key for ${provider.name} saved successfully!`);
             },
             onError: (err: Error) => {
-                setFormError(err.message || "Failed to add connection");
+                const msg = err.message || "Failed to add connection";
+                setFormError(msg);
+                toast.error(msg);
             },
         });
     };
@@ -148,7 +150,7 @@ function ProviderDetailPage() {
         m.id.toLowerCase().includes(modelSearch.toLowerCase()),
     );
 
-    const baseUrl = provider.defaultBaseUrl || "Default upstream gateway";
+    const websiteUrl = getProviderWebsiteUrl(provider.id, provider.defaultBaseUrl);
 
     return (
         <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 font-mono">
@@ -166,14 +168,39 @@ function ProviderDetailPage() {
             {/* Editorial Header Section */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[var(--line)] pb-5">
                 <div className="flex items-center gap-3">
-                    <div className="flex size-12 shrink-0 items-center justify-center rounded-[10px] border border-[var(--line)] bg-[var(--surface)] p-2 shadow-2xs">
-                        <ProviderIcon providerId={provider.id} className="size-7" />
-                    </div>
+                    {websiteUrl ? (
+                        <a
+                            href={websiteUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex size-12 shrink-0 items-center justify-center rounded-[10px] border border-[var(--line)] bg-[var(--surface)] p-2 shadow-2xs hover:border-[var(--ink-2)] hover:bg-[var(--field)] transition-all cursor-pointer"
+                            title={`Open ${provider.name} website (${websiteUrl})`}
+                        >
+                            <ProviderIcon providerId={provider.id} className="size-7" />
+                        </a>
+                    ) : (
+                        <div className="flex size-12 shrink-0 items-center justify-center rounded-[10px] border border-[var(--line)] bg-[var(--surface)] p-2 shadow-2xs">
+                            <ProviderIcon providerId={provider.id} className="size-7" />
+                        </div>
+                    )}
                     <div className="space-y-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                            <h1 className="text-xl font-bold tracking-tight text-[var(--ink)]">
-                                {provider.name}
-                            </h1>
+                            {websiteUrl ? (
+                                <a
+                                    href={websiteUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="group inline-flex items-center gap-1.5 text-xl font-bold tracking-tight text-[var(--ink)] hover:text-orange-500 transition-colors cursor-pointer"
+                                    title={`Visit ${provider.name} (${websiteUrl})`}
+                                >
+                                    <span>{provider.name}</span>
+                                    <ExternalLink className="size-4 text-[var(--ink-3)] group-hover:text-orange-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                                </a>
+                            ) : (
+                                <h1 className="text-xl font-bold tracking-tight text-[var(--ink)]">
+                                    {provider.name}
+                                </h1>
+                            )}
                             <span
                                 className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
                                     activeConnectionsCount > 0
@@ -215,91 +242,6 @@ function ProviderDetailPage() {
                 </div>
             </div>
 
-            {/* Bento Metrics 4-Card Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {/* 1. Active Credentials */}
-                <div className="rounded-[10px] border border-[var(--line)] bg-[var(--surface)] p-3.5 flex flex-col justify-between">
-                    <div className="flex items-center justify-between text-[11px] text-[var(--ink-3)]">
-                        <span>Active Credentials</span>
-                        <Lock className="size-3.5 text-[var(--ink-3)]" />
-                    </div>
-                    <div className="mt-2">
-                        <div className="text-2xl font-bold tabular-nums text-[var(--ink)]">
-                            {activeConnectionsCount}
-                        </div>
-                        <p className="mt-0.5 text-[10.5px] text-[var(--ink-3)] truncate">
-                            {activeConnectionsCount > 0
-                                ? "Routing active credentials"
-                                : "No keys in database"}
-                        </p>
-                    </div>
-                </div>
-
-                {/* 2. Protocol */}
-                <div className="rounded-[10px] border border-[var(--line)] bg-[var(--surface)] p-3.5 flex flex-col justify-between">
-                    <div className="flex items-center justify-between text-[11px] text-[var(--ink-3)]">
-                        <span>Protocol / Auth</span>
-                        <ShieldCheck className="size-3.5 text-blue-500" />
-                    </div>
-                    <div className="mt-2">
-                        <div className="text-2xl font-bold text-[var(--ink)] capitalize">
-                            {provider.protocol}
-                        </div>
-                        <p className="mt-0.5 text-[10.5px] text-[var(--ink-3)] truncate">
-                            {provider.requiresOAuth ? "OAuth 2.0 PKCE Session" : "Direct API Key"}
-                        </p>
-                    </div>
-                </div>
-
-                {/* 3. Models Count */}
-                <div className="rounded-[10px] border border-[var(--line)] bg-[var(--surface)] p-3.5 flex flex-col justify-between">
-                    <div className="flex items-center justify-between text-[11px] text-[var(--ink-3)]">
-                        <span>Exposed Models</span>
-                        <Bot className="size-3.5 text-amber-500" />
-                    </div>
-                    <div className="mt-2">
-                        <div className="text-2xl font-bold tabular-nums text-[var(--ink)]">
-                            {activeModels.length}
-                        </div>
-                        <p className="mt-0.5 text-[10.5px] text-[var(--ink-3)] truncate">
-                            {deletedModelIds.length > 0
-                                ? `${deletedModelIds.length} hidden from list`
-                                : "All upstream models active"}
-                        </p>
-                    </div>
-                </div>
-
-                {/* 4. Base URL */}
-                <div className="rounded-[10px] border border-[var(--line)] bg-[var(--surface)] p-3.5 flex flex-col justify-between">
-                    <div className="flex items-center justify-between text-[11px] text-[var(--ink-3)]">
-                        <span>Endpoint URL</span>
-                        <button
-                            type="button"
-                            onClick={() => void copy(baseUrl)}
-                            className="text-[var(--ink-3)] hover:text-[var(--ink)] cursor-pointer"
-                            title="Copy base URL"
-                        >
-                            {copied === baseUrl ? (
-                                <Check className="size-3 text-emerald-500" />
-                            ) : (
-                                <Copy className="size-3" />
-                            )}
-                        </button>
-                    </div>
-                    <div className="mt-2 min-w-0">
-                        <div
-                            className="text-xs font-bold text-[var(--ink)] truncate"
-                            title={baseUrl}
-                        >
-                            {baseUrl.replace(/^https?:\/\//, "")}
-                        </div>
-                        <p className="mt-0.5 text-[10.5px] text-[var(--ink-3)] truncate">
-                            Upstream provider host
-                        </p>
-                    </div>
-                </div>
-            </div>
-
             {/* Risk Notice Alert Banner if OAuth */}
             {provider.requiresOAuth && (
                 <div className="flex items-start gap-3 rounded-[10px] border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs leading-relaxed text-amber-600 dark:text-amber-400">
@@ -320,7 +262,13 @@ function ProviderDetailPage() {
                 onToggleRoundRobin={() => setRoundRobin(!roundRobin)}
                 onRefresh={() => void refetch()}
                 onAdd={handleAddConnection}
-                onDelete={(connectionId) => deleteMutation.mutate(connectionId)}
+                onDelete={(connectionId) =>
+                    deleteMutation.mutate(connectionId, {
+                        onSuccess: () => toast.success("Connection deleted successfully"),
+                        onError: (err) =>
+                            toast.error(err.message || "Failed to delete connection"),
+                    })
+                }
             />
 
             {/* Available Models Section */}

@@ -42,6 +42,21 @@ authRoute.post("/auth/commandcode/import-token", AuthController.importCommandCod
 authRoute.post("/auth/anthropic/token", AuthController.importAnthropicToken);
 authRoute.post("/auth/anthropic/import-token", AuthController.importAnthropicToken);
 
+// --- GoRouter Provider (API key) ---
+// 1. POST /v1/auth/gorouter/token & POST /v1/auth/gorouter/import-token
+authRoute.post("/auth/gorouter/token", AuthController.importGoRouterToken);
+authRoute.post("/auth/gorouter/import-token", AuthController.importGoRouterToken);
+
+// --- BluesMinds Provider (API key) ---
+// 1. POST /v1/auth/bluesminds/token & POST /v1/auth/bluesminds/import-token
+authRoute.post("/auth/bluesminds/token", AuthController.importBluesMindsToken);
+authRoute.post("/auth/bluesminds/import-token", AuthController.importBluesMindsToken);
+
+// --- SeekAI Provider (API key) ---
+// 1. POST /v1/auth/seekai/token & POST /v1/auth/seekai/import-token
+authRoute.post("/auth/seekai/token", AuthController.importSeekAIToken);
+authRoute.post("/auth/seekai/import-token", AuthController.importSeekAIToken);
+
 // --- Qoder Provider (OAuth & PAT) ---
 // 1. GET /v1/auth/qoder/login - Initiate Qoder OAuth PKCE Login Flow
 authRoute.get("/auth/qoder/login", AuthController.loginQoder);

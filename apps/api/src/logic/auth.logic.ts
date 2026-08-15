@@ -12,9 +12,12 @@ import { registry } from "@/services/registry.js";
 import {
     anthropicAuthHandler,
     antigravityAuthHandler,
+    bluesMindsAuthHandler,
     commandCodeAuthHandler,
+    goRouterAuthHandler,
     openaiCodexAuthHandler,
     qoderAuthHandler,
+    seekAIAuthHandler,
     type AuthProviderHandler,
     type OAuthLoginParams,
     type OAuthLoginResult,
@@ -227,6 +230,21 @@ export class AuthLogic {
     // Anthropic (API key)
     public static processAnthropicTokenImport(params: TokenImportParams): ProviderConfig {
         return processTokenImportFor(anthropicAuthHandler, params);
+    }
+
+    // GoRouter (API key)
+    public static processGoRouterTokenImport(params: TokenImportParams): ProviderConfig {
+        return processTokenImportFor(goRouterAuthHandler, params);
+    }
+
+    // BluesMinds (API key)
+    public static processBluesMindsTokenImport(params: TokenImportParams): ProviderConfig {
+        return processTokenImportFor(bluesMindsAuthHandler, params);
+    }
+
+    // SeekAI (API key)
+    public static processSeekAITokenImport(params: TokenImportParams): ProviderConfig {
+        return processTokenImportFor(seekAIAuthHandler, params);
     }
 
     // Qoder OAuth & Token Import
