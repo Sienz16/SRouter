@@ -503,7 +503,11 @@ export class QoderExecutor implements AIProvider {
         if (!modelConfig) {
             modelConfig = {
                 key: qoderKey,
-                is_reasoning: qoderKey.includes("reasoning") || qoderKey.includes("preview") || qoderKey === "ultimate" || qoderKey.includes("model"),
+                is_reasoning:
+                    qoderKey.includes("reasoning") ||
+                    qoderKey.includes("preview") ||
+                    qoderKey === "ultimate" ||
+                    qoderKey.includes("model"),
                 source: "system",
             };
         }
@@ -514,7 +518,11 @@ export class QoderExecutor implements AIProvider {
 
         let maxTokens = 32_768;
         if (maxOutputTokens > 0) maxTokens = maxOutputTokens;
-        if (typeof req.max_tokens === "number" && req.max_tokens > 0 && req.max_tokens < maxTokens) {
+        if (
+            typeof req.max_tokens === "number" &&
+            req.max_tokens > 0 &&
+            req.max_tokens < maxTokens
+        ) {
             maxTokens = req.max_tokens;
         }
 
@@ -637,7 +645,8 @@ export class QoderExecutor implements AIProvider {
                 try {
                     const parsedErr = JSON.parse(inner) as { code?: string; message?: string };
                     if (parsedErr.code === "112") {
-                        formattedMsg = "Quota / plan limit reached (Code 112). Your Qoder account has exhausted its free quota or requires a subscription for this model (visit https://qoder.com/pricing).";
+                        formattedMsg =
+                            "Quota / plan limit reached (Code 112). Your Qoder account has exhausted its free quota or requires a subscription for this model (visit https://qoder.com/pricing).";
                     } else if (parsedErr.message) {
                         formattedMsg = parsedErr.message;
                     }
@@ -665,7 +674,9 @@ export class QoderExecutor implements AIProvider {
         let role = "assistant";
         let model = req.model;
         let id = `chatcmpl-${randomUUID()}`;
-        const toolCalls: NonNullable<ChatCompletionResponse["choices"][number]["message"]["tool_calls"]> = [];
+        const toolCalls: NonNullable<
+            ChatCompletionResponse["choices"][number]["message"]["tool_calls"]
+        > = [];
 
         for await (const chunk of this.chatCompletionStream(req)) {
             if (chunk.id) id = chunk.id;

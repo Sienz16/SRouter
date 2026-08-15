@@ -45,7 +45,7 @@ interface ServerSettingsResponse {
     settings?: Record<string, string>;
 }
 
-export function SettingsPage() {
+function SettingsPage() {
     const queryClient = useQueryClient();
     const { theme, toggleTheme } = useTheme();
     const { settings, updateSetting, resetToDefaults, exportSettings, clearPlaygroundHistory } =

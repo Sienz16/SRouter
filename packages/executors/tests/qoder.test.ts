@@ -1,11 +1,6 @@
 import assert from "node:assert/strict";
 import { afterEach, test } from "node:test";
-import {
-    buildCosyHeaders,
-    isQoderPat,
-    qoderEncodeBody,
-    QoderExecutor,
-} from "../src/qoder.js";
+import { buildCosyHeaders, isQoderPat, qoderEncodeBody, QoderExecutor } from "../src/qoder.js";
 
 const originalFetch = globalThis.fetch;
 const fixtureToken = "dt-fixture-token-not-a-secret";

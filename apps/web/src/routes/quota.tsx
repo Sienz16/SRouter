@@ -158,7 +158,7 @@ function UsageMetricsTable({ metrics }: { metrics: ProviderUsageMetric[] }) {
     );
 }
 
-export function QuotaPage() {
+function QuotaPage() {
     const { data, isLoading, isFetching, error, refetch } = useQuota();
     const [collapsedMap, setCollapsedMap] = useState<Record<string, boolean>>({});
     const [lastUpdated, setLastUpdated] = useState<Date>(new Date());

@@ -13,7 +13,7 @@
 [![SQLite](https://img.shields.io/badge/SQLite-WAL%20Mode-003B57?style=flat-square&logo=sqlite&logoColor=white)](https://sqlite.org/)
 [![CI](https://img.shields.io/badge/CI-Passing-22C55E?style=flat-square&logo=githubactions&logoColor=white)](.github/workflows/ci.yml)
 
-[Features](#-key-features) • [Architecture](#-architecture) • [Quick Start](#-quick-start) • [Supported Providers](#-supported-providers) • [Client Examples](#-client-integration) • [API Reference](#-api-reference) • [Contributing](#-contributing)
+[Features](#-key-features) • [Architecture](#-architecture) • [Quick Start](#-quick-start) • [Docker Deployment](#-docker-deployment) • [Supported Providers](#-supported-providers) • [Client Examples](#-client-integration) • [API Reference](#-api-reference) • [Contributing](#-contributing)
 
 </div>
 
@@ -131,6 +131,56 @@ Navigate to [http://localhost:5173](http://localhost:5173) in your browser:
 1. Connect your preferred providers in **Providers Catalog**.
 2. Generate an API Key under **API Keys** (optional if Open Access is enabled).
 3. Test your models directly in the **Playground**.
+
+---
+
+## 🐳 Docker Deployment
+
+Deploy SRouter easily to any VPS, home server, or cloud VM using Docker Compose.
+
+### 1. Using Docker Compose (Recommended)
+
+Clone the repository and spin up the unified container:
+
+```bash
+git clone https://github.com/seaavey/SRouter.git
+cd SRouter
+docker compose up -d
+```
+
+SRouter will build and run in the background:
+
+- **Web Dashboard & API Gateway**: [http://localhost:3000](http://localhost:3000) (or `http://<your-vps-ip>:3000`)
+- **OAuth Callback Server**: `http://localhost:1455`
+- **Health Check**: `http://localhost:3000/health`
+
+### 2. Persistent Storage
+
+All providers, client API keys, logs, and settings are saved in SQLite WAL mode and persisted automatically inside the `srouter_data` Docker volume (`/app/data`).
+
+To use a host bind mount instead, edit `docker-compose.yml`:
+
+```yaml
+volumes:
+    - ./data:/app/data
+```
+
+### 3. Manage Container
+
+```bash
+# View live logs
+docker compose logs -f
+
+# Check container health status
+docker compose ps
+
+# Update to latest version
+git pull
+docker compose up -d --build
+
+# Stop the container
+docker compose down
+```
 
 ---
 

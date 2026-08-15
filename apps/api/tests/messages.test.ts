@@ -8,7 +8,12 @@ import {
     setRequireApiKeyDB,
     upsertProviderDB,
 } from "@srouter/db";
-import type { AIProvider, ChatCompletionRequest, ChatCompletionResponse, ProviderConfig } from "@srouter/types";
+import type {
+    AIProvider,
+    ChatCompletionRequest,
+    ChatCompletionResponse,
+    ProviderConfig,
+} from "@srouter/types";
 import { messagesRoute } from "../src/routes/v1/messages.js";
 
 const app = new Hono();
@@ -181,7 +186,13 @@ test("POST /v1/messages streams Anthropic SSE events", async () => {
                 object: "chat.completion.chunk",
                 created: 1786759000,
                 model: "mock-model",
-                choices: [{ index: 0, delta: { role: "assistant", content: "Chunk 1 " }, finish_reason: null }],
+                choices: [
+                    {
+                        index: 0,
+                        delta: { role: "assistant", content: "Chunk 1 " },
+                        finish_reason: null,
+                    },
+                ],
             };
             yield {
                 id: "chunk-2",

@@ -74,7 +74,10 @@ test("anthropicToOpenAIRequest maps system string, messages, and tools", () => {
     assert.equal(openAIReq.messages[2]?.tool_calls?.length, 1);
     assert.equal(openAIReq.messages[2]?.tool_calls?.[0]?.id, "call_123");
     assert.equal(openAIReq.messages[2]?.tool_calls?.[0]?.function.name, "bash");
-    assert.equal(openAIReq.messages[2]?.tool_calls?.[0]?.function.arguments, '{"command":"pnpm test"}');
+    assert.equal(
+        openAIReq.messages[2]?.tool_calls?.[0]?.function.arguments,
+        '{"command":"pnpm test"}',
+    );
 
     // Tool result
     assert.equal(openAIReq.messages[3]?.role, "tool");
@@ -197,6 +200,9 @@ test("openAIToAnthropicStream translates streaming chunks into Anthropic SSE eve
     assert.equal((events[2] as { type: string; delta: { text: string } }).delta.text, "Hello ");
     assert.equal((events[3] as { type: string; delta: { text: string } }).delta.text, "world!");
     assert.equal((events[4] as { type: string }).type, "content_block_stop");
-    assert.equal((events[5] as { type: string; delta: { stop_reason: string } }).delta.stop_reason, "end_turn");
+    assert.equal(
+        (events[5] as { type: string; delta: { stop_reason: string } }).delta.stop_reason,
+        "end_turn",
+    );
     assert.equal((events[6] as { type: string }).type, "message_stop");
 });

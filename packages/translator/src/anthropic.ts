@@ -19,9 +19,7 @@ import type {
 /**
  * Converts Anthropic format Messages API request to OpenAI format ChatCompletionRequest.
  */
-export function anthropicToOpenAIRequest(
-    req: AnthropicMessageRequest,
-): ChatCompletionRequest {
+export function anthropicToOpenAIRequest(req: AnthropicMessageRequest): ChatCompletionRequest {
     const messages: ChatMessage[] = [];
 
     // 1. Process system prompt
@@ -74,7 +72,10 @@ export function anthropicToOpenAIRequest(
                     type: "function",
                     function: {
                         name: block.name || "",
-                        arguments: typeof block.input === "string" ? block.input : JSON.stringify(block.input || {}),
+                        arguments:
+                            typeof block.input === "string"
+                                ? block.input
+                                : JSON.stringify(block.input || {}),
                     },
                 });
             } else if (block.type === "tool_result") {
@@ -88,7 +89,9 @@ export function anthropicToOpenAIRequest(
             if (textAndImageParts.length === 1 && textAndImageParts[0]?.type === "text") {
                 contentStr = textAndImageParts[0].text;
             } else if (textAndImageParts.length > 1) {
-                contentStr = textAndImageParts.map((p) => (p.type === "text" ? p.text : "")).join("\n");
+                contentStr = textAndImageParts
+                    .map((p) => (p.type === "text" ? p.text : ""))
+                    .join("\n");
             }
 
             messages.push({
@@ -241,7 +244,10 @@ export function openAIToAnthropicResponse(
             for (const tc of msg.tool_calls) {
                 let parsedInput: Record<string, unknown> = {};
                 try {
-                    parsedInput = JSON.parse(tc.function.arguments || "{}") as Record<string, unknown>;
+                    parsedInput = JSON.parse(tc.function.arguments || "{}") as Record<
+                        string,
+                        unknown
+                    >;
                 } catch {
                     parsedInput = { raw: tc.function.arguments };
                 }

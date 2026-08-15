@@ -44,7 +44,7 @@ function maskKey(key: string): string {
 
 const PRESET_NAMES = ["Production Server", "Next.js App", "Cursor / VSCode", "Dev / Staging"];
 
-export function KeysPage() {
+function KeysPage() {
     const {
         keys,
         loading,

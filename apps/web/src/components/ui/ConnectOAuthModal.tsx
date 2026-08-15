@@ -50,11 +50,12 @@ export function ConnectOAuthModal({ provider, open, onOpenChange }: ConnectOAuth
         setIsLoadingUrl(true);
         setError("");
 
-        const providerEndpoint = baseId === "antigravity"
-            ? "/v1/auth/antigravity/login?format=json"
-            : baseId === "qoder"
-              ? "/v1/auth/qoder/login?format=json"
-              : "/v1/auth/openai/login?format=json";
+        const providerEndpoint =
+            baseId === "antigravity"
+                ? "/v1/auth/antigravity/login?format=json"
+                : baseId === "qoder"
+                  ? "/v1/auth/qoder/login?format=json"
+                  : "/v1/auth/openai/login?format=json";
 
         api.get<OAuthLoginResponse>(providerEndpoint)
             .then((res) => {
@@ -133,11 +134,12 @@ export function ConnectOAuthModal({ provider, open, onOpenChange }: ConnectOAuth
 
     const callbackMutation = useMutation({
         mutationFn: (payload: { callbackUrl: string }) => {
-            const endpoint = baseId === "antigravity"
-                ? "/v1/auth/antigravity/callback"
-                : baseId === "qoder"
-                  ? "/v1/auth/qoder/callback"
-                  : "/v1/auth/openai/callback";
+            const endpoint =
+                baseId === "antigravity"
+                    ? "/v1/auth/antigravity/callback"
+                    : baseId === "qoder"
+                      ? "/v1/auth/qoder/callback"
+                      : "/v1/auth/openai/callback";
             return api.post(endpoint, payload);
         },
         onSuccess: () => {

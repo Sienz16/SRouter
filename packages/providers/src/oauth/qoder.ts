@@ -1,8 +1,4 @@
-import {
-    QODER_DEVICE_TOKEN_URL,
-    QODER_LOGIN_URL,
-    QODER_USERINFO_URL,
-} from "@srouter/constants";
+import { QODER_DEVICE_TOKEN_URL, QODER_LOGIN_URL, QODER_USERINFO_URL } from "@srouter/constants";
 import type { OAuthTokenResponse, PKCEPair } from "./base.js";
 
 export interface QoderOAuthOptions {
@@ -32,10 +28,7 @@ export class QoderOAuth {
         return `${this.loginUrl}?${params.toString()}`;
     }
 
-    async pollDeviceToken(params: {
-        nonce: string;
-        codeVerifier: string;
-    }): Promise<{
+    async pollDeviceToken(params: { nonce: string; codeVerifier: string }): Promise<{
         status: "pending" | "ok";
         accessToken?: string;
         refreshToken?: string;
@@ -76,7 +69,8 @@ export class QoderOAuth {
         if (typeof body.expires_in === "number" && body.expires_in > 0) {
             expiresIn = body.expires_in;
         } else if (body.expires_at) {
-            const parsed = typeof body.expires_at === "number" ? body.expires_at : Date.parse(body.expires_at);
+            const parsed =
+                typeof body.expires_at === "number" ? body.expires_at : Date.parse(body.expires_at);
             if (!Number.isNaN(parsed) && parsed > Date.now()) {
                 expiresIn = Math.floor((parsed - Date.now()) / 1000);
             }

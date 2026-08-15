@@ -50,7 +50,10 @@ export class MessagesController {
 
             return streamSSE(c, async (stream) => {
                 try {
-                    const chunkGenerator = ChatLogic.processStreamingCompletion(openAIReq, startTime);
+                    const chunkGenerator = ChatLogic.processStreamingCompletion(
+                        openAIReq,
+                        startTime,
+                    );
                     const anthropicStream = openAIToAnthropicStream(chunkGenerator, body.model);
 
                     for await (const event of anthropicStream) {

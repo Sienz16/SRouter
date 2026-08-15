@@ -1,4 +1,7 @@
+import fs from "node:fs";
+import path from "node:path";
 import { serve } from "@hono/node-server";
+import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 import {
     authRoute,
@@ -33,15 +36,6 @@ app.onError((err, c) => {
 });
 
 // Health check endpoint
-app.get("/", (c) => {
-    return c.json({
-        name: "SRouter API",
-        status: "ok",
-        version: "0.1.0-beta",
-        documentation: "Multi-Provider OpenAI & Anthropic Compatible LLM Gateway",
-    });
-});
-
 app.get("/health", (c) => {
     return c.json({ status: "ok" });
 });
@@ -59,6 +53,25 @@ app.route("/v1", settingsRoute);
 
 // Also mount root-level /messages for Anthropic clients sending to base URL directly
 app.route("/", messagesRoute);
+
+// Serve Web Dashboard in production if built dist exists
+const webDistPath = process.env.WEB_DIST_PATH || path.resolve(process.cwd(), "apps/web/dist");
+
+if (fs.existsSync(webDistPath) && fs.existsSync(path.join(webDistPath, "index.html"))) {
+    const relWebDist = path.relative(process.cwd(), webDistPath) || ".";
+    app.use("/*", serveStatic({ root: relWebDist }));
+    app.get("*", serveStatic({ path: path.join(relWebDist, "index.html") }));
+} else {
+    // API Welcome / Health info when web dist is not present
+    app.get("/", (c) => {
+        return c.json({
+            name: "SRouter API",
+            status: "ok",
+            version: "0.1.0-beta",
+            documentation: "Multi-Provider OpenAI & Anthropic Compatible LLM Gateway",
+        });
+    });
+}
 
 const port = Number(process.env.PORT) || 3000;
 

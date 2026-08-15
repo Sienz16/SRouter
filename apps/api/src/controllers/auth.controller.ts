@@ -251,12 +251,7 @@ export class AuthController {
 
     // Qoder Provider (OAuth & PAT)
     public static loginQoder(c: Context): Response {
-        return loginFor(
-            qoderAuthHandler,
-            (p) => AuthLogic.initiateQoderOAuthPKCE(p),
-            c,
-            true,
-        );
+        return loginFor(qoderAuthHandler, (p) => AuthLogic.initiateQoderOAuthPKCE(p), c, true);
     }
 
     public static async handleQoderOAuthCallback(c: Context): Promise<Response> {
@@ -268,11 +263,7 @@ export class AuthController {
     }
 
     public static async importQoderToken(c: Context): Promise<Response> {
-        return importTokenFor(
-            qoderAuthHandler,
-            (b) => AuthLogic.processQoderTokenImport(b),
-            c,
-        );
+        return importTokenFor(qoderAuthHandler, (b) => AuthLogic.processQoderTokenImport(b), c);
     }
 
     public static async pollQoder(c: Context): Promise<Response> {
