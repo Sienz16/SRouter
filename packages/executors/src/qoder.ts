@@ -289,24 +289,6 @@ export async function resolvePatCredential(
     return resolved;
 }
 
-// ─── Default Known Models & Catalog Cache ───
-
-const DEFAULT_QODER_MODELS = [
-    { id: "ultimate", name: "Ultimate", contextLength: 131072, isReasoning: true },
-    { id: "auto", name: "Auto", contextLength: 131072, isReasoning: false },
-    { id: "performance", name: "Performance", contextLength: 131072, isReasoning: false },
-    { id: "efficient", name: "Efficient", contextLength: 131072, isReasoning: false },
-    { id: "qmodel_preview", name: "Qwen3.8-Max-Preview", contextLength: 131072, isReasoning: true },
-    { id: "qmodel_latest", name: "Qwen3.7-Max", contextLength: 131072, isReasoning: true },
-    { id: "qmodel", name: "Qwen3.7-Plus", contextLength: 131072, isReasoning: false },
-    { id: "kmodel_latest", name: "Kimi-K3", contextLength: 131072, isReasoning: true },
-    { id: "kmodel", name: "Kimi-K2.7-Code", contextLength: 131072, isReasoning: false },
-    { id: "gm51model", name: "GLM-5.2", contextLength: 131072, isReasoning: true },
-    { id: "dmodel", name: "DeepSeek-V4-Pro", contextLength: 131072, isReasoning: true },
-    { id: "dfmodel", name: "DeepSeek-V4-Flash", contextLength: 131072, isReasoning: false },
-    { id: "mmodel", name: "MiniMax-M3", contextLength: 131072, isReasoning: true },
-];
-
 function extractText(content: unknown): string {
     if (typeof content === "string") return content;
     if (content == null) return "";
@@ -458,11 +440,7 @@ export class QoderExecutor implements AIProvider {
         try {
             const creds = await this.resolveCredentials();
             if (!creds.accessToken) {
-                return DEFAULT_QODER_MODELS.map((m) => ({
-                    id: `${baseId}/${m.id}`,
-                    object: "model",
-                    owned_by: baseId,
-                }));
+                return [];
             }
 
             const url = this.getModelListUrl(creds.isJobToken);
@@ -480,20 +458,12 @@ export class QoderExecutor implements AIProvider {
 
             const res = await fetch(url, { method: "GET", headers });
             if (!res.ok) {
-                return DEFAULT_QODER_MODELS.map((m) => ({
-                    id: `${baseId}/${m.id}`,
-                    object: "model",
-                    owned_by: baseId,
-                }));
+                return [];
             }
 
             const data = (await res.json()) as { chat?: Array<Record<string, unknown>> };
             if (!data.chat || !Array.isArray(data.chat)) {
-                return DEFAULT_QODER_MODELS.map((m) => ({
-                    id: `${baseId}/${m.id}`,
-                    object: "model",
-                    owned_by: baseId,
-                }));
+                return [];
             }
 
             const models: ModelObject[] = [];
@@ -509,19 +479,9 @@ export class QoderExecutor implements AIProvider {
                 });
             }
 
-            return models.length > 0
-                ? models
-                : DEFAULT_QODER_MODELS.map((m) => ({
-                      id: `${baseId}/${m.id}`,
-                      object: "model",
-                      owned_by: baseId,
-                  }));
+            return models;
         } catch {
-            return DEFAULT_QODER_MODELS.map((m) => ({
-                id: `${baseId}/${m.id}`,
-                object: "model",
-                owned_by: baseId,
-            }));
+            return [];
         }
     }
 
