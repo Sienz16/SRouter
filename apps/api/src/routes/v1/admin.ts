@@ -168,6 +168,55 @@ export function createAdminRoute(options: AdminRouteOptions = {}): Hono {
         return ok(c, { authenticated: true });
     });
 
+    route.post("/admin/change-password", async (c) => {
+        const sessionToken = getCookie(c, ADMIN_SESSION_COOKIE);
+        if (!verifyAdminSession(store, sessionToken, now())) {
+            return err(c, "Admin authentication is required", 401, {
+                type: "authentication_error",
+                code: "authentication_required"
+            });
+        }
+
+        const body = await readBody(c);
+        const currentPassword =
+            typeof body?.currentPassword === "string" ? body.currentPassword : "";
+        const newPassword = typeof body?.newPassword === "string" ? body.newPassword : "";
+        const confirmation = typeof body?.confirmation === "string" ? body.confirmation : "";
+
+        const passwordHash = store.getPasswordHash();
+        if (!passwordHash || !verifyAdminPassword(currentPassword, passwordHash)) {
+            return err(c, "Current admin password is incorrect", 401, {
+                type: "authentication_error",
+                code: "invalid_credentials"
+            });
+        }
+
+        const passwordError = validateAdminPassword(newPassword);
+        if (passwordError) {
+            return err(c, passwordError, 400, {
+                type: "invalid_request_error",
+                code: "invalid_password"
+            });
+        }
+
+        if (newPassword !== confirmation) {
+            return err(c, "New password confirmation does not match", 400, {
+                type: "invalid_request_error",
+                code: "password_mismatch"
+            });
+        }
+
+        const updated = store.updatePasswordHash(hashAdminPassword(newPassword), now());
+        if (!updated) {
+            return err(c, "Failed to update admin password", 500, {
+                type: "internal_error",
+                code: "password_update_failed"
+            });
+        }
+
+        return ok(c, { message: "Admin password updated successfully" });
+    });
+
     route.post("/admin/logout", (c) => {
         const sessionToken = getCookie(c, ADMIN_SESSION_COOKIE);
         if (!verifyAdminSession(store, sessionToken, now())) {

@@ -51,6 +51,18 @@ export class AdminAuthStore {
         return row?.password_hash ?? null;
     }
 
+    public updatePasswordHash(passwordHash: string, now = Date.now()): boolean {
+        const result = this.database
+            .prepare(
+                `UPDATE admin_account
+                 SET password_hash = ?, updated_at = ?
+                 WHERE id = 1`
+            )
+            .run(passwordHash, now);
+
+        return Number(result.changes ?? 0) > 0;
+    }
+
     public createSession(tokenHash: string, createdAt: number, expiresAt: number): void {
         this.database
             .prepare(

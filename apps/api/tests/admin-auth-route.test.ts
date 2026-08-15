@@ -141,3 +141,93 @@ test("repeated failed logins are throttled", async () => {
     });
     assert.equal(throttled.status, 429);
 });
+
+test("change-password validates current password and updates admin account", async () => {
+    const { app, store } = createTestApp({ address: "127.0.0.1" });
+    store.createAdminAccount(hashAdminPassword("correct horse battery staple"));
+
+    // Unauthorized request without session cookie
+    const unauthenticated = await app.request("/v1/admin/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            currentPassword: "correct horse battery staple",
+            newPassword: "new correct horse battery staple",
+            confirmation: "new correct horse battery staple"
+        })
+    });
+    assert.equal(unauthenticated.status, 401);
+
+    // Login to get valid session
+    const login = await app.request("/v1/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: "correct horse battery staple" })
+    });
+    assert.equal(login.status, 200);
+    const cookie = getSessionCookie(login);
+
+    // Wrong current password
+    const wrongCurrent = await app.request("/v1/admin/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Cookie: cookie },
+        body: JSON.stringify({
+            currentPassword: "wrong password here",
+            newPassword: "new correct horse battery staple",
+            confirmation: "new correct horse battery staple"
+        })
+    });
+    assert.equal(wrongCurrent.status, 401);
+
+    // Short password
+    const shortPass = await app.request("/v1/admin/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Cookie: cookie },
+        body: JSON.stringify({
+            currentPassword: "correct horse battery staple",
+            newPassword: "short",
+            confirmation: "short"
+        })
+    });
+    assert.equal(shortPass.status, 400);
+
+    // Mismatched confirmation
+    const mismatch = await app.request("/v1/admin/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Cookie: cookie },
+        body: JSON.stringify({
+            currentPassword: "correct horse battery staple",
+            newPassword: "new correct horse battery staple",
+            confirmation: "different confirmation here"
+        })
+    });
+    assert.equal(mismatch.status, 400);
+
+    // Successful password change
+    const successful = await app.request("/v1/admin/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Cookie: cookie },
+        body: JSON.stringify({
+            currentPassword: "correct horse battery staple",
+            newPassword: "new correct horse battery staple",
+            confirmation: "new correct horse battery staple"
+        })
+    });
+    assert.equal(successful.status, 200);
+
+    // Old password should now fail login
+    const oldLogin = await app.request("/v1/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: "correct horse battery staple" })
+    });
+    assert.equal(oldLogin.status, 401);
+
+    // New password should succeed
+    const newLogin = await app.request("/v1/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: "new correct horse battery staple" })
+    });
+    assert.equal(newLogin.status, 200);
+});
