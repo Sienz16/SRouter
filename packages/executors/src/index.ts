@@ -12,3 +12,4 @@ export * from "./retry.js";
 export * from "./seekai.js";
 export * from "./sse.js";
 export * from "./tabitoken.js";
+export * from "./search.js";
