@@ -20,6 +20,7 @@ import { providersRoute } from "@/routes/v1/providers.js";
 import { quotaRoute } from "@/routes/v1/quota.js";
 import { settingsRoute } from "@/routes/v1/settings.js";
 import { startTokenRefreshSweeper } from "@/services/tokenRefresh.js";
+import { resolveWebDistPath } from "@/services/webDist.js";
 
 const app = new Hono();
 
@@ -58,7 +59,7 @@ app.route("/v1", settingsRoute);
 app.route("/", messagesRoute);
 
 // Serve Web Dashboard in production if built dist exists
-const webDistPath = process.env.WEB_DIST_PATH || path.resolve(process.cwd(), "apps/web/dist");
+const webDistPath = resolveWebDistPath();
 
 if (fs.existsSync(webDistPath) && fs.existsSync(path.join(webDistPath, "index.html"))) {
     const relWebDist = path.relative(process.cwd(), webDistPath) || ".";

@@ -10,6 +10,7 @@ export const BLUESMINDS_BASE_URL = "https://api.bluesminds.com/v1";
 export const SEEKAI_BASE_URL = "https://seekai.cc/v1";
 export const TABITOKEN_BASE_URL = "https://tabitoken.com/v1";
 export const COMMANDCODE_BASE_URL = "https://api.commandcode.ai/alpha/generate";
+export const COMMANDCODE_MODELS_URL = "https://api.commandcode.ai/provider/v1/models";
 export const CODEX_BASE_URL = "https://chatgpt.com/backend-api/codex/responses";
 export const CODEX_MODELS_URL = "https://chatgpt.com/backend-api/codex/models";
 export const ANTIGRAVITY_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai";

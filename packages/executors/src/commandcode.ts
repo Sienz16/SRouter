@@ -1,10 +1,11 @@
 import { randomUUID } from "node:crypto";
-import { COMMANDCODE_BASE_URL } from "@srouter/constants";
+import { COMMANDCODE_BASE_URL, COMMANDCODE_MODELS_URL } from "@srouter/constants";
 import type {
     AIProvider,
     ChatCompletionChunk,
     ChatCompletionRequest,
     ChatCompletionResponse,
+    ModelListResponse,
     ModelObject
 } from "@srouter/types";
 import {
@@ -53,8 +54,44 @@ export class CommandCodeExecutor implements AIProvider {
         return headers;
     }
 
+    private getModelsUrl(): string {
+        if (
+            this.baseUrl === COMMANDCODE_BASE_URL ||
+            this.baseUrl.startsWith("https://api.commandcode.ai")
+        ) {
+            return COMMANDCODE_MODELS_URL;
+        }
+        if (this.baseUrl.endsWith("/alpha/generate")) {
+            return this.baseUrl.replace(/\/alpha\/generate$/, "/provider/v1/models");
+        }
+        return `${this.baseUrl}/models`;
+    }
+
     async listModels(): Promise<ModelObject[]> {
-        return [];
+        try {
+            const res = await fetch(this.getModelsUrl(), {
+                method: "GET",
+                headers: this.getHeaders()
+            });
+
+            if (!res.ok) {
+                return [];
+            }
+
+            const data = (await res.json()) as ModelListResponse;
+            if (!data.data || !Array.isArray(data.data)) {
+                return [];
+            }
+
+            const baseId = this.id.split("_")[0]?.split("-")[0] ?? this.id;
+            return data.data.map((m) => ({
+                id: `${baseId}/${m.id}`,
+                object: "model",
+                owned_by: baseId
+            }));
+        } catch {
+            return [];
+        }
     }
 
     async chatCompletion(req: ChatCompletionRequest): Promise<ChatCompletionResponse> {
