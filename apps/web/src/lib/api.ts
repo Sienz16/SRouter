@@ -51,3 +51,34 @@ export const api = {
             method: "DELETE",
         }),
 };
+
+/**
+ * Resolves the Gateway Base URL for client requests (OpenAI/Anthropic SDKs, curl, etc.).
+ * - Honors `VITE_API_BASE_URL` or `VITE_API_URL` environment variables if set.
+ * - In dev mode (e.g. Vite running on port 5173/5174), points to the backend server (default port 3000).
+ * - In production, resolves relative to window.location.origin.
+ */
+export function getGatewayBaseUrl(): string {
+    if (import.meta.env.VITE_API_BASE_URL) {
+        return (import.meta.env.VITE_API_BASE_URL as string).replace(/\/+$/, "");
+    }
+    if (import.meta.env.VITE_API_URL) {
+        const base = (import.meta.env.VITE_API_URL as string).replace(/\/+$/, "");
+        return base.endsWith("/v1") ? base : `${base}/v1`;
+    }
+
+    if (typeof window !== "undefined") {
+        const { hostname, protocol, port, origin } = window.location;
+
+        // In Vite dev mode (e.g. Vite dev server on port 5173/5174), target the backend API server port
+        if (import.meta.env.DEV || port === "5173" || port === "5174") {
+            const backendPort = (import.meta.env.VITE_BACKEND_PORT as string) || "3000";
+            return `${protocol}//${hostname}:${backendPort}/v1`;
+        }
+
+        return `${origin}/v1`;
+    }
+
+    return "http://localhost:3000/v1";
+}
+

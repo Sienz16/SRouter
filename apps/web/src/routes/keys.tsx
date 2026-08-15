@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/api";
+import { api, getGatewayBaseUrl } from "@/lib/api";
 import {
     AlertTriangle,
     Check,
@@ -126,8 +126,7 @@ function KeysPage() {
     const totalUsage = keys.reduce((acc, k) => acc + (k.usageTokens || 0), 0);
     const activeKeysCount = keys.filter((k) => k.enabled).length;
 
-    const apiBase =
-        typeof window !== "undefined" ? `${window.location.origin}/v1` : "http://localhost:3000/v1";
+    const apiBase = getGatewayBaseUrl();
 
     const snippetKey = newlyCreatedKey?.key || (keys[0]?.key ?? "sr-live-YOUR_API_KEY");
 

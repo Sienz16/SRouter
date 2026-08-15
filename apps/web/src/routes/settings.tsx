@@ -28,7 +28,7 @@ import {
     Zap,
 } from "lucide-react";
 import { toast } from "sonner";
-import { api } from "@/lib/api";
+import { api, getGatewayBaseUrl } from "@/lib/api";
 import { useTheme } from "@/context/Theme";
 import { useSettings } from "@/hooks/useSettings";
 
@@ -50,6 +50,7 @@ function SettingsPage() {
     const { theme, toggleTheme } = useTheme();
     const { settings, updateSetting, resetToDefaults, exportSettings, clearPlaygroundHistory } =
         useSettings();
+    const apiBase = getGatewayBaseUrl();
 
     const [activeTab, setActiveTab] = useState<SettingsTab>("security");
 
@@ -246,7 +247,7 @@ function SettingsPage() {
                                         Client Request Example:
                                     </div>
                                     <div className="rounded-[6px] bg-[var(--surface)] border border-[var(--line)] p-2.5 font-mono text-[11px] text-[var(--ink)] overflow-x-auto select-all">
-                                        curl http://localhost:3000/v1/chat/completions \<br />
+                                        curl {apiBase}/chat/completions \<br />
                                         {requireApiKey ? (
                                             <span className="text-emerald-500 font-semibold">
                                                 {"  "}-H "Authorization: Bearer

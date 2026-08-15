@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Check, Cloud, Code2, Copy, Network } from "lucide-react";
 import { toast } from "sonner";
-
-const API_BASE = `${typeof window !== "undefined" ? window.location.origin : "http://localhost:3000"}/v1`;
+import { getGatewayBaseUrl } from "@/lib/api";
 
 function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) {
     const [copied, setCopied] = useState(false);
@@ -36,6 +35,8 @@ function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) 
 }
 
 export function NetworkStatus() {
+    const apiBase = getGatewayBaseUrl();
+
     return (
         <section
             aria-labelledby="api-integration-title"
@@ -69,10 +70,10 @@ export function NetworkStatus() {
                         <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                             Base URL
                         </span>
-                        <CopyButton text={API_BASE} label="Copy" />
+                        <CopyButton text={apiBase} label="Copy" />
                     </div>
                     <code className="mt-3 block truncate font-mono text-[11px] text-foreground">
-                        {API_BASE}
+                        {apiBase}
                     </code>
                 </div>
             </div>

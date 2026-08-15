@@ -7,6 +7,7 @@ import type {
     PlaygroundModel,
     PlaygroundSession,
 } from "@/components/playground/types";
+import { getGatewayBaseUrl } from "@/lib/api";
 
 type SseResult = "done" | "continue";
 
@@ -121,7 +122,7 @@ export function usePlayground(initialModel: string, models: PlaygroundModel[]) {
 
     const selectedModel = models.find((item) => item.id === model);
     const hasUsableModel = Boolean(selectedModel);
-    const apiBase = `${typeof window !== "undefined" ? window.location.origin : "http://localhost:3000"}/v1`;
+    const apiBase = getGatewayBaseUrl();
 
     useEffect(() => {
         return () => abortRef.current?.abort();
