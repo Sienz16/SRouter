@@ -5,6 +5,7 @@ import {
     antigravityAuthHandler,
     commandCodeAuthHandler,
     openaiCodexAuthHandler,
+    qoderAuthHandler,
     type AuthProviderHandler,
     type OAuthLoginParams,
     type TokenImportParams,
@@ -246,5 +247,48 @@ export class AuthController {
             (b) => AuthLogic.processAnthropicTokenImport(b),
             c,
         );
+    }
+
+    // Qoder Provider (OAuth & PAT)
+    public static loginQoder(c: Context): Response {
+        return loginFor(
+            qoderAuthHandler,
+            (p) => AuthLogic.initiateQoderOAuthPKCE(p),
+            c,
+            true,
+        );
+    }
+
+    public static async handleQoderOAuthCallback(c: Context): Promise<Response> {
+        return handleOAuthCallbackFor(
+            qoderAuthHandler,
+            (code, state) => AuthLogic.processQoderOAuthCallback(code, state),
+            c,
+        );
+    }
+
+    public static async importQoderToken(c: Context): Promise<Response> {
+        return importTokenFor(
+            qoderAuthHandler,
+            (b) => AuthLogic.processQoderTokenImport(b),
+            c,
+        );
+    }
+
+    public static async pollQoder(c: Context): Promise<Response> {
+        let state = c.req.query("state");
+        if (!state) {
+            try {
+                const body = await c.req.json<{ state?: string }>();
+                state = body?.state;
+            } catch {}
+        }
+
+        if (!state) {
+            return err(c, "Missing state parameter", 400, { type: "invalid_request_error" });
+        }
+
+        const result = await AuthLogic.pollQoderDeviceToken(state);
+        return ok(c, result);
     }
 }

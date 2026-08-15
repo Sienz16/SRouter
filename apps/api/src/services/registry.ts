@@ -13,6 +13,7 @@ import {
     CommandCodeExecutor,
     KiroExecutor,
     OpenAIExecutor,
+    QoderExecutor,
 } from "@srouter/executors";
 import { ProviderRegistry } from "@srouter/providers";
 
@@ -125,6 +126,19 @@ export function loadSavedProvidersFromDB(): void {
                         baseUrl: baseUrl || NEOSANTARA_BASE_URL,
                         apiKey: p.apiKey,
                         accessToken: p.accessToken,
+                    }),
+                );
+                break;
+            case isProviderBaseId(p.id, "qoder"):
+                registry.registerProvider(
+                    new QoderExecutor({
+                        id: p.id || p.providerId,
+                        name: p.name,
+                        baseUrl,
+                        apiKey: p.apiKey,
+                        accessToken: p.accessToken,
+                        refreshToken: p.refreshToken,
+                        providerSpecificData: p.providerSpecificData,
                     }),
                 );
                 break;

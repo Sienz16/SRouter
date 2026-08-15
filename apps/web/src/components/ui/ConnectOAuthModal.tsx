@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
-import { Loader2, Copy, Check, X } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Loader2, Copy, Check, X, Key, Globe } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import type { ProviderDefinition } from "@srouter/types";
+import type { ProviderConfig, ProviderDefinition } from "@srouter/types";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface ConnectOAuthModalProps {
@@ -22,36 +22,52 @@ export function ConnectOAuthModal({ provider, open, onOpenChange }: ConnectOAuth
     const queryClient = useQueryClient();
     const [copied, setCopied] = useState(false);
     const [callbackUrlInput, setCallbackUrlInput] = useState("");
+    const [patInput, setPatInput] = useState("");
+    const [activeTab, setActiveTab] = useState<"oauth" | "pat">("oauth");
     const [error, setError] = useState("");
     const [authUrl, setAuthUrl] = useState("");
+    const [oauthState, setOauthState] = useState("");
     const [isLoadingUrl, setIsLoadingUrl] = useState(false);
+    const popupRef = useRef<Window | null>(null);
+
+    const baseId = provider?.id.split("_")[0]?.split("-")[0] ?? provider?.id ?? "";
+    const isQoder = baseId === "qoder";
 
     // Fetch backend-registered PKCE OAuth session & open popup
     useEffect(() => {
         if (!open || !provider) {
             setAuthUrl("");
+            setOauthState("");
             setError("");
             setCallbackUrlInput("");
+            setPatInput("");
+            if (popupRef.current && !popupRef.current.closed) {
+                popupRef.current.close();
+            }
             return;
         }
 
         setIsLoadingUrl(true);
         setError("");
 
-        const providerEndpoint = provider.id.includes("antigravity")
+        const providerEndpoint = baseId === "antigravity"
             ? "/v1/auth/antigravity/login?format=json"
-            : "/v1/auth/openai/login?format=json";
+            : baseId === "qoder"
+              ? "/v1/auth/qoder/login?format=json"
+              : "/v1/auth/openai/login?format=json";
 
         api.get<OAuthLoginResponse>(providerEndpoint)
             .then((res) => {
                 setAuthUrl(res.authorizeUrl);
+                setOauthState(res.state);
                 setIsLoadingUrl(false);
                 try {
-                    window.open(
+                    const popup = window.open(
                         res.authorizeUrl,
                         "_blank",
                         "width=600,height=700,status=yes,scrollbars=yes",
                     );
+                    popupRef.current = popup;
                 } catch {
                     // Popup blocked
                 }
@@ -60,9 +76,9 @@ export function ConnectOAuthModal({ provider, open, onOpenChange }: ConnectOAuth
                 setIsLoadingUrl(false);
                 setError(err.message || "Failed to initiate OAuth login session");
             });
-    }, [open, provider]);
+    }, [open, provider, baseId]);
 
-    // Listen for postMessage from auto-closing popup window
+    // Listen for postMessage from auto-closing popup window (for redirect-based OAuth)
     useEffect(() => {
         if (!open || !provider) return;
 
@@ -72,6 +88,10 @@ export function ConnectOAuthModal({ provider, open, onOpenChange }: ConnectOAuth
                 typeof event.data === "object" &&
                 event.data.type === "SROUTER_OAUTH_SUCCESS"
             ) {
+                if (popupRef.current && !popupRef.current.closed) {
+                    popupRef.current.close();
+                }
+                void queryClient.invalidateQueries({ queryKey: ["providers"] });
                 void queryClient.invalidateQueries({ queryKey: ["providers", provider.id] });
                 void queryClient.invalidateQueries({ queryKey: ["providers", "catalog"] });
                 onOpenChange(false);
@@ -84,26 +104,48 @@ export function ConnectOAuthModal({ provider, open, onOpenChange }: ConnectOAuth
         return () => window.removeEventListener("message", handleMessage);
     }, [open, provider, queryClient, onOpenChange]);
 
-    // Poll for provider connections while modal is open as fallback
+    // Active polling for Qoder Device Flow
     useEffect(() => {
-        if (!open || !provider) return;
+        if (!open || !provider || !isQoder || !oauthState) return;
 
-        const interval = setInterval(() => {
-            void queryClient.invalidateQueries({ queryKey: ["providers", provider.id] });
+        const interval = setInterval(async () => {
+            try {
+                const res = await api.get<{ status: string; provider?: ProviderConfig }>(
+                    `/v1/auth/qoder/poll?state=${encodeURIComponent(oauthState)}`,
+                );
+                if (res && res.status === "ok") {
+                    if (popupRef.current && !popupRef.current.closed) {
+                        popupRef.current.close();
+                    }
+                    void queryClient.invalidateQueries({ queryKey: ["providers"] });
+                    void queryClient.invalidateQueries({ queryKey: ["providers", provider.id] });
+                    void queryClient.invalidateQueries({ queryKey: ["providers", "catalog"] });
+                    onOpenChange(false);
+                    setError("");
+                }
+            } catch {
+                // Ignore poll errors until user completes flow
+            }
         }, 2000);
 
         return () => clearInterval(interval);
-    }, [open, provider, queryClient]);
+    }, [open, provider, isQoder, oauthState, queryClient, onOpenChange]);
 
     const callbackMutation = useMutation({
         mutationFn: (payload: { callbackUrl: string }) => {
-            const endpoint = provider?.id.includes("antigravity")
+            const endpoint = baseId === "antigravity"
                 ? "/v1/auth/antigravity/callback"
-                : "/v1/auth/openai/callback";
+                : baseId === "qoder"
+                  ? "/v1/auth/qoder/callback"
+                  : "/v1/auth/openai/callback";
             return api.post(endpoint, payload);
         },
         onSuccess: () => {
+            if (popupRef.current && !popupRef.current.closed) {
+                popupRef.current.close();
+            }
             if (provider) {
+                void queryClient.invalidateQueries({ queryKey: ["providers"] });
                 void queryClient.invalidateQueries({ queryKey: ["providers", provider.id] });
                 void queryClient.invalidateQueries({ queryKey: ["providers", "catalog"] });
             }
@@ -113,6 +155,26 @@ export function ConnectOAuthModal({ provider, open, onOpenChange }: ConnectOAuth
         },
         onError: (err: Error) => {
             setError(err.message || "Failed to process callback URL");
+        },
+    });
+
+    const patMutation = useMutation({
+        mutationFn: (payload: { accessToken: string }) => {
+            const endpoint = `/v1/auth/${baseId}/token`;
+            return api.post(endpoint, payload);
+        },
+        onSuccess: () => {
+            if (provider) {
+                void queryClient.invalidateQueries({ queryKey: ["providers"] });
+                void queryClient.invalidateQueries({ queryKey: ["providers", provider.id] });
+                void queryClient.invalidateQueries({ queryKey: ["providers", "catalog"] });
+            }
+            onOpenChange(false);
+            setPatInput("");
+            setError("");
+        },
+        onError: (err: Error) => {
+            setError(err.message || "Failed to save token");
         },
     });
 
@@ -137,12 +199,26 @@ export function ConnectOAuthModal({ provider, open, onOpenChange }: ConnectOAuth
         callbackMutation.mutate({ callbackUrl: input });
     };
 
+    const handlePatSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!provider) return;
+
+        const token = patInput.trim();
+        if (!token) {
+            setError("Please enter your Personal Access Token (PAT) or Access Token.");
+            return;
+        }
+
+        setError("");
+        patMutation.mutate({ accessToken: token });
+    };
+
     if (!provider) return null;
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-md w-full p-5 bg-card border border-border/80 rounded-xl space-y-4 shadow-xl">
-                {/* Window Header (macOS control dots + title) */}
+                {/* Window Header */}
                 <div className="flex items-center justify-between border-b border-border/60 pb-3">
                     <div className="flex items-center gap-2">
                         <div className="flex items-center gap-1.5">
@@ -164,25 +240,35 @@ export function ConnectOAuthModal({ provider, open, onOpenChange }: ConnectOAuth
                     </button>
                 </div>
 
-                {/* Waiting State Banner */}
-                <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-secondary/30 p-3 text-xs font-mono text-foreground">
-                    <Loader2 className="size-4 text-orange-500 animate-spin shrink-0" />
-                    <span>
-                        {isLoadingUrl
-                            ? "Generating PKCE session…"
-                            : "Waiting for popup authorization..."}
-                    </span>
-                </div>
-
-                {/* Divider */}
-                <div className="relative flex items-center justify-center my-2">
-                    <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-border/60" />
+                {/* Optional Tab Switcher for Qoder or token-based providers */}
+                {isQoder && (
+                    <div className="flex border-b border-border/60 text-xs font-mono">
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab("oauth")}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 border-b-2 transition-colors cursor-pointer ${
+                                activeTab === "oauth"
+                                    ? "border-foreground text-foreground font-semibold"
+                                    : "border-transparent text-muted-foreground hover:text-foreground"
+                            }`}
+                        >
+                            <Globe className="size-3.5" />
+                            <span>Browser Login</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab("pat")}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 border-b-2 transition-colors cursor-pointer ${
+                                activeTab === "pat"
+                                    ? "border-foreground text-foreground font-semibold"
+                                    : "border-transparent text-muted-foreground hover:text-foreground"
+                            }`}
+                        >
+                            <Key className="size-3.5" />
+                            <span>Personal Access Token (PAT)</span>
+                        </button>
                     </div>
-                    <span className="relative bg-card px-2 text-[10px] font-mono uppercase text-muted-foreground tracking-wider">
-                        Or Paste Callback URL Manually
-                    </span>
-                </div>
+                )}
 
                 {error && (
                     <div className="rounded border border-destructive/40 bg-destructive/10 p-2.5 text-xs font-mono text-destructive">
@@ -190,70 +276,130 @@ export function ConnectOAuthModal({ provider, open, onOpenChange }: ConnectOAuth
                     </div>
                 )}
 
-                <form onSubmit={handleConnect} className="space-y-4 text-xs font-mono">
-                    {/* Step 1 */}
-                    <div className="space-y-1.5">
-                        <label className="font-semibold text-foreground block font-sans text-xs">
-                            Step 1: Open this URL in your browser
-                        </label>
-                        <div className="flex items-center gap-2">
+                {activeTab === "oauth" ? (
+                    <>
+                        {/* Waiting State Banner */}
+                        <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-secondary/30 p-3 text-xs font-mono text-foreground">
+                            <Loader2 className="size-4 text-orange-500 animate-spin shrink-0" />
+                            <span>
+                                {isLoadingUrl
+                                    ? "Generating PKCE session…"
+                                    : isQoder
+                                      ? "Waiting for Qoder browser authorization…"
+                                      : "Waiting for popup authorization…"}
+                            </span>
+                        </div>
+
+                        <form onSubmit={handleConnect} className="space-y-4 text-xs font-mono">
+                            {/* Step 1 */}
+                            <div className="space-y-1.5">
+                                <label className="font-semibold text-foreground block font-sans text-xs">
+                                    Step 1: Open this URL in your browser
+                                </label>
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="text"
+                                        readOnly
+                                        value={authUrl || "Generating authorization URL..."}
+                                        className="w-full rounded-lg border border-border/60 bg-secondary/30 px-3 py-2 text-xs font-mono text-muted-foreground focus:outline-none truncate"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => void handleCopy()}
+                                        disabled={!authUrl}
+                                        className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-secondary/60 hover:bg-secondary px-3 py-2 text-xs font-semibold text-foreground transition-all shrink-0 disabled:opacity-50 cursor-pointer"
+                                    >
+                                        {copied ? (
+                                            <Check className="size-3.5 text-emerald-500" />
+                                        ) : (
+                                            <Copy className="size-3.5" />
+                                        )}
+                                        <span>Copy</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {!isQoder && (
+                                <>
+                                    {/* Step 2 for redirect-based OAuth */}
+                                    <div className="space-y-1.5">
+                                        <label className="font-semibold text-foreground block font-sans text-xs">
+                                            Step 2: Paste the callback URL here (if not auto-closed)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="http://localhost:1455/auth/callback?code=...&state=..."
+                                            value={callbackUrlInput}
+                                            onChange={(e) => setCallbackUrlInput(e.target.value)}
+                                            className="w-full rounded-lg border border-border/60 bg-secondary/30 px-3 py-2 text-xs font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                                        />
+                                    </div>
+
+                                    <div className="pt-3 border-t border-border/60 flex items-center justify-end gap-3 font-sans">
+                                        <button
+                                            type="button"
+                                            onClick={() => onOpenChange(false)}
+                                            className="px-4 py-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={callbackMutation.isPending}
+                                            className="rounded-lg bg-secondary hover:bg-foreground hover:text-background border border-border/60 text-foreground px-5 py-2 text-xs font-bold transition-all disabled:opacity-50 cursor-pointer"
+                                        >
+                                            {callbackMutation.isPending ? "Connecting…" : "Connect"}
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+                        </form>
+                    </>
+                ) : (
+                    /* PAT Tab */
+                    <form onSubmit={handlePatSubmit} className="space-y-4 text-xs font-mono">
+                        <div className="space-y-1.5">
+                            <label className="font-semibold text-foreground block font-sans text-xs">
+                                Personal Access Token (PAT)
+                            </label>
+                            <p className="text-[11px] text-muted-foreground font-sans">
+                                Generate your PAT (`pt-...`) from{" "}
+                                <a
+                                    href="https://qoder.com/account/integrations"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="underline text-foreground"
+                                >
+                                    qoder.com/account/integrations
+                                </a>
+                            </p>
                             <input
-                                type="text"
-                                readOnly
-                                value={authUrl || "Generating authorization URL..."}
-                                className="w-full rounded-lg border border-border/60 bg-secondary/30 px-3 py-2 text-xs font-mono text-muted-foreground focus:outline-none truncate"
+                                type="password"
+                                placeholder="pt-..."
+                                value={patInput}
+                                onChange={(e) => setPatInput(e.target.value)}
+                                className="w-full rounded-lg border border-border/60 bg-secondary/30 px-3 py-2 text-xs font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                             />
+                        </div>
+
+                        <div className="pt-3 border-t border-border/60 flex items-center justify-end gap-3 font-sans">
                             <button
                                 type="button"
-                                onClick={() => void handleCopy()}
-                                disabled={!authUrl}
-                                className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-secondary/60 hover:bg-secondary px-3 py-2 text-xs font-semibold text-foreground transition-all shrink-0 disabled:opacity-50"
+                                onClick={() => onOpenChange(false)}
+                                className="px-4 py-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                             >
-                                {copied ? (
-                                    <Check className="size-3.5 text-emerald-500" />
-                                ) : (
-                                    <Copy className="size-3.5" />
-                                )}
-                                <span>Copy</span>
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={patMutation.isPending}
+                                className="rounded-lg bg-secondary hover:bg-foreground hover:text-background border border-border/60 text-foreground px-5 py-2 text-xs font-bold transition-all disabled:opacity-50 cursor-pointer"
+                            >
+                                {patMutation.isPending ? "Connecting…" : "Connect PAT"}
                             </button>
                         </div>
-                    </div>
-
-                    {/* Step 2 */}
-                    <div className="space-y-1.5">
-                        <label className="font-semibold text-foreground block font-sans text-xs">
-                            Step 2: Paste the callback URL here
-                        </label>
-                        <p className="text-[11px] text-muted-foreground font-sans">
-                            After authorization, copy the full URL from your browser.
-                        </p>
-                        <input
-                            type="text"
-                            placeholder="http://localhost:1455/auth/callback?code=...&state=..."
-                            value={callbackUrlInput}
-                            onChange={(e) => setCallbackUrlInput(e.target.value)}
-                            className="w-full rounded-lg border border-border/60 bg-secondary/30 px-3 py-2 text-xs font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                        />
-                    </div>
-
-                    {/* Modal Actions */}
-                    <div className="pt-3 border-t border-border/60 flex items-center justify-end gap-3 font-sans">
-                        <button
-                            type="button"
-                            onClick={() => onOpenChange(false)}
-                            className="px-4 py-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={callbackMutation.isPending}
-                            className="rounded-lg bg-secondary hover:bg-foreground hover:text-background border border-border/60 text-foreground px-5 py-2 text-xs font-bold transition-all disabled:opacity-50"
-                        >
-                            {callbackMutation.isPending ? "Connecting…" : "Connect"}
-                        </button>
-                    </div>
-                </form>
+                    </form>
+                )}
             </DialogContent>
         </Dialog>
     );
