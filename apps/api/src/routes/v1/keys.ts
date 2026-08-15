@@ -1,7 +1,9 @@
 import { Hono } from "hono";
 import { KeysController } from "@/controllers/keys.controller.js";
+import { adminAuth } from "@/middleware/adminAuth.js";
 
 export const keysRoute = new Hono();
+keysRoute.use("/*", adminAuth);
 
 // GET /v1/keys - List all virtual API keys
 keysRoute.get("/keys", KeysController.listKeys);

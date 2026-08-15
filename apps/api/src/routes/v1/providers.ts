@@ -1,7 +1,9 @@
 import { Hono } from "hono";
 import { ProvidersController } from "@/controllers/providers.controller.js";
+import { adminAuth } from "@/middleware/adminAuth.js";
 
 export const providersRoute = new Hono();
+providersRoute.use("/*", adminAuth);
 
 // GET /v1/providers - Flat list of all provider definitions
 providersRoute.get("/providers", ProvidersController.listProviders);

@@ -1,7 +1,9 @@
 import { Hono } from "hono";
 import { SettingsController } from "@/controllers/settings.controller.js";
+import { adminAuth } from "@/middleware/adminAuth.js";
 
 export const settingsRoute = new Hono();
+settingsRoute.use("/*", adminAuth);
 
 // GET /v1/settings
 settingsRoute.get("/settings", SettingsController.getSettings);

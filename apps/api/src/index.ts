@@ -9,6 +9,7 @@ import {
     handleOAuthCallback,
     handleQoderOAuthCallback,
 } from "@/routes/v1/auth.js";
+import { adminRoute } from "@/routes/v1/admin.js";
 import { chatRoute } from "@/routes/v1/chat.js";
 import { keysRoute } from "@/routes/v1/keys.js";
 import { logsRoute } from "@/routes/v1/logs.js";
@@ -42,6 +43,7 @@ app.get("/health", (c) => {
 
 // Mount OpenAI & Anthropic v1 API routes
 app.route("/v1", modelsRoute);
+app.route("/v1", adminRoute);
 app.route("/v1", chatRoute);
 app.route("/v1", messagesRoute);
 app.route("/v1", providersRoute);
