@@ -5,5 +5,6 @@ export * from "./codex.js";
 export * from "./kiro.js";
 export * from "./commandcode.js";
 export * from "./openai.js";
+export * from "./qoder.js";
 export * from "./retry.js";
 export * from "./sse.js";

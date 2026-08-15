@@ -4,6 +4,7 @@ import {
     authRoute,
     handleAntigravityOAuthCallback,
     handleOAuthCallback,
+    handleQoderOAuthCallback,
 } from "@/routes/v1/auth.js";
 import { chatRoute } from "@/routes/v1/chat.js";
 import { keysRoute } from "@/routes/v1/keys.js";
@@ -72,6 +73,8 @@ oauthApp.get("/auth/callback", (c) => handleOAuthCallback(c));
 oauthApp.post("/auth/callback", (c) => handleOAuthCallback(c));
 oauthApp.get("/auth/antigravity/callback", (c) => handleAntigravityOAuthCallback(c));
 oauthApp.post("/auth/antigravity/callback", (c) => handleAntigravityOAuthCallback(c));
+oauthApp.get("/auth/qoder/callback", (c) => handleQoderOAuthCallback(c));
+oauthApp.post("/auth/qoder/callback", (c) => handleQoderOAuthCallback(c));
 
 const oauthPort = Number(process.env.OAUTH_PORT) || 1455;
 
