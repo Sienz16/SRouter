@@ -12,8 +12,9 @@ import {
     AnthropicExecutor,
     CodexExecutor,
     CommandCodeExecutor,
+    QoderExecutor,
 } from "@srouter/executors";
-import { AntigravityOAuth, OpenAICodexOAuth } from "@srouter/providers";
+import { AntigravityOAuth, OpenAICodexOAuth, QoderOAuth } from "@srouter/providers";
 import type { AIProvider, ProviderCategory, ProviderProtocol } from "@srouter/types";
 
 export interface OAuthLoginParams {
@@ -209,9 +210,36 @@ export const anthropicAuthHandler: AuthProviderHandler = {
         new AnthropicExecutor({ id, name, baseUrl, apiKey }),
 };
 
+export const qoderAuthHandler: AuthProviderHandler = {
+    providerId: "qoder",
+    displayName: "Qoder",
+    category: "oauth",
+    protocol: "openai",
+    idPrefix: "qoder",
+    oauthSuccessMessage: "Login Qoder Berhasil!",
+    tokenImportMessage:
+        "Qoder Access Token / PAT registered and saved directly to SQLite database!",
+    oauthClass: QoderOAuth,
+    mapOAuthTokens: (tokens) => ({
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        accountId: tokens.accountId,
+        expiresIn: tokens.expiresIn,
+    }),
+    mapImportTokens: (params) => ({
+        accessToken: params.accessToken,
+        refreshToken: params.refreshToken,
+        accountId: params.accountId,
+        baseUrl: params.baseUrl,
+    }),
+    buildExecutor: ({ id, name, baseUrl, apiKey, accessToken, refreshToken }) =>
+        new QoderExecutor({ id, name, baseUrl, apiKey, accessToken, refreshToken }),
+};
+
 export const authProviderHandlers: Record<string, AuthProviderHandler> = {
     openai_codex: openaiCodexAuthHandler,
     antigravity: antigravityAuthHandler,
     commandcode: commandCodeAuthHandler,
     anthropic: anthropicAuthHandler,
+    qoder: qoderAuthHandler,
 };

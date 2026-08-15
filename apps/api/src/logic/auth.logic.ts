@@ -5,7 +5,8 @@ import {
     saveOAuthSessionDB,
     upsertProviderDB,
 } from "@srouter/db";
-import { generatePKCE } from "@srouter/providers";
+import { generatePKCE, QoderOAuth } from "@srouter/providers";
+import { QoderExecutor } from "@srouter/executors";
 import type { ProviderConfig } from "@srouter/types";
 import { registry } from "@/services/registry.js";
 import {
@@ -13,6 +14,7 @@ import {
     antigravityAuthHandler,
     commandCodeAuthHandler,
     openaiCodexAuthHandler,
+    qoderAuthHandler,
     type AuthProviderHandler,
     type OAuthLoginParams,
     type OAuthLoginResult,
@@ -225,5 +227,109 @@ export class AuthLogic {
     // Anthropic (API key)
     public static processAnthropicTokenImport(params: TokenImportParams): ProviderConfig {
         return processTokenImportFor(anthropicAuthHandler, params);
+    }
+
+    // Qoder OAuth & Token Import
+    public static initiateQoderOAuthPKCE(params: OAuthLoginParams): OAuthLoginResult {
+        return initiatePKCEFor(qoderAuthHandler, params);
+    }
+
+    public static async processQoderOAuthCallback(
+        code: string,
+        state: string,
+    ): Promise<ProviderConfig> {
+        return processOAuthCallbackFor(qoderAuthHandler, code, state);
+    }
+
+    public static processQoderTokenImport(params: TokenImportParams): ProviderConfig {
+        return processTokenImportFor(qoderAuthHandler, params);
+    }
+
+    public static async pollQoderDeviceToken(state: string): Promise<{
+        status: "pending" | "ok";
+        provider?: ProviderConfig;
+        error?: string;
+    }> {
+        if (!state) {
+            return { status: "pending", error: "Missing state parameter" };
+        }
+
+        const session = getOAuthSessionDB(state);
+        if (!session) {
+            return { status: "pending", error: "Session expired or not found" };
+        }
+
+        const qoderOAuth = new QoderOAuth();
+        let poll: {
+            status: "pending" | "ok";
+            accessToken?: string;
+            refreshToken?: string;
+            userId?: string;
+            expiresIn?: number;
+        };
+        try {
+            poll = await qoderOAuth.pollDeviceToken({
+                nonce: state,
+                codeVerifier: session.codeVerifier,
+            });
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : String(err);
+            return { status: "pending", error: msg };
+        }
+
+        if (poll.status !== "ok" || !poll.accessToken) {
+            return { status: "pending" };
+        }
+
+        deleteOAuthSessionDB(state);
+
+        const userInfo = await qoderOAuth.fetchUserInfo(poll.accessToken);
+        const timestamp = Date.now();
+        const accountId = `qoder_${timestamp}`;
+        const accountName = userInfo.name
+            ? `Qoder (${userInfo.name})`
+            : `Qoder (Account #${timestamp.toString().slice(-4)})`;
+
+        const providerConfig = upsertProviderDB({
+            id: accountId,
+            providerId: "qoder",
+            name: accountName,
+            category: "oauth",
+            protocol: "openai",
+            accessToken: poll.accessToken,
+            refreshToken: poll.refreshToken,
+            accountId: poll.userId || userInfo.id,
+            tokenExpiresAt: poll.expiresIn ? timestamp + poll.expiresIn * 1000 : undefined,
+            lastRefreshedAt: timestamp,
+            providerSpecificData: {
+                authMethod: "device",
+                userId: poll.userId || userInfo.id || "",
+                email: userInfo.email || "",
+                name: userInfo.name || "",
+                organizationId: userInfo.organizationId || "",
+            },
+            enabled: true,
+            createdAt: timestamp,
+        });
+
+        const providerInstance = new QoderExecutor({
+            id: accountId,
+            name: accountName,
+            accessToken: poll.accessToken,
+            refreshToken: poll.refreshToken,
+            providerSpecificData: {
+                authMethod: "device",
+                userId: poll.userId || userInfo.id || "",
+                email: userInfo.email || "",
+                name: userInfo.name || "",
+                organizationId: userInfo.organizationId || "",
+            },
+        });
+        registry.registerProvider(providerInstance);
+
+        return {
+            status: "ok",
+            provider: providerConfig,
+        };
     }
 }

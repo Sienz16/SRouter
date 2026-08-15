@@ -6,6 +6,7 @@ export const authRoute = new Hono();
 export const handleOAuthCallback = AuthController.handleOAuthCallback;
 export const handleAntigravityOAuthCallback = AuthController.handleAntigravityOAuthCallback;
 export const handleCommandCodeTokenImport = AuthController.importCommandCodeToken;
+export const handleQoderOAuthCallback = AuthController.handleQoderOAuthCallback;
 
 // --- OpenAI OAuth ---
 // 1. GET /v1/auth/openai/login - Initiate OAuth PKCE Login Flow
@@ -40,3 +41,19 @@ authRoute.post("/auth/commandcode/import-token", AuthController.importCommandCod
 // 1. POST /v1/auth/anthropic/token & POST /v1/auth/anthropic/import-token
 authRoute.post("/auth/anthropic/token", AuthController.importAnthropicToken);
 authRoute.post("/auth/anthropic/import-token", AuthController.importAnthropicToken);
+
+// --- Qoder Provider (OAuth & PAT) ---
+// 1. GET /v1/auth/qoder/login - Initiate Qoder OAuth PKCE Login Flow
+authRoute.get("/auth/qoder/login", AuthController.loginQoder);
+
+// 2. GET & POST /v1/auth/qoder/callback - Qoder OAuth Callback Receiver
+authRoute.get("/auth/qoder/callback", AuthController.handleQoderOAuthCallback);
+authRoute.post("/auth/qoder/callback", AuthController.handleQoderOAuthCallback);
+
+// 3. GET & POST /v1/auth/qoder/poll - Device Flow Poll Receiver
+authRoute.get("/auth/qoder/poll", AuthController.pollQoder);
+authRoute.post("/auth/qoder/poll", AuthController.pollQoder);
+
+// 4. POST /v1/auth/qoder/token & POST /v1/auth/qoder/import-token
+authRoute.post("/auth/qoder/token", AuthController.importQoderToken);
+authRoute.post("/auth/qoder/import-token", AuthController.importQoderToken);

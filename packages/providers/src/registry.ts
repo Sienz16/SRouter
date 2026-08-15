@@ -1,4 +1,9 @@
-import { providerAlias, providerBaseId } from "@srouter/constants";
+import {
+    isProviderBaseId,
+    providerAlias,
+    providerBaseId,
+    providerTypeForAlias,
+} from "@srouter/constants";
 import type {
     AIProvider,
     ChatCompletionChunk,
@@ -16,6 +21,10 @@ export function getProviderAlias(providerId: string): string {
 function stripModelPrefix(modelId: string, alias: string, providerId: string): string {
     if (modelId.startsWith(`${alias}/`)) return modelId.slice(alias.length + 1);
     if (modelId.startsWith(`${providerId}/`)) return modelId.slice(providerId.length + 1);
+    const baseId = providerBaseId(providerId);
+    if (modelId.startsWith(`${baseId}/`)) return modelId.slice(baseId.length + 1);
+    const slash = modelId.indexOf("/");
+    if (slash >= 0) return modelId.slice(slash + 1);
     return modelId;
 }
 
@@ -31,12 +40,16 @@ export class ProviderRegistry {
             protocol: "openai",
             listModels: async () => [],
             chatCompletion: async (req: ChatCompletionRequest) => {
-                throw new Error("No default provider set for chatCompletion");
+                throw new Error(
+                    `No active provider connection found for model "${req.model}". Please connect a provider account in the Providers tab or verify the model name.`,
+                );
             },
             chatCompletionStream: async function* (
                 req: ChatCompletionRequest,
             ): AsyncGenerator<ChatCompletionChunk, void, void> {
-                throw new Error("No default provider set for chatCompletionStream");
+                throw new Error(
+                    `No active provider connection found for model "${req.model}". Please connect a provider account in the Providers tab or verify the model name.`,
+                );
             },
         };
         this.registerProvider(this.defaultProvider);
@@ -97,18 +110,38 @@ export class ProviderRegistry {
         // 1. Direct match from registered providers' listModels()
         for (const provider of this.providers.values()) {
             if (provider.id === "default") continue;
+            const alias = getProviderAlias(provider.id);
+            const baseId = providerBaseId(provider.id);
             const models = await provider.listModels();
-            if (models.some((m) => m.id === modelId)) {
+            if (
+                models.some((m) => {
+                    const bareId = stripModelPrefix(m.id, alias, provider.id);
+                    return (
+                        m.id === modelId ||
+                        `${alias}/${bareId}` === modelId ||
+                        `${baseId}/${bareId}` === modelId ||
+                        bareId === modelId
+                    );
+                })
+            ) {
                 candidates.push(provider);
             }
         }
 
-        // 2. Prefix matching for provider ID (e.g., antigravity/gemini-3.6-flash -> antigravity_*)
+        // 2. Prefix matching for provider ID or alias (e.g., qd/*, qoder/*, antigravity/*, openai/*)
         if (candidates.length === 0) {
             const prefix = modelId.includes("/") ? (modelId.split("/")[0] ?? modelId) : modelId;
+            const targetBaseId = providerTypeForAlias(prefix) ?? prefix;
             for (const [id, provider] of this.providers.entries()) {
                 if (id === "default") continue;
-                if (id === prefix || id.startsWith(`${prefix}_`) || id.startsWith(`${prefix}-`)) {
+                const baseId = providerBaseId(id);
+                const alias = providerAlias(baseId);
+                if (
+                    isProviderBaseId(id, prefix) ||
+                    isProviderBaseId(id, targetBaseId) ||
+                    prefix === alias ||
+                    targetBaseId === baseId
+                ) {
                     candidates.push(provider);
                 }
             }
@@ -120,7 +153,13 @@ export class ProviderRegistry {
             return candidates[index] ?? candidates[0] ?? this.defaultProvider;
         }
 
-        return this.defaultProvider;
+        if (this.defaultProvider.id !== "default") {
+            return this.defaultProvider;
+        }
+
+        throw new Error(
+            `No active provider connection found for model "${modelId}". Please connect a provider account in the Providers tab (e.g. Qoder, OpenAI, Antigravity) or verify the model prefix.`,
+        );
     }
 
     async listAllModels(providerFilter?: string): Promise<ModelObject[]> {
