@@ -16,18 +16,18 @@ export class ChatController {
                     const generator = ChatLogic.processStreamingCompletion(body, startTime);
                     for await (const chunk of generator) {
                         await stream.writeSSE({
-                            data: JSON.stringify(chunk),
+                            data: JSON.stringify(chunk)
                         });
                     }
                     await stream.writeSSE({
-                        data: "[DONE]",
+                        data: "[DONE]"
                     });
                 } catch (error) {
                     const errorMessage = error instanceof Error ? error.message : String(error);
                     await stream.writeSSE({
                         data: JSON.stringify(
-                            formatErrorPayload(errorMessage || "Error occurred during streaming"),
-                        ),
+                            formatErrorPayload(errorMessage || "Error occurred during streaming")
+                        )
                     });
                 }
             });

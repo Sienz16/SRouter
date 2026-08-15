@@ -21,15 +21,15 @@ export interface OpenAIErrorPayload {
  */
 export function formatErrorPayload(
     message: string,
-    options: ErrorResponseOptions = {},
+    options: ErrorResponseOptions = {}
 ): OpenAIErrorPayload {
     return {
         error: {
             message,
             type: options.type ?? "api_error",
             ...(options.code ? { code: options.code } : {}),
-            ...(options.param ? { param: options.param } : {}),
-        },
+            ...(options.param ? { param: options.param } : {})
+        }
     };
 }
 
@@ -47,7 +47,7 @@ export function err(
     c: Context,
     message: string,
     status: ContentfulStatusCode = 500,
-    options: ErrorResponseOptions = {},
+    options: ErrorResponseOptions = {}
 ): Response {
     return c.json(formatErrorPayload(message, options), status);
 }

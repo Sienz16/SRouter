@@ -23,7 +23,7 @@ export function getAllProvidersDB(): ProviderConfig[] {
             ? JSON.parse(String(row.provider_specific_data))
             : undefined,
         enabled: Boolean(row.enabled),
-        createdAt: Number(row.created_at ?? 0),
+        createdAt: Number(row.created_at ?? 0)
     }));
 }
 
@@ -51,12 +51,12 @@ export function getProviderByIdDB(id: string): ProviderConfig | null {
             ? JSON.parse(String(row.provider_specific_data))
             : undefined,
         enabled: Boolean(row.enabled),
-        createdAt: Number(row.created_at ?? 0),
+        createdAt: Number(row.created_at ?? 0)
     };
 }
 
 export function upsertProviderDB(
-    config: ProviderConfig & { category: string; protocol: string },
+    config: ProviderConfig & { category: string; protocol: string }
 ): ProviderConfig {
     const query = db.prepare(`
         INSERT INTO providers (id, provider_id, name, category, protocol, base_url, api_key, access_token, refresh_token, account_id, token_expires_at, last_refreshed_at, custom_headers, provider_specific_data, enabled, created_at)
@@ -95,14 +95,14 @@ export function upsertProviderDB(
         config.customHeaders ? JSON.stringify(config.customHeaders) : null,
         config.providerSpecificData ? JSON.stringify(config.providerSpecificData) : null,
         config.enabled ? 1 : 0,
-        config.createdAt,
+        config.createdAt
     );
 
     return config;
 }
 
 export function createProviderDB(
-    config: ProviderConfig & { category: string; protocol: string },
+    config: ProviderConfig & { category: string; protocol: string }
 ): ProviderConfig {
     return upsertProviderDB(config);
 }
@@ -131,20 +131,20 @@ export function updateProviderTokensDB(input: UpdateProviderTokensInput): void {
             refresh_token = ?,
             token_expires_at = ?,
             last_refreshed_at = ?
-         WHERE id = ?`,
+         WHERE id = ?`
     ).run(
         input.accessToken,
         input.refreshToken ?? null,
         input.tokenExpiresAt ?? null,
         input.lastRefreshedAt ?? null,
-        input.id,
+        input.id
     );
 }
 
 export function getConnectionsByProviderIdDB(providerId: string): ProviderConfig[] {
     const pId = providerId.toLowerCase();
     const query = db.prepare(
-        "SELECT * FROM providers WHERE LOWER(provider_id) = ? OR LOWER(id) = ? ORDER BY created_at DESC",
+        "SELECT * FROM providers WHERE LOWER(provider_id) = ? OR LOWER(id) = ? ORDER BY created_at DESC"
     );
     const rows = query.all(pId, pId);
 
@@ -166,6 +166,6 @@ export function getConnectionsByProviderIdDB(providerId: string): ProviderConfig
             ? JSON.parse(String(row.provider_specific_data))
             : undefined,
         enabled: Boolean(row.enabled),
-        createdAt: Number(row.created_at ?? 0),
+        createdAt: Number(row.created_at ?? 0)
     }));
 }

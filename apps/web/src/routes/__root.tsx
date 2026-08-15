@@ -31,5 +31,5 @@ export const Route = createRootRouteWithContext<RouterContext>()({
                 </SidebarProvider>
             </AdminAuthGate>
         </TooltipProvider>
-    ),
+    )
 });

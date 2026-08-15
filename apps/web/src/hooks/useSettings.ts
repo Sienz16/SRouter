@@ -32,7 +32,7 @@ const DEFAULT_SETTINGS: AppSettings = {
     defaultTemperature: 0.7,
     defaultTopP: 0.95,
     defaultMaxTokens: 4096,
-    systemPromptDefault: "You are a helpful and versatile AI assistant.",
+    systemPromptDefault: "You are a helpful and versatile AI assistant."
 };
 
 const STORAGE_KEY = "srouter_app_settings";
@@ -77,7 +77,7 @@ export function useSettings() {
         downloadAnchor.setAttribute("href", dataStr);
         downloadAnchor.setAttribute(
             "download",
-            `srouter-settings-${new Date().toISOString().slice(0, 10)}.json`,
+            `srouter-settings-${new Date().toISOString().slice(0, 10)}.json`
         );
         document.body.appendChild(downloadAnchor);
         downloadAnchor.click();
@@ -113,6 +113,6 @@ export function useSettings() {
         updateSetting,
         resetToDefaults,
         exportSettings,
-        clearPlaygroundHistory,
+        clearPlaygroundHistory
     };
 }

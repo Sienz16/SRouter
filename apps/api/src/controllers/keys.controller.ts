@@ -7,7 +7,7 @@ export class KeysController {
         const keys = getAllAPIKeysDB();
         return ok(c, {
             object: "list",
-            data: keys,
+            data: keys
         });
     }
 
@@ -26,7 +26,7 @@ export class KeysController {
             const created = createAPIKeyDB({
                 name: body.name.trim(),
                 rateLimit: body.rateLimit ? Number(body.rateLimit) : 0,
-                quotaLimit: body.quotaLimit ? Number(body.quotaLimit) : 0,
+                quotaLimit: body.quotaLimit ? Number(body.quotaLimit) : 0
             });
             return ok(c, created, 201);
         } catch (error) {

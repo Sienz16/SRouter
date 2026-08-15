@@ -5,7 +5,7 @@ import type {
     AnthropicMessageResponse,
     ChatCompletionChunk,
     ChatCompletionRequest,
-    ChatCompletionResponse,
+    ChatCompletionResponse
 } from "@srouter/types";
 
 /**
@@ -25,7 +25,7 @@ export function openAIToAnthropicRequest(req: ChatCompletionRequest): AnthropicM
                 content:
                     (typeof msg.content === "string"
                         ? msg.content
-                        : (msg.content as AnthropicContentBlock[])) ?? "",
+                        : (msg.content as AnthropicContentBlock[])) ?? ""
             });
         }
     }
@@ -37,7 +37,7 @@ export function openAIToAnthropicRequest(req: ChatCompletionRequest): AnthropicM
         max_tokens: req.max_tokens ?? 4096,
         temperature: req.temperature,
         top_p: req.top_p,
-        stream: req.stream,
+        stream: req.stream
     };
 }
 
@@ -46,7 +46,7 @@ export function openAIToAnthropicRequest(req: ChatCompletionRequest): AnthropicM
  */
 export function anthropicToOpenAIResponse(
     res: AnthropicMessageResponse,
-    requestedModel: string,
+    requestedModel: string
 ): ChatCompletionResponse {
     const textContent = res.content
         .filter((c) => c.type === "text")
@@ -63,16 +63,16 @@ export function anthropicToOpenAIResponse(
                 index: 0,
                 message: {
                     role: "assistant",
-                    content: textContent,
+                    content: textContent
                 },
-                finish_reason: res.stop_reason === "max_tokens" ? "length" : "stop",
-            },
+                finish_reason: res.stop_reason === "max_tokens" ? "length" : "stop"
+            }
         ],
         usage: {
             prompt_tokens: res.usage.input_tokens,
             completion_tokens: res.usage.output_tokens,
-            total_tokens: res.usage.input_tokens + res.usage.output_tokens,
-        },
+            total_tokens: res.usage.input_tokens + res.usage.output_tokens
+        }
     };
 }
 
@@ -88,7 +88,7 @@ interface AnthropicStreamEventData {
 export function anthropicEventToOpenAIChunk(
     event: string,
     dataJson: AnthropicStreamEventData,
-    requestedModel: string,
+    requestedModel: string
 ): ChatCompletionChunk | null {
     const completionId = dataJson?.message?.id || `chatcmpl-${dataJson?.index ?? 0}`;
     const created = Math.floor(Date.now() / 1000);
@@ -104,9 +104,9 @@ export function anthropicEventToOpenAIChunk(
                 {
                     index: 0,
                     delta: { content: deltaText },
-                    finish_reason: null,
-                },
-            ],
+                    finish_reason: null
+                }
+            ]
         };
     }
 
@@ -120,9 +120,9 @@ export function anthropicEventToOpenAIChunk(
                 {
                     index: 0,
                     delta: {},
-                    finish_reason: "stop",
-                },
-            ],
+                    finish_reason: "stop"
+                }
+            ]
         };
     }
 

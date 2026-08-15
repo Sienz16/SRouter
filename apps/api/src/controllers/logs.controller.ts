@@ -10,7 +10,7 @@ export class LogsController {
 
         return ok(c, {
             object: "list",
-            data: logs,
+            data: logs
         });
     }
 

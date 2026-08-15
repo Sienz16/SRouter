@@ -21,7 +21,7 @@ export function useProvider(providerId: string) {
 
     const query = useQuery({
         queryKey: ["providers", providerId],
-        queryFn: () => api.get<ProviderDefinition>(`/v1/providers/${providerId}`),
+        queryFn: () => api.get<ProviderDefinition>(`/v1/providers/${providerId}`)
     });
 
     const addMutation = useMutation({
@@ -34,7 +34,7 @@ export function useProvider(providerId: string) {
         },
         onError: (err: Error) => {
             toast.error(err.message || "Failed to save connection");
-        },
+        }
     });
 
     const deleteMutation = useMutation({
@@ -47,7 +47,7 @@ export function useProvider(providerId: string) {
         },
         onError: (err: Error) => {
             toast.error(err.message || "Failed to delete connection");
-        },
+        }
     });
 
     return { ...query, addMutation, deleteMutation };

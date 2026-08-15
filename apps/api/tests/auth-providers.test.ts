@@ -7,7 +7,7 @@ import { AuthLogic } from "../src/logic/auth.logic.js";
 import {
     commandCodeAuthHandler,
     openaiCodexAuthHandler,
-    type AuthProviderHandler,
+    type AuthProviderHandler
 } from "../src/logic/auth.providers.js";
 
 const createdIds: string[] = [];
@@ -23,7 +23,7 @@ test("processTokenImport stores an OAuth provider with accountId (Codex shape)",
     const config = AuthLogic.processTokenImport({
         accessToken: "codex-token",
         refreshToken: "codex-refresh",
-        accountId: "u_test_account",
+        accountId: "u_test_account"
     });
 
     createdIds.push(config.id);
@@ -45,7 +45,7 @@ test("processTokenImport stores an api_key provider with baseUrl (CommandCode sh
     const config = AuthLogic.processCommandCodeTokenImport({
         accessToken: "cc-token",
         baseUrl: "https://api.commandcode.example/alpha/generate",
-        name: "My Command Code",
+        name: "My Command Code"
     });
 
     createdIds.push(config.id);
@@ -73,7 +73,7 @@ test("auth provider handlers carry preserved per-provider messages", () => {
     assert.equal(openaiCodexAuthHandler.oauthSuccessMessage, "Login OpenAI Codex Berhasil!");
     assert.equal(
         commandCodeAuthHandler.tokenImportMessage,
-        "Command Code API Key registered and saved directly to SQLite database!",
+        "Command Code API Key registered and saved directly to SQLite database!"
     );
 });
 
@@ -83,7 +83,7 @@ test("processTokenImportFor honors provided id and name", () => {
     const config = AuthLogic.processTokenImport({
         id: "my-custom-id",
         name: "Custom Label",
-        accessToken: "tok",
+        accessToken: "tok"
     });
 
     createdIds.push(config.id);

@@ -28,6 +28,6 @@ export function generatePKCE(): PKCEPair {
     return {
         codeVerifier,
         codeChallenge,
-        state,
+        state
     };
 }

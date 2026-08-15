@@ -26,7 +26,7 @@ test("saved BluesMinds connections use the official URL and bearer auth", async 
         protocol: "openai",
         accessToken: fixtureKey,
         enabled: true,
-        createdAt: Date.now(),
+        createdAt: Date.now()
     };
     upsertProviderDB(config);
 
@@ -54,7 +54,7 @@ test("saved BluesMinds connections use the official URL and bearer auth", async 
 test("processBluesMindsTokenImport creates and registers BluesMinds provider config", () => {
     const config = AuthLogic.processBluesMindsTokenImport({
         accessToken: "test-bluesminds-key",
-        name: "My BluesMinds Account",
+        name: "My BluesMinds Account"
     });
 
     createdIds.push(config.id);
@@ -68,6 +68,6 @@ test("processBluesMindsTokenImport creates and registers BluesMinds provider con
     assert.equal(config.enabled, true);
     assert.equal(
         bluesMindsAuthHandler.tokenImportMessage,
-        "BluesMinds API Key registered and saved directly to SQLite database!",
+        "BluesMinds API Key registered and saved directly to SQLite database!"
     );
 });

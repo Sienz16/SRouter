@@ -3,7 +3,7 @@ import {
     getAllSettingsDB,
     getRequireApiKeyDB,
     setRequireApiKeyDB,
-    setSettingDB,
+    setSettingDB
 } from "@srouter/db";
 import { ok, err } from "@/utils/response.js";
 
@@ -13,7 +13,7 @@ export class SettingsController {
         const all = getAllSettingsDB();
         return ok(c, {
             requireApiKey,
-            settings: all,
+            settings: all
         });
     }
 
@@ -35,7 +35,7 @@ export class SettingsController {
             return ok(c, {
                 message: "Settings updated successfully",
                 requireApiKey,
-                settings: all,
+                settings: all
             });
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);

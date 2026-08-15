@@ -11,7 +11,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     const res = await fetch(path, {
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        ...init,
+        ...init
     });
 
     if (!res.ok) {
@@ -35,22 +35,22 @@ export const api = {
     post: <T>(path: string, body?: unknown) =>
         request<T>(path, {
             method: "POST",
-            body: body === undefined ? undefined : JSON.stringify(body),
+            body: body === undefined ? undefined : JSON.stringify(body)
         }),
     patch: <T>(path: string, body?: unknown) =>
         request<T>(path, {
             method: "PATCH",
-            body: body === undefined ? undefined : JSON.stringify(body),
+            body: body === undefined ? undefined : JSON.stringify(body)
         }),
     put: <T>(path: string, body?: unknown) =>
         request<T>(path, {
             method: "PUT",
-            body: body === undefined ? undefined : JSON.stringify(body),
+            body: body === undefined ? undefined : JSON.stringify(body)
         }),
     delete: <T>(path: string) =>
         request<T>(path, {
-            method: "DELETE",
-        }),
+            method: "DELETE"
+        })
 };
 
 /**

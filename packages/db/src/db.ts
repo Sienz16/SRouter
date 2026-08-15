@@ -124,10 +124,10 @@ export function initDatabase(): void {
         { name: "cached_tokens", definition: "cached_tokens INTEGER NOT NULL DEFAULT 0" },
         {
             name: "cache_creation_tokens",
-            definition: "cache_creation_tokens INTEGER NOT NULL DEFAULT 0",
+            definition: "cache_creation_tokens INTEGER NOT NULL DEFAULT 0"
         },
         { name: "reasoning_tokens", definition: "reasoning_tokens INTEGER NOT NULL DEFAULT 0" },
-        { name: "estimated_cost", definition: "estimated_cost REAL NOT NULL DEFAULT 0" },
+        { name: "estimated_cost", definition: "estimated_cost REAL NOT NULL DEFAULT 0" }
     ];
     for (const col of analyticsColumns) {
         try {

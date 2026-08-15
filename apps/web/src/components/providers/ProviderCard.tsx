@@ -6,7 +6,7 @@ import {
     ChevronRight,
     ExternalLink,
     ShieldCheck,
-    Zap,
+    Zap
 } from "lucide-react";
 import type { ProviderDefinition } from "@srouter/types";
 import { ProviderIcon } from "@/components/ProviderIcon";
@@ -17,7 +17,7 @@ const protocolLabels: Record<string, string> = {
     openai: "OpenAI",
     anthropic: "Anthropic",
     gemini: "Gemini",
-    custom: "Custom",
+    custom: "Custom"
 };
 
 export function ProviderCard({ provider }: { provider: ProviderDefinition }) {

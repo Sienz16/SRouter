@@ -20,7 +20,7 @@ export function ConnectionCard({
     onToggleRoundRobin,
     onRefresh,
     onAdd,
-    onDelete,
+    onDelete
 }: ConnectionCardProps) {
     return (
         <div className="rounded-[12px] border border-[var(--line)] bg-[var(--surface)] p-5 space-y-4 font-mono shadow-2xs">

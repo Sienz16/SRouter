@@ -3,7 +3,7 @@ import type {
     ChatCompletionChunk,
     ChatCompletionRequest,
     ChatCompletionResponse,
-    ModelObject,
+    ModelObject
 } from "@srouter/types";
 import { CODEX_BASE_URL, CODEX_MODELS_URL } from "@srouter/constants";
 import {
@@ -13,7 +13,7 @@ import {
     normalizeReasoningEffort,
     normalizeResponsesInput,
     responsesEventToChunk,
-    type ResponsesRequestBody,
+    type ResponsesRequestBody
 } from "@srouter/translator";
 import { parseDataLine, streamLines } from "./base.js";
 import { extractSseErrorMessage, MODEL_CAPACITY_MESSAGE } from "./sse.js";
@@ -38,7 +38,7 @@ const SSE_USER_OUTPUT_PATTERNS = [
     "event: response.output_text.delta",
     "event: response.function_call_arguments.delta",
     '"type":"response.output_text.delta"',
-    '"type":"response.function_call_arguments.delta"',
+    '"type":"response.function_call_arguments.delta"'
 ];
 const SSE_PEEK_BYTES = 256 * 1024;
 
@@ -93,7 +93,7 @@ export class CodexExecutor implements AIProvider {
         this.name = options.name ?? "OpenAI Codex / ChatGPT";
         this.baseUrl = (options.baseUrl ?? process.env.CODEX_BASE_URL ?? CODEX_BASE_URL).replace(
             /\/$/,
-            "",
+            ""
         );
         this.modelsUrl = (process.env.CODEX_MODELS_URL ?? CODEX_MODELS_URL).replace(/\/$/, "");
         this.apiKey = options.apiKey ?? process.env.CODEX_API_KEY ?? "";
@@ -116,7 +116,7 @@ export class CodexExecutor implements AIProvider {
             "Content-Type": "application/json",
             originator: "codex_cli_rs",
             "User-Agent": `codex_cli_rs/${CODEX_CLIENT_VERSION}`,
-            session_id: this.sessionId || this._currentSessionId || this.id || "default",
+            session_id: this.sessionId || this._currentSessionId || this.id || "default"
         };
         const token = this.accessToken || this.apiKey;
         if (token) {
@@ -140,7 +140,7 @@ export class CodexExecutor implements AIProvider {
             url.searchParams.set("client_version", CODEX_CLIENT_VERSION);
             const res = await fetch(url.toString(), {
                 method: "GET",
-                headers: this.getHeaders({ Accept: "application/json" }),
+                headers: this.getHeaders({ Accept: "application/json" })
             });
             if (!res.ok) return [];
             const json = (await res.json()) as {
@@ -162,7 +162,7 @@ export class CodexExecutor implements AIProvider {
                     id: m.slug || m.id || "",
                     object: "model" as const,
                     created: Math.floor(Date.now() / 1000),
-                    owned_by: "openai",
+                    owned_by: "openai"
                 }))
                 .filter((m) => m.id.length > 0);
         } catch {
@@ -180,7 +180,7 @@ export class CodexExecutor implements AIProvider {
     }
 
     async *chatCompletionStream(
-        req: ChatCompletionRequest,
+        req: ChatCompletionRequest
     ): AsyncGenerator<ChatCompletionChunk, void, void> {
         const body = this.transformRequest(req);
         this._currentSessionId = this.sessionId || body.prompt_cache_key || null;
@@ -193,7 +193,7 @@ export class CodexExecutor implements AIProvider {
             const res = await fetch(this.baseUrl, {
                 method: "POST",
                 headers: this.getHeaders(),
-                body: JSON.stringify(body),
+                body: JSON.stringify(body)
             });
 
             // Non-OK — surface error immediately
@@ -225,7 +225,7 @@ export class CodexExecutor implements AIProvider {
 
             if (peek.accountFallback) {
                 throw new Error(
-                    `Codex Provider Error (503): ${peek.message || MODEL_CAPACITY_MESSAGE}`,
+                    `Codex Provider Error (503): ${peek.message || MODEL_CAPACITY_MESSAGE}`
                 );
             }
 
@@ -323,7 +323,7 @@ export class CodexExecutor implements AIProvider {
             "include",
             "prompt_cache_key",
             "client_metadata",
-            "text",
+            "text"
         ]);
         for (const k of Object.keys(body)) {
             if (!ALLOWLIST.has(k)) delete (body as Record<string, unknown>)[k];
@@ -390,7 +390,7 @@ export class CodexExecutor implements AIProvider {
                 matched,
                 message: extractSseErrorMessage(text, matched),
                 accountFallback,
-                replacementBody: null,
+                replacementBody: null
             };
         }
 
@@ -426,7 +426,7 @@ export class CodexExecutor implements AIProvider {
                 } catch {
                     /* noop */
                 }
-            },
+            }
         });
         return { matched: null, message: null, accountFallback: false, replacementBody };
     }
@@ -436,7 +436,7 @@ export class CodexExecutor implements AIProvider {
      */
     private parseError(
         status: number,
-        bodyText: string,
+        bodyText: string
     ): { status: number; message: string; resetsAtMs?: number } | null {
         if (status === 429 && bodyText) {
             try {
@@ -479,7 +479,7 @@ export class CodexExecutor implements AIProvider {
      */
     private async *streamResponses(
         body: ReadableStream<Uint8Array>,
-        requestedModel: string,
+        requestedModel: string
     ): AsyncGenerator<ChatCompletionChunk, void, void> {
         const state = createResponsesStreamState(requestedModel);
         let pendingEvent = "";

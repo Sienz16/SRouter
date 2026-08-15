@@ -1,7 +1,7 @@
 import type {
     ChatCompletionChunk,
     ChatCompletionRequest,
-    ChatCompletionResponse,
+    ChatCompletionResponse
 } from "@srouter/types";
 import crypto from "node:crypto";
 
@@ -45,7 +45,7 @@ export function parseGeminiModelName(rawModel: string): string {
 export function buildGeminiContents(req: ChatCompletionRequest): GeminiContent[] {
     return req.messages.map((m) => ({
         role: m.role === "assistant" ? "model" : "user",
-        parts: [{ text: typeof m.content === "string" ? m.content : JSON.stringify(m.content) }],
+        parts: [{ text: typeof m.content === "string" ? m.content : JSON.stringify(m.content) }]
     }));
 }
 
@@ -53,7 +53,7 @@ export function buildGeminiContents(req: ChatCompletionRequest): GeminiContent[]
 export function buildGeminiBody(
     contents: GeminiContent[],
     modelName: string,
-    token: string,
+    token: string
 ): CloudCodePayload | GeminiNativePayload {
     if (token.startsWith("ya29.")) {
         return { model: modelName, request: { contents } };
@@ -107,7 +107,7 @@ export function parseGeminiResponse(data: GeminiRawResponse): string {
 
 export function geminiToOpenAIResponse(
     data: GeminiRawResponse,
-    requestedModel: string,
+    requestedModel: string
 ): ChatCompletionResponse {
     const textResponse = parseGeminiResponse(data);
     return {
@@ -120,11 +120,11 @@ export function geminiToOpenAIResponse(
                 index: 0,
                 message: {
                     role: "assistant",
-                    content: textResponse,
+                    content: textResponse
                 },
-                finish_reason: "stop",
-            },
-        ],
+                finish_reason: "stop"
+            }
+        ]
     };
 }
 
@@ -179,7 +179,7 @@ export function buildIdeRequestId({
     request,
     sessionId,
     model,
-    requestType,
+    requestType
 }: IdeRequestIdArgs): string {
     if (body?.requestId && ANTIGRAVITY_IDE_REQUEST_ID_RE.test(body.requestId)) {
         return body.requestId;
@@ -211,7 +211,7 @@ export function buildAntigravityEnvelope(args: {
         userAgent: "antigravity",
         requestType,
         requestId: buildIdeRequestId({ body, request, sessionId, model, requestType }),
-        request,
+        request
     };
 }
 
@@ -273,7 +273,7 @@ const UNSUPPORTED_SCHEMA_CONSTRAINTS = [
     "padding",
     "strokeColor",
     "strokeThickness",
-    "textColor",
+    "textColor"
 ];
 
 function removeUnsupportedKeywords(obj: unknown, keywords: string[]): void {
@@ -338,7 +338,7 @@ function mergeAllOf(obj: unknown): void {
         if (merged.properties)
             o.properties = {
                 ...(o.properties as Record<string, unknown>),
-                ...(merged.properties as Record<string, unknown>),
+                ...(merged.properties as Record<string, unknown>)
             };
         if (merged.required)
             o.required = [...((o.required as string[]) || []), ...(merged.required as string[])];
@@ -371,7 +371,7 @@ function flattenAnyOfOneOf(obj: unknown): void {
     const o = obj as Record<string, unknown>;
     if (o.anyOf && Array.isArray(o.anyOf) && o.anyOf.length > 0) {
         const nonNull = (o.anyOf as Array<Record<string, unknown>>).filter(
-            (s) => s && s.type !== "null",
+            (s) => s && s.type !== "null"
         );
         if (nonNull.length > 0) {
             const selected = nonNull[selectBest(nonNull)];
@@ -381,7 +381,7 @@ function flattenAnyOfOneOf(obj: unknown): void {
     }
     if (o.oneOf && Array.isArray(o.oneOf) && o.oneOf.length > 0) {
         const nonNull = (o.oneOf as Array<Record<string, unknown>>).filter(
-            (s) => s && s.type !== "null",
+            (s) => s && s.type !== "null"
         );
         if (nonNull.length > 0) {
             const selected = nonNull[selectBest(nonNull)];
@@ -419,7 +419,7 @@ function cleanupRequired(obj: unknown): void {
     if (o.required && Array.isArray(o.required) && o.properties) {
         const props = o.properties as Record<string, unknown>;
         const valid = (o.required as string[]).filter((f) =>
-            Object.prototype.hasOwnProperty.call(props, f),
+            Object.prototype.hasOwnProperty.call(props, f)
         );
         if (valid.length === 0) delete o.required;
         else o.required = valid;
@@ -437,8 +437,8 @@ function addPlaceholders(obj: unknown): void {
         o.properties = {
             reason: {
                 type: "string",
-                description: "Brief explanation of why you are calling this tool",
-            },
+                description: "Brief explanation of why you are calling this tool"
+            }
         };
         o.required = ["reason"];
         return;
@@ -448,8 +448,8 @@ function addPlaceholders(obj: unknown): void {
             o.properties = {
                 reason: {
                     type: "string",
-                    description: "Brief explanation of why you are calling this tool",
-                },
+                    description: "Brief explanation of why you are calling this tool"
+                }
             };
             o.required = ["reason"];
         }
@@ -502,7 +502,7 @@ export interface GeminiStreamState {
 
 export function createGeminiStreamState(
     model: string,
-    toolNameMap?: Map<string, string> | null,
+    toolNameMap?: Map<string, string> | null
 ): GeminiStreamState {
     return { model, functionIndex: 0, geminiToolCallCount: 0, toolNameMap };
 }
@@ -511,14 +511,14 @@ function geminiChunkMeta(state: GeminiStreamState) {
     return {
         id: `chatcmpl-${state.messageId || Date.now()}`,
         created: Math.floor(Date.now() / 1000),
-        model: state.model,
+        model: state.model
     };
 }
 
 function buildGeminiChunk(
     state: GeminiStreamState,
     delta: Record<string, unknown>,
-    finishReason: string | null,
+    finishReason: string | null
 ): ChatCompletionChunk {
     return {
         id: `chatcmpl-${state.messageId || Date.now()}`,
@@ -529,15 +529,15 @@ function buildGeminiChunk(
             {
                 index: 0,
                 delta: delta as ChatCompletionChunk["choices"][0]["delta"],
-                finish_reason: finishReason as ChatCompletionChunk["choices"][0]["finish_reason"],
-            },
-        ],
+                finish_reason: finishReason as ChatCompletionChunk["choices"][0]["finish_reason"]
+            }
+        ]
     };
 }
 
 function emitGeminiFunctionCall(
     functionCall: { name: string; args?: Record<string, unknown> },
-    state: GeminiStreamState,
+    state: GeminiStreamState
 ): ChatCompletionChunk {
     const rawName = functionCall.name;
     const fcName = state.toolNameMap?.get(rawName) || rawName;
@@ -552,11 +552,11 @@ function emitGeminiFunctionCall(
                     index: toolCallIndex,
                     id: `${fcName}-${Date.now()}-${toolCallIndex}`,
                     type: "function",
-                    function: { name: fcName, arguments: JSON.stringify(fcArgs) },
-                },
-            ],
+                    function: { name: fcName, arguments: JSON.stringify(fcArgs) }
+                }
+            ]
         },
-        null,
+        null
     );
 }
 
@@ -566,7 +566,7 @@ function emitGeminiFunctionCall(
  */
 export function geminiStreamToOpenAIChunks(
     chunk: Record<string, unknown>,
-    state: GeminiStreamState,
+    state: GeminiStreamState
 ): ChatCompletionChunk[] | null {
     if (!chunk) return null;
 
@@ -600,8 +600,8 @@ export function geminiStreamToOpenAIChunks(
                         buildGeminiChunk(
                             state,
                             isThought ? { reasoning_content: part.text } : { content: part.text },
-                            null,
-                        ),
+                            null
+                        )
                     );
                 }
                 if (hasFunctionCall && part.functionCall) {
@@ -615,8 +615,8 @@ export function geminiStreamToOpenAIChunks(
                     buildGeminiChunk(
                         state,
                         isThought ? { reasoning_content: part.text } : { content: part.text },
-                        null,
-                    ),
+                        null
+                    )
                 );
             }
 
@@ -636,12 +636,12 @@ export function geminiStreamToOpenAIChunks(
                             images: [
                                 {
                                     type: "image_url",
-                                    image_url: { url: `data:${mimeType};base64,${id.data}` },
-                                },
-                            ],
+                                    image_url: { url: `data:${mimeType};base64,${id.data}` }
+                                }
+                            ]
                         },
-                        null,
-                    ),
+                        null
+                    )
                 );
             }
         }
@@ -654,13 +654,13 @@ export function geminiStreamToOpenAIChunks(
     if (usageMeta) {
         const promptTokens = Number(usageMeta.promptTokenCount ?? 0);
         const completionTokens = Number(
-            usageMeta.candidatesTokenCount ?? usageMeta.candidates_tokens_count ?? 0,
+            usageMeta.candidatesTokenCount ?? usageMeta.candidates_tokens_count ?? 0
         );
         const total = promptTokens + completionTokens;
         state.usage = {
             prompt_tokens: promptTokens,
             completion_tokens: completionTokens,
-            total_tokens: total,
+            total_tokens: total
         };
     }
 
@@ -690,7 +690,7 @@ const ANTIGRAVITY_REQUEST_BLACKLIST = [
     "reasoning",
     "enable_thinking",
     "thinking_budget",
-    "thinkingConfig",
+    "thinkingConfig"
 ];
 
 /**
@@ -749,7 +749,7 @@ export function buildAntigravityContents(req: ChatCompletionRequest): GeminiCont
                 }
                 parts.push({
                     text: "",
-                    functionCall: { name: tc.function.name, args },
+                    functionCall: { name: tc.function.name, args }
                 });
             }
         } else if (m.role === "tool" && m.tool_call_id) {
@@ -759,9 +759,9 @@ export function buildAntigravityContents(req: ChatCompletionRequest): GeminiCont
                     name: m.tool_call_id,
                     response: {
                         result:
-                            typeof m.content === "string" ? m.content : JSON.stringify(m.content),
-                    },
-                },
+                            typeof m.content === "string" ? m.content : JSON.stringify(m.content)
+                    }
+                }
             });
         } else {
             const text =
@@ -808,10 +808,10 @@ export function buildAntigravityTools(req: ChatCompletionRequest): Array<Record<
                 : {
                       type: "object",
                       properties: {
-                          reason: { type: "string", description: "Brief explanation" },
+                          reason: { type: "string", description: "Brief explanation" }
                       },
-                      required: ["reason"],
-                  },
+                      required: ["reason"]
+                  }
         });
     }
     return declarations.length > 0 ? [{ functionDeclarations: declarations }] : [];

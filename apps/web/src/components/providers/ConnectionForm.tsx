@@ -5,7 +5,7 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
-    DialogDescription,
+    DialogDescription
 } from "@/components/ui/dialog";
 
 export interface ConnectionFormInput {
@@ -31,7 +31,7 @@ export function ConnectionForm({
     defaultBaseUrl,
     isSaving,
     error,
-    onSubmit,
+    onSubmit
 }: ConnectionFormProps) {
     const [apiKey, setApiKey] = useState("");
     const [showKey, setShowKey] = useState(false);
@@ -57,7 +57,7 @@ export function ConnectionForm({
         onSubmit({
             name: `${providerName} Key`,
             baseUrl: defaultBaseUrl || undefined,
-            apiKey: trimmedKey,
+            apiKey: trimmedKey
         });
     };
 
@@ -92,7 +92,8 @@ export function ConnectionForm({
                 <DialogHeader className="p-0 space-y-1">
                     <DialogTitle className="sr-only">Add API Key for {providerName}</DialogTitle>
                     <DialogDescription className="text-xs text-[var(--ink-3)]">
-                        Masukkan API Key / Access Token untuk menghubungkan {providerName} ke SRouter.
+                        Masukkan API Key / Access Token untuk menghubungkan {providerName} ke
+                        SRouter.
                     </DialogDescription>
                 </DialogHeader>
 

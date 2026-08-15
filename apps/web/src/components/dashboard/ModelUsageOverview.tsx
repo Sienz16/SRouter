@@ -10,12 +10,12 @@ export function ModelUsageOverview({ models }: ModelUsageOverviewProps) {
             (a, b) =>
                 b.totalInputTokens +
                 b.totalOutputTokens -
-                (a.totalInputTokens + a.totalOutputTokens),
+                (a.totalInputTokens + a.totalOutputTokens)
         )
         .slice(0, 5);
     const maxTokens = Math.max(
         ...topModels.map((model) => model.totalInputTokens + model.totalOutputTokens),
-        0,
+        0
     );
 
     return (
@@ -114,14 +114,14 @@ export function ModelUsageOverview({ models }: ModelUsageOverviewProps) {
                                         <span
                                             className="h-full bg-foreground/60"
                                             style={{
-                                                width: `${(model.totalInputTokens / (totalTokens || 1)) * 100}%`,
+                                                width: `${(model.totalInputTokens / (totalTokens || 1)) * 100}%`
                                             }}
                                             title={`Input: ${model.totalInputTokens.toLocaleString()}`}
                                         />
                                         <span
                                             className="h-full bg-foreground"
                                             style={{
-                                                width: `${(model.totalOutputTokens / (totalTokens || 1)) * 100}%`,
+                                                width: `${(model.totalOutputTokens / (totalTokens || 1)) * 100}%`
                                             }}
                                             title={`Output: ${model.totalOutputTokens.toLocaleString()}`}
                                         />

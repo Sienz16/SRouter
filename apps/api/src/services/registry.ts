@@ -7,7 +7,7 @@ import {
     NEOSANTARA_BASE_URL,
     SEED_MARKER,
     SEEKAI_BASE_URL,
-    TABITOKEN_BASE_URL,
+    TABITOKEN_BASE_URL
 } from "@srouter/constants";
 import { deleteProviderDB, getAllProvidersDB, upsertProviderDB } from "@srouter/db";
 import {
@@ -21,7 +21,7 @@ import {
     OpenAIExecutor,
     QoderExecutor,
     SeekAIExecutor,
-    TabiTokenExecutor,
+    TabiTokenExecutor
 } from "@srouter/executors";
 import { ProviderRegistry } from "@srouter/providers";
 
@@ -57,7 +57,7 @@ export function seedDefaultProviders(): void {
                 baseUrl: seed.baseUrl,
                 enabled: true,
                 providerSpecificData: { [SEED_MARKER]: "true" },
-                createdAt: now,
+                createdAt: now
             });
         }
     }
@@ -86,8 +86,8 @@ export function loadSavedProvidersFromDB(): void {
                         apiKey: p.apiKey,
                         accessToken: p.accessToken,
                         refreshToken: p.refreshToken,
-                        providerSpecificData: p.providerSpecificData,
-                    }),
+                        providerSpecificData: p.providerSpecificData
+                    })
                 );
                 break;
             case isProviderBaseId(p.id, "commandcode"):
@@ -97,8 +97,8 @@ export function loadSavedProvidersFromDB(): void {
                         name: p.name,
                         baseUrl,
                         apiKey: p.apiKey,
-                        accessToken: p.accessToken,
-                    }),
+                        accessToken: p.accessToken
+                    })
                 );
                 break;
             case isProviderBaseId(p.id, "antigravity"):
@@ -109,8 +109,8 @@ export function loadSavedProvidersFromDB(): void {
                         baseUrl,
                         apiKey: p.apiKey,
                         accessToken: p.accessToken,
-                        refreshToken: p.refreshToken,
-                    }),
+                        refreshToken: p.refreshToken
+                    })
                 );
                 break;
             case isProviderBaseId(p.id, "openai_codex"):
@@ -122,8 +122,8 @@ export function loadSavedProvidersFromDB(): void {
                         apiKey: p.apiKey,
                         accessToken: p.accessToken,
                         refreshToken: p.refreshToken,
-                        accountId: p.accountId,
-                    }),
+                        accountId: p.accountId
+                    })
                 );
                 break;
             case isProviderBaseId(p.id, "neosantara"):
@@ -133,8 +133,8 @@ export function loadSavedProvidersFromDB(): void {
                         name: p.name,
                         baseUrl: baseUrl || NEOSANTARA_BASE_URL,
                         apiKey: p.apiKey,
-                        accessToken: p.accessToken,
-                    }),
+                        accessToken: p.accessToken
+                    })
                 );
                 break;
             case isProviderBaseId(p.id, "gorouter"):
@@ -144,8 +144,8 @@ export function loadSavedProvidersFromDB(): void {
                         name: p.name,
                         baseUrl: baseUrl || GOROUTER_BASE_URL,
                         apiKey: p.apiKey,
-                        accessToken: p.accessToken,
-                    }),
+                        accessToken: p.accessToken
+                    })
                 );
                 break;
             case isProviderBaseId(p.id, "bluesminds"):
@@ -155,8 +155,8 @@ export function loadSavedProvidersFromDB(): void {
                         name: p.name,
                         baseUrl: baseUrl || BLUESMINDS_BASE_URL,
                         apiKey: p.apiKey,
-                        accessToken: p.accessToken,
-                    }),
+                        accessToken: p.accessToken
+                    })
                 );
                 break;
             case isProviderBaseId(p.id, "seekai"):
@@ -166,8 +166,8 @@ export function loadSavedProvidersFromDB(): void {
                         name: p.name,
                         baseUrl: baseUrl || SEEKAI_BASE_URL,
                         apiKey: p.apiKey,
-                        accessToken: p.accessToken,
-                    }),
+                        accessToken: p.accessToken
+                    })
                 );
                 break;
             case isProviderBaseId(p.id, "tabitoken"):
@@ -177,8 +177,8 @@ export function loadSavedProvidersFromDB(): void {
                         name: p.name,
                         baseUrl: baseUrl || TABITOKEN_BASE_URL,
                         apiKey: p.apiKey,
-                        accessToken: p.accessToken,
-                    }),
+                        accessToken: p.accessToken
+                    })
                 );
                 break;
             case isProviderBaseId(p.id, "qoder"):
@@ -190,8 +190,8 @@ export function loadSavedProvidersFromDB(): void {
                         apiKey: p.apiKey,
                         accessToken: p.accessToken,
                         refreshToken: p.refreshToken,
-                        providerSpecificData: p.providerSpecificData,
-                    }),
+                        providerSpecificData: p.providerSpecificData
+                    })
                 );
                 break;
             case p.protocol === "openai" ||
@@ -205,8 +205,8 @@ export function loadSavedProvidersFromDB(): void {
                         name: p.name,
                         baseUrl,
                         apiKey: p.apiKey,
-                        accessToken: p.accessToken,
-                    }),
+                        accessToken: p.accessToken
+                    })
                 );
                 break;
             case p.protocol === "anthropic" ||
@@ -218,8 +218,8 @@ export function loadSavedProvidersFromDB(): void {
                         name: p.name,
                         baseUrl,
                         apiKey: p.apiKey,
-                        accessToken: p.accessToken,
-                    }),
+                        accessToken: p.accessToken
+                    })
                 );
                 break;
             default:

@@ -20,7 +20,7 @@ const LANGUAGES: Array<{ id: ExportLanguage; label: string; icon: typeof Termina
     { id: "curl", label: "cURL", icon: Terminal },
     { id: "typescript", label: "TypeScript (SDK)", icon: FileCode },
     { id: "python", label: "Python (SDK)", icon: FileCode },
-    { id: "fetch", label: "JavaScript (Fetch)", icon: Code2 },
+    { id: "fetch", label: "JavaScript (Fetch)", icon: Code2 }
 ];
 
 export function CodeSheet({
@@ -32,7 +32,7 @@ export function CodeSheet({
     canCopy,
     copied,
     onCopy,
-    selectedModel,
+    selectedModel
 }: CodeSheetProps) {
     const code = generateCode(exportLanguage);
 

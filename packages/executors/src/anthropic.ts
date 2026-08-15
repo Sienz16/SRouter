@@ -5,12 +5,12 @@ import type {
     ChatCompletionChunk,
     ChatCompletionRequest,
     ChatCompletionResponse,
-    ModelObject,
+    ModelObject
 } from "@srouter/types";
 import {
     anthropicEventToOpenAIChunk,
     anthropicToOpenAIResponse,
-    openAIToAnthropicRequest,
+    openAIToAnthropicRequest
 } from "@srouter/translator";
 import { parseDataLine, streamLines } from "./base.js";
 
@@ -42,7 +42,7 @@ export class AnthropicExecutor implements AIProvider {
     private getHeaders(): Record<string, string> {
         const headers: Record<string, string> = {
             "Content-Type": "application/json",
-            "anthropic-version": "2023-06-01",
+            "anthropic-version": "2023-06-01"
         };
         const token = this.accessToken || this.apiKey;
         if (token) {
@@ -59,7 +59,7 @@ export class AnthropicExecutor implements AIProvider {
         try {
             const res = await fetch(`${this.baseUrl}/models`, {
                 method: "GET",
-                headers: this.getHeaders(),
+                headers: this.getHeaders()
             });
 
             if (!res.ok) {
@@ -81,7 +81,7 @@ export class AnthropicExecutor implements AIProvider {
                     created: m.created_at
                         ? Math.floor(new Date(m.created_at).getTime() / 1000)
                         : Math.floor(Date.now() / 1000),
-                    owned_by: "anthropic",
+                    owned_by: "anthropic"
                 }));
             }
 
@@ -98,7 +98,7 @@ export class AnthropicExecutor implements AIProvider {
         const res = await fetch(`${this.baseUrl}/messages`, {
             method: "POST",
             headers: this.getHeaders(),
-            body: JSON.stringify(anthropicReq),
+            body: JSON.stringify(anthropicReq)
         });
 
         if (!res.ok) {
@@ -111,7 +111,7 @@ export class AnthropicExecutor implements AIProvider {
     }
 
     async *chatCompletionStream(
-        req: ChatCompletionRequest,
+        req: ChatCompletionRequest
     ): AsyncGenerator<ChatCompletionChunk, void, void> {
         const anthropicReq = openAIToAnthropicRequest(req);
         anthropicReq.stream = true;
@@ -119,7 +119,7 @@ export class AnthropicExecutor implements AIProvider {
         const res = await fetch(`${this.baseUrl}/messages`, {
             method: "POST",
             headers: this.getHeaders(),
-            body: JSON.stringify(anthropicReq),
+            body: JSON.stringify(anthropicReq)
         });
 
         if (!res.ok) {

@@ -2,7 +2,7 @@ import {
     isProviderBaseId,
     providerAlias,
     providerBaseId,
-    providerTypeForAlias,
+    providerTypeForAlias
 } from "@srouter/constants";
 import type {
     AIProvider,
@@ -10,7 +10,7 @@ import type {
     ChatCompletionRequest,
     ChatCompletionResponse,
     ModelObject,
-    ProviderDefinition,
+    ProviderDefinition
 } from "@srouter/types";
 
 export function getProviderAlias(providerId: string): string {
@@ -41,16 +41,16 @@ export class ProviderRegistry {
             listModels: async () => [],
             chatCompletion: async (req: ChatCompletionRequest) => {
                 throw new Error(
-                    `No active provider connection found for model "${req.model}". Please connect a provider account in the Providers tab or verify the model name.`,
+                    `No active provider connection found for model "${req.model}". Please connect a provider account in the Providers tab or verify the model name.`
                 );
             },
             chatCompletionStream: async function* (
-                req: ChatCompletionRequest,
+                req: ChatCompletionRequest
             ): AsyncGenerator<ChatCompletionChunk, void, void> {
                 throw new Error(
-                    `No active provider connection found for model "${req.model}". Please connect a provider account in the Providers tab or verify the model name.`,
+                    `No active provider connection found for model "${req.model}". Please connect a provider account in the Providers tab or verify the model name.`
                 );
-            },
+            }
         };
         this.registerProvider(this.defaultProvider);
     }
@@ -86,7 +86,7 @@ export class ProviderRegistry {
             seen.add(baseId);
 
             const connectedCount = Array.from(this.providers.keys()).filter(
-                (id) => id === baseId || id.startsWith(`${baseId}_`) || id.startsWith(`${baseId}-`),
+                (id) => id === baseId || id.startsWith(`${baseId}_`) || id.startsWith(`${baseId}-`)
             ).length;
 
             catalog.push({
@@ -97,7 +97,7 @@ export class ProviderRegistry {
                 requiresApiKey: false,
                 supportsCustomUrl: true,
                 status: { state: "connected", connectedCount },
-                models: [],
+                models: []
             });
         }
 
@@ -158,7 +158,7 @@ export class ProviderRegistry {
         }
 
         throw new Error(
-            `No active provider connection found for model "${modelId}". Please connect a provider account in the Providers tab (e.g. Qoder, OpenAI, Antigravity) or verify the model prefix.`,
+            `No active provider connection found for model "${modelId}". Please connect a provider account in the Providers tab (e.g. Qoder, OpenAI, Antigravity) or verify the model prefix.`
         );
     }
 
@@ -204,7 +204,7 @@ export class ProviderRegistry {
     }
 
     async *chatCompletionStream(
-        req: ChatCompletionRequest,
+        req: ChatCompletionRequest
     ): AsyncGenerator<ChatCompletionChunk, void, void> {
         const provider = await this.getProviderForModel(req.model);
         yield* provider.chatCompletionStream(req);

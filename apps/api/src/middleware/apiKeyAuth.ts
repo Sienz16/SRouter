@@ -4,7 +4,7 @@ import {
     adminAuthStore,
     getAPIKeyByKeyDB,
     getRequireApiKeyDB,
-    type AdminAuthStore,
+    type AdminAuthStore
 } from "@srouter/db";
 import { err } from "@/utils/response.js";
 import { ADMIN_SESSION_COOKIE, verifyAdminSession } from "@/services/adminAuth.js";
@@ -44,7 +44,7 @@ export function createApiKeyAuth(options: ApiKeyAuthOptions = {}) {
                 if (!apiKeyRow.enabled) {
                     return err(c, "The provided SRouter API Key is disabled", 401, {
                         type: "invalid_request_error",
-                        code: "api_key_disabled",
+                        code: "api_key_disabled"
                     });
                 }
                 c.set("apiKeyRow", apiKeyRow);
@@ -56,7 +56,7 @@ export function createApiKeyAuth(options: ApiKeyAuthOptions = {}) {
             if (isRequired) {
                 return err(c, "Invalid SRouter API Key", 401, {
                     type: "invalid_request_error",
-                    code: "invalid_api_key",
+                    code: "invalid_api_key"
                 });
             }
         }
@@ -68,8 +68,8 @@ export function createApiKeyAuth(options: ApiKeyAuthOptions = {}) {
                 401,
                 {
                     type: "invalid_request_error",
-                    code: "missing_api_key",
-                },
+                    code: "missing_api_key"
+                }
             );
         }
 

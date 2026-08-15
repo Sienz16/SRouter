@@ -12,7 +12,7 @@ import { LogDetailSheet } from "@/components/logs/LogDetailSheet";
 
 export const Route = createFileRoute("/logs")({
     staticData: { title: "Logs" },
-    component: LogsPage,
+    component: LogsPage
 });
 
 function LogsPage() {
@@ -20,7 +20,7 @@ function LogsPage() {
 
     const { data, isLoading, error } = useQuery({
         queryKey: ["logs"],
-        queryFn: () => api.get<ListResponse<RequestLogEntry>>("/v1/logs?limit=100"),
+        queryFn: () => api.get<ListResponse<RequestLogEntry>>("/v1/logs?limit=100")
     });
 
     const logs: RequestLogEntry[] = data?.data ?? [];

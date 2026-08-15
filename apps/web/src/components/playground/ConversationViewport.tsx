@@ -16,7 +16,7 @@ import {
     ThumbsUp,
     Trash2,
     User,
-    Zap,
+    Zap
 } from "lucide-react";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 import LoadingState from "./LoadingState";
@@ -40,7 +40,7 @@ export function ConversationViewport({
     chatId,
     onStarterClick,
     onRetry,
-    onDeleteMessage,
+    onDeleteMessage
 }: ConversationViewportProps) {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [userScrolledUp, setUserScrolledUp] = useState(false);
@@ -84,7 +84,7 @@ export function ConversationViewport({
         if (scrollContainerRef.current) {
             scrollContainerRef.current.scrollTo({
                 top: 0,
-                behavior: "smooth",
+                behavior: "smooth"
             });
         }
     };
@@ -94,7 +94,7 @@ export function ConversationViewport({
         if (scrollContainerRef.current) {
             scrollContainerRef.current.scrollTo({
                 top: scrollContainerRef.current.scrollHeight,
-                behavior: "smooth",
+                behavior: "smooth"
             });
         }
     };
@@ -327,7 +327,7 @@ export function ConversationViewport({
                                                         onClick={() =>
                                                             setFeedback((prev) => ({
                                                                 ...prev,
-                                                                [message.id]: "up",
+                                                                [message.id]: "up"
                                                             }))
                                                         }
                                                         className={`flex size-6 items-center justify-center rounded-[6px] transition-colors ${
@@ -344,7 +344,7 @@ export function ConversationViewport({
                                                         onClick={() =>
                                                             setFeedback((prev) => ({
                                                                 ...prev,
-                                                                [message.id]: "down",
+                                                                [message.id]: "down"
                                                             }))
                                                         }
                                                         className={`flex size-6 items-center justify-center rounded-[6px] transition-colors ${

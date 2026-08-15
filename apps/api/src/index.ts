@@ -7,7 +7,7 @@ import {
     authRoute,
     handleAntigravityOAuthCallback,
     handleOAuthCallback,
-    handleQoderOAuthCallback,
+    handleQoderOAuthCallback
 } from "@/routes/v1/auth.js";
 import { adminRoute } from "@/routes/v1/admin.js";
 import { chatRoute } from "@/routes/v1/chat.js";
@@ -29,10 +29,10 @@ app.onError((err, c) => {
         {
             error: {
                 message: err.message || "Internal Server Error",
-                type: "internal_error",
-            },
+                type: "internal_error"
+            }
         },
-        500,
+        500
     );
 });
 
@@ -70,7 +70,7 @@ if (fs.existsSync(webDistPath) && fs.existsSync(path.join(webDistPath, "index.ht
             name: "SRouter API",
             status: "ok",
             version: "0.1.0-beta",
-            documentation: "Multi-Provider OpenAI & Anthropic Compatible LLM Gateway",
+            documentation: "Multi-Provider OpenAI & Anthropic Compatible LLM Gateway"
         });
     });
 }
@@ -80,11 +80,11 @@ const port = Number(process.env.PORT) || 3000;
 serve(
     {
         fetch: app.fetch,
-        port,
+        port
     },
     (info) => {
         console.log(`🚀 SRouter API Server running at http://localhost:${info.port}`);
-    },
+    }
 );
 
 // Secondary listener on Port 1455 for OAuth callbacks and local Anthropic proxy
@@ -106,13 +106,13 @@ try {
     serve(
         {
             fetch: oauthApp.fetch,
-            port: oauthPort,
+            port: oauthPort
         },
         (info) => {
             console.log(
-                `🔑 OAuth Callback Server running at http://localhost:${info.port}/auth/callback & /auth/antigravity/callback`,
+                `🔑 OAuth Callback Server running at http://localhost:${info.port}/auth/callback & /auth/antigravity/callback`
             );
-        },
+        }
     );
 } catch (err) {
     console.warn(`Could not start OAuth server on port ${oauthPort}:`, err);

@@ -83,7 +83,7 @@ function renderFormattedLine(text: string): React.ReactNode {
                     className="rounded border border-border/60 bg-secondary/50 px-1 py-0.5 font-mono text-[11px] text-foreground"
                 >
                     {codeMatch![1]}
-                </code>,
+                </code>
             );
             remaining = remaining.slice(codeIdx + codeMatch![0].length);
         } else if (boldIdx !== -1) {
@@ -93,7 +93,7 @@ function renderFormattedLine(text: string): React.ReactNode {
             parts.push(
                 <strong key={keyIdx++} className="font-semibold text-foreground">
                     {boldMatch![1]}
-                </strong>,
+                </strong>
             );
             remaining = remaining.slice(boldIdx + boldMatch![0].length);
         } else {
@@ -119,13 +119,13 @@ export function MarkdownRenderer({ content, isStreaming }: MarkdownRendererProps
         if (match.index > lastIndex) {
             segments.push({
                 type: "text",
-                content: content.slice(lastIndex, match.index),
+                content: content.slice(lastIndex, match.index)
             });
         }
         segments.push({
             type: "code",
             language: match[1] || "text",
-            content: match[2].replace(/\n$/, ""),
+            content: match[2].replace(/\n$/, "")
         });
         lastIndex = match.index + match[0].length;
     }
@@ -133,7 +133,7 @@ export function MarkdownRenderer({ content, isStreaming }: MarkdownRendererProps
     if (lastIndex < content.length) {
         segments.push({
             type: "text",
-            content: content.slice(lastIndex),
+            content: content.slice(lastIndex)
         });
     }
 
@@ -163,7 +163,7 @@ export function MarkdownRenderer({ content, isStreaming }: MarkdownRendererProps
                                 className="my-2 list-disc space-y-1 pl-4"
                             >
                                 {currentList}
-                            </ul>,
+                            </ul>
                         );
                         currentList = [];
                     }
@@ -175,7 +175,7 @@ export function MarkdownRenderer({ content, isStreaming }: MarkdownRendererProps
                     if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
                         const itemContent = trimmed.slice(2);
                         currentList.push(
-                            <li key={`li-${lineIndex}`}>{renderFormattedLine(itemContent)}</li>,
+                            <li key={`li-${lineIndex}`}>{renderFormattedLine(itemContent)}</li>
                         );
                     } else if (trimmed.startsWith("### ")) {
                         flushList();
@@ -185,7 +185,7 @@ export function MarkdownRenderer({ content, isStreaming }: MarkdownRendererProps
                                 className="mt-3 mb-1 font-mono text-xs font-bold text-foreground"
                             >
                                 {renderFormattedLine(trimmed.slice(4))}
-                            </h4>,
+                            </h4>
                         );
                     } else if (trimmed.startsWith("## ")) {
                         flushList();
@@ -195,7 +195,7 @@ export function MarkdownRenderer({ content, isStreaming }: MarkdownRendererProps
                                 className="mt-3 mb-1 font-mono text-sm font-bold text-foreground"
                             >
                                 {renderFormattedLine(trimmed.slice(3))}
-                            </h3>,
+                            </h3>
                         );
                     } else if (trimmed.startsWith("# ")) {
                         flushList();
@@ -205,7 +205,7 @@ export function MarkdownRenderer({ content, isStreaming }: MarkdownRendererProps
                                 className="mt-4 mb-2 font-mono text-base font-bold text-foreground"
                             >
                                 {renderFormattedLine(trimmed.slice(2))}
-                            </h2>,
+                            </h2>
                         );
                     } else if (trimmed.startsWith("> ")) {
                         flushList();
@@ -215,14 +215,14 @@ export function MarkdownRenderer({ content, isStreaming }: MarkdownRendererProps
                                 className="my-2 border-l-2 border-border/80 pl-3 italic text-muted-foreground"
                             >
                                 {renderFormattedLine(trimmed.slice(2))}
-                            </blockquote>,
+                            </blockquote>
                         );
                     } else if (trimmed.length > 0) {
                         flushList();
                         elements.push(
                             <p key={`p-${lineIndex}`} className="my-1 whitespace-pre-wrap">
                                 {renderFormattedLine(line)}
-                            </p>,
+                            </p>
                         );
                     } else {
                         flushList();

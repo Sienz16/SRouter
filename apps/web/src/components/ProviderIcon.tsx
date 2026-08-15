@@ -35,12 +35,12 @@ const ICON_MAPPING: Record<string, string> = {
     cohere: "/icons/providers/cohere.png",
     replicate: "/icons/providers/replicate.png",
     together: "/icons/providers/together.png",
-    siliconflow: "/icons/providers/siliconflow.png",
+    siliconflow: "/icons/providers/siliconflow.png"
 };
 
 export function ProviderIcon({
     providerId,
-    className = "size-5",
+    className = "size-5"
 }: {
     providerId: string;
     className?: string;

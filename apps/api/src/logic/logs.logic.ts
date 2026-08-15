@@ -16,7 +16,7 @@ export class LogsLogic {
             ...summary,
             costLabel: formatCost(summary.totalEstimatedCost),
             estimated: true,
-            byModel,
+            byModel
         };
     }
 }

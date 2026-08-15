@@ -30,7 +30,7 @@ const orbit = Array.from({ length: 9 }, (_, i) => {
 const PATTERNS: Record<string, { delays: (number | null)[]; dur: number; round: boolean }> = {
     Drive: { delays: chevron, dur: 650, round: false },
     Dots: { delays: chevron, dur: 650, round: true },
-    Orbit: { delays: orbit, dur: 950, round: false },
+    Orbit: { delays: orbit, dur: 950, round: false }
 };
 
 function useElapsed(startTime?: number) {
@@ -51,7 +51,7 @@ function useElapsed(startTime?: number) {
 export default function LoadingState({
     label = "Churning",
     variant = "Drive",
-    startTime,
+    startTime
 }: {
     label?: string;
     variant?: "Drive" | "Dots" | "Orbit" | string;
@@ -72,7 +72,7 @@ export default function LoadingState({
                             animation:
                                 d === null
                                     ? "none"
-                                    : `pixel-on ${dur}ms ease-in-out ${d}ms infinite`,
+                                    : `pixel-on ${dur}ms ease-in-out ${d}ms infinite`
                         }}
                     />
                 ))}
@@ -83,7 +83,7 @@ export default function LoadingState({
                     backgroundImage:
                         "linear-gradient(90deg, var(--ink-3) 35%, var(--ink) 50%, var(--ink-3) 65%)",
                     backgroundSize: "200% 100%",
-                    animation: "shimmer-text 1.4s linear infinite",
+                    animation: "shimmer-text 1.4s linear infinite"
                 }}
             >
                 {label}

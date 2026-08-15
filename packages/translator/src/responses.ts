@@ -2,7 +2,7 @@ import type {
     ChatCompletionChunk,
     ChatCompletionRequest,
     ChatMessage,
-    FinishReason,
+    FinishReason
 } from "@srouter/types";
 
 // --- OpenAI Responses API translation helpers (port of 9router openai-responses) ---
@@ -21,7 +21,7 @@ const RESPONSES_BODY_ALLOWLIST = new Set([
     "include",
     "prompt_cache_key",
     "client_metadata",
-    "text",
+    "text"
 ]);
 
 // Hosted tool types that Codex/OpenAI Responses executes server-side
@@ -35,7 +35,7 @@ const HOSTED_TOOL_TYPES = new Set([
     "code_interpreter",
     "mcp",
     "local_shell",
-    "tool_search",
+    "tool_search"
 ]);
 
 const SERVER_ID_PATTERN = /^(rs|fc|resp|msg)_/;
@@ -89,7 +89,7 @@ export interface ResponsesStreamState {
 function buildChunk(
     model: string,
     delta: Record<string, unknown>,
-    finishReason: FinishReason = null,
+    finishReason: FinishReason = null
 ): ChatCompletionChunk {
     return {
         id: `chatcmpl-${Date.now()}`,
@@ -100,9 +100,9 @@ function buildChunk(
             {
                 index: 0,
                 delta: delta as ChatCompletionChunk["choices"][0]["delta"],
-                finish_reason: finishReason,
-            },
-        ],
+                finish_reason: finishReason
+            }
+        ]
     };
 }
 
@@ -119,13 +119,13 @@ function buildUsage(
     promptTokens: number,
     completionTokens: number,
     totalTokens: number,
-    cachedTokens?: number,
+    cachedTokens?: number
 ) {
     return {
         prompt_tokens: promptTokens,
         completion_tokens: completionTokens,
         total_tokens: totalTokens,
-        ...(cachedTokens ? { prompt_tokens_details: { cached_tokens: cachedTokens } } : {}),
+        ...(cachedTokens ? { prompt_tokens_details: { cached_tokens: cachedTokens } } : {})
     };
 }
 
@@ -166,7 +166,7 @@ export function chatToResponsesBody(req: ChatCompletionRequest): ResponsesReques
             input.push({
                 type: "message",
                 role: "developer",
-                content: [{ type: "input_text", text: flattenText(msg.content) }],
+                content: [{ type: "input_text", text: flattenText(msg.content) }]
             });
             continue;
         }
@@ -180,7 +180,7 @@ export function chatToResponsesBody(req: ChatCompletionRequest): ResponsesReques
                           return {
                               type: "input_image",
                               image_url: url,
-                              detail: c.image_url?.detail ?? "auto",
+                              detail: c.image_url?.detail ?? "auto"
                           };
                       }
                       if (c.type === "text") return { type: "input_text", text: c.text ?? "" };
@@ -199,7 +199,7 @@ export function chatToResponsesBody(req: ChatCompletionRequest): ResponsesReques
                         type: "function_call",
                         call_id: tc.id,
                         name: tc.function.name,
-                        arguments: tc.function.arguments || "",
+                        arguments: tc.function.arguments || ""
                     });
                 }
                 continue;
@@ -209,7 +209,7 @@ export function chatToResponsesBody(req: ChatCompletionRequest): ResponsesReques
                 input.push({
                     type: "message",
                     role: "assistant",
-                    content: [{ type: "output_text", text }],
+                    content: [{ type: "output_text", text }]
                 });
             }
             continue;
@@ -219,7 +219,7 @@ export function chatToResponsesBody(req: ChatCompletionRequest): ResponsesReques
             input.push({
                 type: "function_call_output",
                 call_id: msg.tool_call_id || "",
-                output: flattenText(msg.content),
+                output: flattenText(msg.content)
             });
             continue;
         }
@@ -230,7 +230,7 @@ export function chatToResponsesBody(req: ChatCompletionRequest): ResponsesReques
         input.push({
             type: "message",
             role: "user",
-            content: [{ type: "input_text", text: "..." }],
+            content: [{ type: "input_text", text: "..." }]
         });
     }
 
@@ -258,7 +258,7 @@ export function chatToResponsesBody(req: ChatCompletionRequest): ResponsesReques
                     type: "function",
                     name: name.slice(0, 128),
                     description: fn.description || "",
-                    parameters: fn.parameters || { type: "object", properties: {} },
+                    parameters: fn.parameters || { type: "object", properties: {} }
                 });
             } else if (type === "namespace") {
                 tools.push(tool); // passthrough namespace (contains nested tools)
@@ -275,7 +275,7 @@ export function chatToResponsesBody(req: ChatCompletionRequest): ResponsesReques
         model: req.model,
         input,
         stream: true,
-        store: false,
+        store: false
     };
 
     // Extract instructions from system message (we converted to developer above, but
@@ -293,14 +293,14 @@ export function chatToResponsesBody(req: ChatCompletionRequest): ResponsesReques
     if (reasoningEffort) {
         body.reasoning = {
             effort: normalizeReasoningEffort(reasoningEffort),
-            summary: "auto",
+            summary: "auto"
         };
     } else if ((req as unknown as { reasoning?: { effort?: string } }).reasoning) {
         body.reasoning = {
             effort: normalizeReasoningEffort(
-                (req as unknown as { reasoning: { effort?: string } }).reasoning.effort,
+                (req as unknown as { reasoning: { effort?: string } }).reasoning.effort
             ),
-            summary: "auto",
+            summary: "auto"
         };
     }
 
@@ -321,7 +321,7 @@ export function normalizeReasoningEffort(value?: string): string {
 export function responsesEventToChunk(
     eventType: string,
     data: Record<string, unknown>,
-    state: ResponsesStreamState,
+    state: ResponsesStreamState
 ): ChatCompletionChunk | null {
     if (!state.started) {
         state.started = true;
@@ -349,9 +349,9 @@ export function responsesEventToChunk(
                         index: state.toolCallIndex,
                         id: state.currentToolCallId,
                         type: "function",
-                        function: { name: item.name || "", arguments: "" },
-                    },
-                ],
+                        function: { name: item.name || "", arguments: "" }
+                    }
+                ]
             });
         }
         return null;
@@ -365,7 +365,7 @@ export function responsesEventToChunk(
         const argsDelta = (data.delta as string) || "";
         if (!argsDelta) return null;
         return buildChunk(state.model, {
-            tool_calls: [{ index: state.toolCallIndex, function: { arguments: argsDelta } }],
+            tool_calls: [{ index: state.toolCallIndex, function: { arguments: argsDelta } }]
         });
     }
 
@@ -402,7 +402,7 @@ export function responsesEventToChunk(
                 inputTokens,
                 outputTokens,
                 inputTokens + outputTokens,
-                cachedTokens,
+                cachedTokens
             );
         }
 
@@ -427,7 +427,7 @@ export function createResponsesStreamState(model: string): ResponsesStreamState 
         toolCallIndex: 0,
         currentToolCallId: null,
         finishReasonSent: false,
-        model,
+        model
     };
 }
 
@@ -439,7 +439,7 @@ export function createResponsesStreamState(model: string): ResponsesStreamState 
  * Empty array → placeholder (providers reject empty input).
  */
 export function normalizeResponsesInput(
-    input: string | ResponsesInputItem[] | undefined,
+    input: string | ResponsesInputItem[] | undefined
 ): ResponsesInputItem[] | null {
     if (typeof input === "string") {
         const text = input.trim() === "" ? "..." : input;
@@ -448,7 +448,7 @@ export function normalizeResponsesInput(
     if (Array.isArray(input)) {
         if (input.length === 0) {
             return [
-                { type: "message", role: "user", content: [{ type: "input_text", text: "..." }] },
+                { type: "message", role: "user", content: [{ type: "input_text", text: "..." }] }
             ];
         }
         return input;
@@ -497,7 +497,7 @@ export function convertResponsesApiFormat(body: ResponsesRequestBody): Record<st
                                   : c.image_url?.url || "";
                           return {
                               type: "image_url",
-                              image_url: { url, detail: c.detail || "auto" },
+                              image_url: { url, detail: c.detail || "auto" }
                           };
                       }
                       return c;
@@ -505,7 +505,7 @@ export function convertResponsesApiFormat(body: ResponsesRequestBody): Record<st
                 : item.content;
             messages.push({
                 role: (item.role as ChatMessage["role"]) || "user",
-                content: content as ChatMessage["content"],
+                content: content as ChatMessage["content"]
             });
         } else if (itemType === "function_call") {
             if (!currentAssistantMsg) {
@@ -520,8 +520,8 @@ export function convertResponsesApiFormat(body: ResponsesRequestBody): Record<st
                     arguments:
                         typeof item.arguments === "string"
                             ? item.arguments
-                            : JSON.stringify(item.arguments ?? ""),
-                },
+                            : JSON.stringify(item.arguments ?? "")
+                }
             });
         } else if (itemType === "function_call_output") {
             if (currentAssistantMsg) {
@@ -534,7 +534,7 @@ export function convertResponsesApiFormat(body: ResponsesRequestBody): Record<st
                 content:
                     typeof item.output === "string"
                         ? item.output
-                        : JSON.stringify(item.output ?? ""),
+                        : JSON.stringify(item.output ?? "")
             });
         }
         // reasoning items skipped

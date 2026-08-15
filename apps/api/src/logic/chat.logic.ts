@@ -3,7 +3,7 @@ import { extractUsageBreakdown, estimateCostForUsage } from "@srouter/translator
 import type {
     ChatCompletionChunk,
     ChatCompletionRequest,
-    ChatCompletionResponse,
+    ChatCompletionResponse
 } from "@srouter/types";
 import { registry } from "@/services/registry.js";
 import { ensureFreshToken } from "@/services/tokenRefresh.js";
@@ -11,7 +11,7 @@ import { ensureFreshToken } from "@/services/tokenRefresh.js";
 export class ChatLogic {
     public static async processNonStreamingCompletion(
         body: ChatCompletionRequest,
-        startTime: number,
+        startTime: number
     ): Promise<ChatCompletionResponse> {
         try {
             // Lazy token refresh: ensure the target provider's token is fresh before dispatch
@@ -34,7 +34,7 @@ export class ChatLogic {
                 reasoningTokens: breakdown.reasoningTokens,
                 estimatedCost: estimateCostForUsage(provider, body.model, breakdown),
                 statusCode: 200,
-                latencyMs,
+                latencyMs
             });
 
             return response;
@@ -46,7 +46,7 @@ export class ChatLogic {
                 completionTokens: 0,
                 totalTokens: 0,
                 statusCode: 500,
-                latencyMs: Date.now() - startTime,
+                latencyMs: Date.now() - startTime
             });
             throw err;
         }
@@ -54,7 +54,7 @@ export class ChatLogic {
 
     public static async *processStreamingCompletion(
         body: ChatCompletionRequest,
-        startTime: number,
+        startTime: number
     ): AsyncGenerator<ChatCompletionChunk, void, void> {
         const provider = body.model.split("/")[0] || "default";
         let usage: unknown = null;
@@ -82,7 +82,7 @@ export class ChatLogic {
                 reasoningTokens: breakdown.reasoningTokens,
                 estimatedCost: estimateCostForUsage(provider, body.model, breakdown),
                 statusCode: 200,
-                latencyMs: Date.now() - startTime,
+                latencyMs: Date.now() - startTime
             });
         } catch (err) {
             logRequestDB({
@@ -92,7 +92,7 @@ export class ChatLogic {
                 completionTokens: 0,
                 totalTokens: 0,
                 statusCode: 500,
-                latencyMs: Date.now() - startTime,
+                latencyMs: Date.now() - startTime
             });
             throw err;
         }

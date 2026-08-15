@@ -24,11 +24,11 @@ export interface DefaultProviderSeed {
  * catalog in `providers.ts` is the single source of truth for driver metadata.
  */
 export const DEFAULT_PROVIDERS: DefaultProviderSeed[] = KNOWN_PROVIDERS.map(
-    ({ alias: _alias, ...seed }) => seed,
+    ({ alias: _alias, ...seed }) => seed
 );
 
 export const DEFAULT_PROVIDER_MAP: Record<string, DefaultProviderSeed> = Object.fromEntries(
-    DEFAULT_PROVIDERS.map((seed) => [seed.id, seed]),
+    DEFAULT_PROVIDERS.map((seed) => [seed.id, seed])
 );
 
 /**

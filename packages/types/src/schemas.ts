@@ -6,45 +6,45 @@ export const ContentPartSchema = z.object({
     image_url: z
         .object({
             url: z.string(),
-            detail: z.enum(["auto", "low", "high"]).optional(),
+            detail: z.enum(["auto", "low", "high"]).optional()
         })
-        .optional(),
+        .optional()
 });
 
 export const ToolCallFunctionSchema = z.object({
     name: z.string(),
-    arguments: z.string(),
+    arguments: z.string()
 });
 
 export const ToolCallSchema = z.object({
     id: z.string(),
     type: z.literal("function"),
-    function: ToolCallFunctionSchema,
+    function: ToolCallFunctionSchema
 });
 
 export const ChatMessageSchema = z.object({
     role: z.enum(["system", "user", "assistant", "tool", "function"], {
         required_error:
-            "Role is required and must be 'system', 'user', 'assistant', 'tool', or 'function'",
+            "Role is required and must be 'system', 'user', 'assistant', 'tool', or 'function'"
     }),
     content: z.union([z.string(), z.array(ContentPartSchema), z.null()], {
-        required_error: "Content is required",
+        required_error: "Content is required"
     }),
     name: z.string().optional(),
     tool_calls: z.array(ToolCallSchema).optional(),
-    tool_call_id: z.string().optional(),
+    tool_call_id: z.string().optional()
 });
 
 export const ToolParameterPropertySchema = z.object({
     type: z.string(),
     description: z.string().optional(),
-    enum: z.array(z.string()).optional(),
+    enum: z.array(z.string()).optional()
 });
 
 export const ToolParametersSchema = z.object({
     type: z.literal("object"),
     properties: z.record(ToolParameterPropertySchema).optional(),
-    required: z.array(z.string()).optional(),
+    required: z.array(z.string()).optional()
 });
 
 export const ToolDefinitionSchema = z.object({
@@ -52,25 +52,25 @@ export const ToolDefinitionSchema = z.object({
     function: z.object({
         name: z.string(),
         description: z.string().optional(),
-        parameters: ToolParametersSchema.optional(),
-    }),
+        parameters: ToolParametersSchema.optional()
+    })
 });
 
 export const ToolChoiceSchema = z.union([
     z.enum(["none", "auto", "required"]),
     z.object({
         type: z.literal("function"),
-        function: z.object({ name: z.string() }),
-    }),
+        function: z.object({ name: z.string() })
+    })
 ]);
 
 export const ChatCompletionRequestSchema = z.object({
     model: z.string({
-        required_error: "Missing required parameter 'model'",
+        required_error: "Missing required parameter 'model'"
     }),
     messages: z
         .array(ChatMessageSchema, {
-            required_error: "Missing required parameter 'messages'",
+            required_error: "Missing required parameter 'messages'"
         })
         .min(1, "Parameter 'messages' cannot be empty"),
     temperature: z.number().min(0).max(2).optional(),
@@ -84,17 +84,17 @@ export const ChatCompletionRequestSchema = z.object({
     user: z.string().optional(),
     tools: z.array(ToolDefinitionSchema).optional(),
     tool_choice: ToolChoiceSchema.optional(),
-    response_format: z.object({ type: z.string() }).optional(),
+    response_format: z.object({ type: z.string() }).optional()
 });
 
 export const CreateAPIKeySchema = z.object({
     name: z
         .string({
-            required_error: "Field 'name' is required",
+            required_error: "Field 'name' is required"
         })
         .min(1, "Field 'name' cannot be empty"),
     rateLimit: z.number().int().nonnegative().optional(),
-    quotaLimit: z.number().int().nonnegative().optional(),
+    quotaLimit: z.number().int().nonnegative().optional()
 });
 
 export const CreateProviderSchema = z.object({
@@ -105,7 +105,7 @@ export const CreateProviderSchema = z.object({
     baseUrl: z.string().url().optional(),
     apiKey: z.string().optional(),
     accessToken: z.string().optional(),
-    customHeaders: z.record(z.string()).optional(),
+    customHeaders: z.record(z.string()).optional()
 });
 
 export type ChatCompletionRequestZod = z.infer<typeof ChatCompletionRequestSchema>;

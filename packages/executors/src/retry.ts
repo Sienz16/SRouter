@@ -10,7 +10,7 @@ const TRANSIENT_ERROR_PATTERNS = [
     /temporarily\s+unavailable/i,
     /timeout/i,
     /stream\s+(ended|closed|terminated|interrupted)/i,
-    /empty\s+response/i,
+    /empty\s+response/i
 ];
 
 const TRANSIENT_STATUSES = new Set([500, 502, 503, 504]);
@@ -85,7 +85,7 @@ function isTransientError(status: number, message: string): boolean {
  */
 export async function computeRetryDelay(
     response: Response,
-    attempt: number,
+    attempt: number
 ): Promise<number | null> {
     let bodyText = "";
     let errorJson: unknown = null;
@@ -119,13 +119,13 @@ export async function fetchWithRetry(
     url: string,
     body: Record<string, unknown>,
     headers: Record<string, string>,
-    maxAttempts = 3,
+    maxAttempts = 3
 ): Promise<Response> {
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
         const res = await fetch(url, {
             method: "POST",
             headers,
-            body: JSON.stringify(body),
+            body: JSON.stringify(body)
         });
 
         if (res.ok) return res;
@@ -139,6 +139,6 @@ export async function fetchWithRetry(
     return fetch(url, {
         method: "POST",
         headers,
-        body: JSON.stringify(body),
+        body: JSON.stringify(body)
     });
 }

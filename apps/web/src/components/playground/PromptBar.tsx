@@ -17,7 +17,7 @@ import {
     Square,
     Trash2,
     X,
-    Zap,
+    Zap
 } from "lucide-react";
 import { PlaygroundSettingsPopover } from "./PlaygroundSettingsPopover";
 import type { PlaygroundModel } from "./types";
@@ -62,26 +62,26 @@ const SOURCES: Source[] = [
         name: "Add files & data",
         desc: "Upload text or code context",
         icon: <Paperclip className="size-3.5 text-blue-400" />,
-        attach: true,
+        attach: true
     },
     {
         key: "web",
         name: "@web",
         desc: "Real-time web search and live grounding",
-        icon: <Globe className="size-3.5 text-emerald-400" />,
+        icon: <Globe className="size-3.5 text-emerald-400" />
     },
     {
         key: "docs",
         name: "@docs",
         desc: "SRouter API documentation & guides",
-        icon: <FileText className="size-3.5 text-indigo-400" />,
+        icon: <FileText className="size-3.5 text-indigo-400" />
     },
     {
         key: "models",
         name: "@models",
         desc: "Available upstream model benchmarks",
-        icon: <Database className="size-3.5 text-amber-400" />,
-    },
+        icon: <Database className="size-3.5 text-amber-400" />
+    }
 ];
 
 const COMMANDS = [
@@ -89,33 +89,33 @@ const COMMANDS = [
         key: "compare",
         name: "/compare",
         desc: "Compare model latency & token costs",
-        icon: <Layers className="size-3.5 text-purple-400" />,
+        icon: <Layers className="size-3.5 text-purple-400" />
     },
     {
         key: "summarize",
         name: "/summarize",
         desc: "Digest and summarize current conversation",
-        icon: <Sparkles className="size-3.5 text-amber-400" />,
+        icon: <Sparkles className="size-3.5 text-amber-400" />
     },
     {
         key: "clear",
         name: "/clear",
         desc: "Clear current chat conversation",
-        icon: <Trash2 className="size-3.5 text-rose-400" />,
+        icon: <Trash2 className="size-3.5 text-rose-400" />
     },
     {
         key: "fast",
         name: "/fast",
         desc: "Switch to highest throughput model",
-        icon: <Zap className="size-3.5 text-emerald-400" />,
-    },
+        icon: <Zap className="size-3.5 text-emerald-400" />
+    }
 ];
 
 const SAMPLE_FILES = ["schema.json", "api-route.ts", "benchmark.csv"];
 const DICTATION_SAMPLES = [
     "Compare latency and token pricing between GPT-5 and Claude Sonnet",
     "Explain how SRouter implements zero-latency executor routing",
-    "Write a TypeScript client for streaming chat completions",
+    "Write a TypeScript client for streaming chat completions"
 ];
 
 function parseToken(draft: string): { kind: "at" | "slash"; query: string; start: number } | null {
@@ -124,7 +124,7 @@ function parseToken(draft: string): { kind: "at" | "slash"; query: string; start
     return {
         kind: match[2] === "@" ? "at" : "slash",
         query: match[3].toLowerCase(),
-        start: match.index + match[1].length,
+        start: match.index + match[1].length
     };
 }
 
@@ -151,7 +151,7 @@ export function PromptBar({
     onMaxTokensChange,
     onOpenCode,
     onClear,
-    variant = "Rounded",
+    variant = "Rounded"
 }: PromptBarProps) {
     const pill = variant === "Pill";
     const [dismissed, setDismissed] = useState(false);
@@ -283,7 +283,7 @@ export function PromptBar({
                 (progress - 0.4) * canvas.width,
                 0,
                 (progress + 0.4) * canvas.width,
-                0,
+                0
             );
             gradient.addColorStop(0, "transparent");
             gradient.addColorStop(0.2, "rgba(239, 68, 68, 0.15)");
@@ -317,7 +317,7 @@ export function PromptBar({
                 (m) =>
                     m.id.toLowerCase().includes("mini") ||
                     m.id.toLowerCase().includes("flash") ||
-                    m.id.toLowerCase().includes("luna"),
+                    m.id.toLowerCase().includes("luna")
             );
             if (fastest) handleSelectModel(fastest);
             onInputChange("");
@@ -364,7 +364,7 @@ export function PromptBar({
                         className="absolute inset-x-0 bottom-full z-40 mb-2 rounded-[12px] border border-[var(--line)] bg-[var(--surface)] p-1 shadow-2xl backdrop-blur-xl"
                         style={{
                             animation: "pop-in 180ms cubic-bezier(0.23,1,0.32,1) both",
-                            transformOrigin: "bottom center",
+                            transformOrigin: "bottom center"
                         }}
                     >
                         {/* Gliding highlight */}
@@ -376,7 +376,7 @@ export function PromptBar({
                                 height: rowBox?.height ?? 0,
                                 opacity: rowBox && engaged && rows.length > 0 ? 1 : 0,
                                 transition:
-                                    "top 220ms cubic-bezier(0.23,1,0.32,1), height 220ms cubic-bezier(0.23,1,0.32,1), opacity 150ms ease",
+                                    "top 220ms cubic-bezier(0.23,1,0.32,1), height 220ms cubic-bezier(0.23,1,0.32,1), opacity 150ms ease"
                             }}
                         />
                         {rows.map((row, i) => (
@@ -426,7 +426,7 @@ export function PromptBar({
                         className="absolute left-0 sm:left-10 bottom-full z-40 mb-2 w-72 sm:w-80 rounded-[12px] border border-[var(--line)] bg-[var(--surface)] p-1.5 shadow-2xl backdrop-blur-xl"
                         style={{
                             animation: "pop-in 180ms cubic-bezier(0.23,1,0.32,1) both",
-                            transformOrigin: "bottom left",
+                            transformOrigin: "bottom left"
                         }}
                     >
                         {/* Search in model dropdown */}
@@ -450,7 +450,7 @@ export function PromptBar({
                                 height: modelBox?.height ?? 0,
                                 opacity: modelBox && modelHovered !== null ? 1 : 0,
                                 transition:
-                                    "top 200ms cubic-bezier(0.23,1,0.32,1), height 200ms cubic-bezier(0.23,1,0.32,1), opacity 150ms ease",
+                                    "top 200ms cubic-bezier(0.23,1,0.32,1), height 200ms cubic-bezier(0.23,1,0.32,1), opacity 150ms ease"
                             }}
                         />
 
@@ -517,7 +517,7 @@ export function PromptBar({
                                     key={`${file}-${i}`}
                                     className="flex h-6 items-center gap-1.5 rounded-[6px] border border-[var(--line)] bg-[var(--field)] py-0.5 pr-1 pl-2 font-mono text-[10.5px] text-[var(--ink-2)]"
                                     style={{
-                                        animation: "pop-in 200ms cubic-bezier(0.23,1,0.32,1) both",
+                                        animation: "pop-in 200ms cubic-bezier(0.23,1,0.32,1) both"
                                     }}
                                 >
                                     <Paperclip className="size-3 text-blue-400" />
@@ -527,7 +527,7 @@ export function PromptBar({
                                         aria-label={`Remove ${file}`}
                                         onClick={() =>
                                             setAttachments((current) =>
-                                                current.filter((_, j) => j !== i),
+                                                current.filter((_, j) => j !== i)
                                             )
                                         }
                                         className="flex size-4 items-center justify-center rounded-[4px] text-[var(--ink-3)] hover:bg-[var(--hover)] hover:text-[var(--ink)] cursor-pointer"
@@ -559,7 +559,7 @@ export function PromptBar({
                                             (cur) =>
                                                 (cur +
                                                     (e.key === "ArrowDown" ? 1 : rows.length - 1)) %
-                                                rows.length,
+                                                rows.length
                                         );
                                         return;
                                     }
@@ -724,7 +724,7 @@ export function PromptBar({
                                                 className="w-[2.5px] rounded-full bg-current"
                                                 style={{
                                                     height: "100%",
-                                                    animation: `eq-bounce 900ms ease-in-out ${i * 150}ms infinite`,
+                                                    animation: `eq-bounce 900ms ease-in-out ${i * 150}ms infinite`
                                                 }}
                                             />
                                         ))}

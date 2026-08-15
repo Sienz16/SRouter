@@ -13,7 +13,7 @@ export function getAllAPIKeysDB(): DBAPIKey[] {
         rateLimit: Number(row.rate_limit ?? 0),
         quotaLimit: Number(row.quota_limit ?? 0),
         usageTokens: Number(row.usage_tokens ?? 0),
-        createdAt: Number(row.created_at ?? 0),
+        createdAt: Number(row.created_at ?? 0)
     }));
 }
 
@@ -31,7 +31,7 @@ export function getAPIKeyByKeyDB(key: string): DBAPIKey | null {
         rateLimit: Number(row.rate_limit ?? 0),
         quotaLimit: Number(row.quota_limit ?? 0),
         usageTokens: Number(row.usage_tokens ?? 0),
-        createdAt: Number(row.created_at ?? 0),
+        createdAt: Number(row.created_at ?? 0)
     };
 }
 
@@ -42,7 +42,7 @@ export function createAPIKeyDB(data: {
 }): DBAPIKey {
     const id = `key_${Math.random().toString(36).substring(2, 11)}`;
     const randomHex = Array.from({ length: 16 }, () =>
-        Math.floor(Math.random() * 16).toString(16),
+        Math.floor(Math.random() * 16).toString(16)
     ).join("");
     const key = `sr-live-${randomHex}`;
     const createdAt = Date.now();
@@ -62,7 +62,7 @@ export function createAPIKeyDB(data: {
         rateLimit: data.rateLimit ?? 0,
         quotaLimit: data.quotaLimit ?? 0,
         usageTokens: 0,
-        createdAt,
+        createdAt
     };
 }
 

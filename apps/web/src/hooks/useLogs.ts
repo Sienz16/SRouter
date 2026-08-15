@@ -21,7 +21,7 @@ export function useLogs(logs: RequestLogEntry[]) {
 
                 return matchesQuery;
             }),
-        [logs, searchQuery, statusFilter],
+        [logs, searchQuery, statusFilter]
     );
 
     return { searchQuery, setSearchQuery, statusFilter, setStatusFilter, filteredLogs };

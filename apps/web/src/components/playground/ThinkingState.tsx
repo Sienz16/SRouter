@@ -43,22 +43,21 @@ const VARIANTS: Record<
             { primary: "Reading model configuration & context" },
             { primary: "Evaluating tokenizer and prompt parameters" },
             { primary: "Formulating multi-turn response plan", secondary: "optimized" },
-            { primary: "Synthesizing stream chunks" },
-        ],
+            { primary: "Synthesizing stream chunks" }
+        ]
     },
     Reasoning: {
         active: "Thinking",
         done: "Thought for 4 seconds",
         rows: [
             {
-                primary:
-                    "Evaluating constraints, structure, and intent from the user input prompt.",
+                primary: "Evaluating constraints, structure, and intent from the user input prompt."
             },
             {
                 primary:
-                    "Generating grounded, modular implementation with verified edge-case handling.",
-            },
-        ],
+                    "Generating grounded, modular implementation with verified edge-case handling."
+            }
+        ]
     },
     Search: {
         active: "Searching the web",
@@ -68,19 +67,19 @@ const VARIANTS: Record<
             {
                 primary: "SRouter Docs",
                 secondary: "docs.srouter.dev",
-                href: "https://github.com/seaavey/SRouter",
+                href: "https://github.com/seaavey/SRouter"
             },
             {
                 primary: "OpenAI API Reference",
                 secondary: "platform.openai.com",
-                href: "https://platform.openai.com/docs",
+                href: "https://platform.openai.com/docs"
             },
             {
                 primary: "Anthropic Claude Models",
                 secondary: "docs.anthropic.com",
-                href: "https://docs.anthropic.com",
-            },
-        ],
+                href: "https://docs.anthropic.com"
+            }
+        ]
     },
     Coding: {
         active: "Running tools",
@@ -92,11 +91,11 @@ const VARIANTS: Record<
                 secondary: "ConversationViewport.tsx",
                 mono: true,
                 add: 42,
-                del: 18,
+                del: 18
             },
-            { primary: "Run", secondary: "pnpm test", mono: true },
-        ],
-    },
+            { primary: "Run", secondary: "pnpm test", mono: true }
+        ]
+    }
 };
 
 function Dot({ tone }: { tone: string }) {
@@ -140,7 +139,7 @@ export default function ThinkingState({
     modelId,
     customRows,
     activeLabel,
-    doneLabel,
+    doneLabel
 }: ThinkingStateProps) {
     const stage = useSequence(STAGES);
     const [manualExpanded, setManualExpanded] = useState<boolean | null>(null);
@@ -166,7 +165,7 @@ export default function ThinkingState({
         active: dynamicActive,
         done: dynamicDone,
         rows: dynamicRows,
-        query: baseV.query,
+        query: baseV.query
     };
 
     const autoExpanded = isStreaming !== undefined ? isStreaming : stage >= 1 && stage < 4;
@@ -212,7 +211,7 @@ export default function ThinkingState({
                             backgroundImage:
                                 "linear-gradient(90deg, var(--ink-3) 35%, var(--ink) 50%, var(--ink-3) 65%)",
                             backgroundSize: "200% 100%",
-                            animation: "shimmer-text 1.4s linear infinite",
+                            animation: "shimmer-text 1.4s linear infinite"
                         }}
                     >
                         {v.active}
@@ -247,7 +246,7 @@ export default function ThinkingState({
                 style={{
                     gridTemplateRows: expanded ? "1fr" : "0fr",
                     opacity: expanded ? 1 : 0,
-                    transitionTimingFunction: "cubic-bezier(0.23, 1, 0.32, 1)",
+                    transitionTimingFunction: "cubic-bezier(0.23, 1, 0.32, 1)"
                 }}
             >
                 <div className="overflow-hidden">
@@ -258,7 +257,7 @@ export default function ThinkingState({
                             style={{
                                 top: -8,
                                 height: lineHeight ? lineHeight - 2 : 0,
-                                transition: "height 500ms cubic-bezier(0.23,1,0.32,1)",
+                                transition: "height 500ms cubic-bezier(0.23,1,0.32,1)"
                             }}
                         />
                         <div ref={traceRef} className="flex flex-col gap-1 py-1">
@@ -268,7 +267,7 @@ export default function ThinkingState({
                                     style={{
                                         animation: expanded
                                             ? "fade-up 300ms cubic-bezier(0.23,1,0.32,1) both"
-                                            : undefined,
+                                            : undefined
                                     }}
                                 >
                                     <svg
@@ -312,7 +311,7 @@ export default function ThinkingState({
                                                 <span
                                                     className="size-3 shrink-0 rounded-full border-[1.5px] border-[var(--line-strong)] border-t-[var(--ink-2)]"
                                                     style={{
-                                                        animation: "spin 700ms linear infinite",
+                                                        animation: "spin 700ms linear infinite"
                                                     }}
                                                 />
                                             ))}
@@ -345,7 +344,7 @@ export default function ThinkingState({
                                 const rowClass =
                                     "flex min-h-6.5 w-full items-center gap-2 rounded-[6px] px-1.5 py-0.5 text-left";
                                 const animation = {
-                                    animation: `fade-up 320ms cubic-bezier(0.23,1,0.32,1) ${i * 120}ms both`,
+                                    animation: `fade-up 320ms cubic-bezier(0.23,1,0.32,1) ${i * 120}ms both`
                                 };
 
                                 if (variant === "Search") {

@@ -4,7 +4,7 @@ import {
     CODEX_OAUTH_ORIGINATOR,
     CODEX_OAUTH_REDIRECT_URI,
     CODEX_OAUTH_SCOPE,
-    CODEX_OAUTH_TOKEN_URL,
+    CODEX_OAUTH_TOKEN_URL
 } from "@srouter/constants";
 import type { OAuthTokenResponse, PKCEPair } from "./base.js";
 
@@ -53,7 +53,7 @@ export class OpenAICodexOAuth {
             // Required by OpenAI's Codex OAuth flow for a valid consent session
             id_token_add_organizations: "true",
             codex_cli_simplified_flow: "true",
-            originator: this.originator,
+            originator: this.originator
         };
 
         if (this.prompt) {
@@ -74,15 +74,15 @@ export class OpenAICodexOAuth {
         const res = await fetch(this.tokenUrl, {
             method: "POST",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
+                "Content-Type": "application/x-www-form-urlencoded"
             },
             body: new URLSearchParams({
                 grant_type: "authorization_code",
                 client_id: this.clientId,
                 code,
                 code_verifier: codeVerifier,
-                redirect_uri: this.redirectUri,
-            }),
+                redirect_uri: this.redirectUri
+            })
         });
 
         if (!res.ok) {
@@ -109,7 +109,7 @@ export class OpenAICodexOAuth {
             accountId:
                 data.chatgpt_account_id ||
                 data.account_id ||
-                extractAccountIdFromIdToken(data.id_token),
+                extractAccountIdFromIdToken(data.id_token)
         };
     }
 
@@ -120,13 +120,13 @@ export class OpenAICodexOAuth {
         const res = await fetch(this.tokenUrl, {
             method: "POST",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
+                "Content-Type": "application/x-www-form-urlencoded"
             },
             body: new URLSearchParams({
                 grant_type: "refresh_token",
                 client_id: this.clientId,
-                refresh_token: refreshToken,
-            }),
+                refresh_token: refreshToken
+            })
         });
 
         if (!res.ok) {
@@ -145,7 +145,7 @@ export class OpenAICodexOAuth {
             accessToken: data.access_token,
             refreshToken: data.refresh_token ?? refreshToken,
             expiresIn: data.expires_in,
-            tokenType: data.token_type ?? "Bearer",
+            tokenType: data.token_type ?? "Bearer"
         };
     }
 }

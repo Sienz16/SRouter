@@ -5,7 +5,7 @@ import {
     deleteAPIKeyDB,
     getAllAPIKeysDB,
     getAPIKeyByKeyDB,
-    incrementAPIKeyUsageDB,
+    incrementAPIKeyUsageDB
 } from "@srouter/db";
 
 const createdIds: string[] = [];
@@ -20,7 +20,7 @@ test("createAPIKeyDB stores a new virtual key with prefix sr-live-", () => {
     const created = createAPIKeyDB({
         name: "Test Client Key",
         rateLimit: 60,
-        quotaLimit: 50000,
+        quotaLimit: 50000
     });
 
     createdIds.push(created.id);
@@ -41,7 +41,7 @@ test("createAPIKeyDB stores a new virtual key with prefix sr-live-", () => {
 
 test("incrementAPIKeyUsageDB and deleteAPIKeyDB work accurately", () => {
     const created = createAPIKeyDB({
-        name: "Usage Test Key",
+        name: "Usage Test Key"
     });
 
     createdIds.push(created.id);

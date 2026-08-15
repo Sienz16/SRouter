@@ -5,7 +5,7 @@ import {
     createAPIKeyDB,
     deleteAPIKeyDB,
     getRequireApiKeyDB,
-    setRequireApiKeyDB,
+    setRequireApiKeyDB
 } from "@srouter/db";
 import { apiKeyAuth } from "../src/middleware/apiKeyAuth.js";
 
@@ -38,7 +38,7 @@ test("apiKeyAuth middleware rejects requests with 401 when require_api_key is tr
     testApp.post("/chat/completions", (c) => c.json({ ok: true }));
 
     const res = await testApp.request("/chat/completions", {
-        method: "POST",
+        method: "POST"
     });
 
     assert.equal(res.status, 401);
@@ -50,7 +50,7 @@ test("apiKeyAuth middleware allows request when valid Bearer key is provided", a
     setRequireApiKeyDB(true);
 
     const created = createAPIKeyDB({
-        name: "Test Auth Key",
+        name: "Test Auth Key"
     });
     createdKeyIds.push(created.id);
 
@@ -61,8 +61,8 @@ test("apiKeyAuth middleware allows request when valid Bearer key is provided", a
     const res = await testApp.request("/chat/completions", {
         method: "POST",
         headers: {
-            Authorization: `Bearer ${created.key}`,
-        },
+            Authorization: `Bearer ${created.key}`
+        }
     });
 
     assert.equal(res.status, 200);
@@ -78,7 +78,7 @@ test("apiKeyAuth middleware allows unauthenticated requests when require_api_key
     testApp.post("/chat/completions", (c) => c.json({ ok: true }));
 
     const res = await testApp.request("/chat/completions", {
-        method: "POST",
+        method: "POST"
     });
 
     assert.equal(res.status, 200);

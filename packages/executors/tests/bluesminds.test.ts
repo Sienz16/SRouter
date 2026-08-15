@@ -11,7 +11,7 @@ function executor(): BluesMindsExecutor {
         id: "bluesminds",
         name: "BluesMinds",
         baseUrl: "https://api.bluesminds.com/v1",
-        accessToken: fixtureKey,
+        accessToken: fixtureKey
     });
 }
 
@@ -31,7 +31,7 @@ test("BluesMinds lists namespaced live models with bearer auth", async () => {
         const auth = new Headers(init?.headers).get("authorization") ?? "";
         authorized = auth.startsWith("Bearer ") && auth.endsWith(fixtureKey);
         return Response.json({
-            data: [{ id: "meta/llama-3.1-8b-instruct", object: "model", owned_by: "bluesminds" }],
+            data: [{ id: "meta/llama-3.1-8b-instruct", object: "model", owned_by: "bluesminds" }]
         });
     };
 
@@ -39,7 +39,7 @@ test("BluesMinds lists namespaced live models with bearer auth", async () => {
     assert.equal(url, "https://api.bluesminds.com/v1/models");
     assert.equal(authorized, true);
     assert.deepEqual(models, [
-        { id: "bluesminds/meta/llama-3.1-8b-instruct", object: "model", owned_by: "bluesminds" },
+        { id: "bluesminds/meta/llama-3.1-8b-instruct", object: "model", owned_by: "bluesminds" }
     ]);
 });
 
@@ -52,7 +52,7 @@ test("BluesMinds chat sends bare model and preserves nested upstream IDs", async
             object: "chat.completion",
             created: 1,
             model: "test",
-            choices: [],
+            choices: []
         });
     };
 
@@ -73,28 +73,28 @@ test("BluesMinds streaming preserves tools and yields tool-call deltas", async (
             {
                 index: 0,
                 delta: {
-                    content: "Hello world",
+                    content: "Hello world"
                 },
-                finish_reason: null,
-            },
-        ],
+                finish_reason: null
+            }
+        ]
     };
     globalThis.fetch = async (_input, init) => {
         body = JSON.parse(String(init?.body)) as Record<string, unknown>;
         const stream = new ReadableStream({
             start(controller) {
                 controller.enqueue(
-                    new TextEncoder().encode(`data: ${JSON.stringify(chunk)}\n\ndata: [DONE]\n\n`),
+                    new TextEncoder().encode(`data: ${JSON.stringify(chunk)}\n\ndata: [DONE]\n\n`)
                 );
                 controller.close();
-            },
+            }
         });
         return new Response(stream, { headers: { "content-type": "text/event-stream" } });
     };
 
     const output = [];
     for await (const item of executor().chatCompletionStream(
-        request("bluesminds/meta/llama-3.1-8b-instruct"),
+        request("bluesminds/meta/llama-3.1-8b-instruct")
     )) {
         output.push(item);
     }
@@ -110,6 +110,6 @@ test("BluesMinds upstream errors do not expose credentials", async () => {
         (error: Error) =>
             error.message.includes("503") &&
             error.message.includes("upstream unavailable") &&
-            !error.message.includes(fixtureKey),
+            !error.message.includes(fixtureKey)
     );
 });

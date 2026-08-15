@@ -24,7 +24,7 @@ test("buildCosyHeaders creates expected COSY signature and headers", () => {
     const headers = buildCosyHeaders(body, url, {
         userId: fixtureUserId,
         authToken: fixtureToken,
-        machineId: "machine-uuid-1",
+        machineId: "machine-uuid-1"
     });
 
     assert.ok(headers["Authorization"].startsWith("Bearer COSY."));
@@ -42,8 +42,8 @@ test("QoderExecutor lists models with base id prefix", async () => {
             return Response.json({
                 chat: [
                     { key: "ultimate", display_name: "Ultimate", enable: true },
-                    { key: "qmodel_latest", display_name: "Qwen3.7-Max", enable: true },
-                ],
+                    { key: "qmodel_latest", display_name: "Qwen3.7-Max", enable: true }
+                ]
             });
         }
         return Response.json({});
@@ -53,7 +53,7 @@ test("QoderExecutor lists models with base id prefix", async () => {
         id: "qoder",
         name: "Qoder",
         accessToken: fixtureToken,
-        providerSpecificData: { userId: fixtureUserId },
+        providerSpecificData: { userId: fixtureUserId }
     });
 
     const models = await executor.listModels();
@@ -76,9 +76,9 @@ test("QoderExecutor streams SSE chat and unwraps statusCodeValue envelope", asyn
             {
                 index: 0,
                 delta: { content: "Hello from Qoder!" },
-                finish_reason: null,
-            },
-        ],
+                finish_reason: null
+            }
+        ]
     };
 
     globalThis.fetch = async (input, init) => {
@@ -88,20 +88,20 @@ test("QoderExecutor streams SSE chat and unwraps statusCodeValue envelope", asyn
 
         const envelope = JSON.stringify({
             statusCodeValue: 200,
-            body: JSON.stringify(chunkData),
+            body: JSON.stringify(chunkData)
         });
 
         const sseStream = new ReadableStream({
             start(controller) {
                 controller.enqueue(
-                    new TextEncoder().encode(`data: ${envelope}\n\ndata: [DONE]\n\n`),
+                    new TextEncoder().encode(`data: ${envelope}\n\ndata: [DONE]\n\n`)
                 );
                 controller.close();
-            },
+            }
         });
 
         return new Response(sseStream, {
-            headers: { "Content-Type": "text/event-stream" },
+            headers: { "Content-Type": "text/event-stream" }
         });
     };
 
@@ -109,13 +109,13 @@ test("QoderExecutor streams SSE chat and unwraps statusCodeValue envelope", asyn
         id: "qoder",
         name: "Qoder",
         accessToken: fixtureToken,
-        providerSpecificData: { userId: fixtureUserId },
+        providerSpecificData: { userId: fixtureUserId }
     });
 
     const chunks = [];
     for await (const chunk of executor.chatCompletionStream({
         model: "qoder/ultimate",
-        messages: [{ role: "user", content: "hi" }],
+        messages: [{ role: "user", content: "hi" }]
     })) {
         chunks.push(chunk);
     }
@@ -151,19 +151,19 @@ test("QoderExecutor handles PAT exchange to job token and routes to api2", async
                 statusCodeValue: 200,
                 body: JSON.stringify({
                     id: "cmpl-pat",
-                    choices: [{ index: 0, delta: { content: "PAT success" } }],
-                }),
+                    choices: [{ index: 0, delta: { content: "PAT success" } }]
+                })
             });
             const sseStream = new ReadableStream({
                 start(controller) {
                     controller.enqueue(
-                        new TextEncoder().encode(`data: ${envelope}\n\ndata: [DONE]\n\n`),
+                        new TextEncoder().encode(`data: ${envelope}\n\ndata: [DONE]\n\n`)
                     );
                     controller.close();
-                },
+                }
             });
             return new Response(sseStream, {
-                headers: { "Content-Type": "text/event-stream" },
+                headers: { "Content-Type": "text/event-stream" }
             });
         }
         return Response.json({});
@@ -174,13 +174,13 @@ test("QoderExecutor handles PAT exchange to job token and routes to api2", async
     const executor = new QoderExecutor({
         id: "qoder",
         name: "Qoder",
-        apiKey: patToken,
+        apiKey: patToken
     });
 
     const chunks = [];
     for await (const chunk of executor.chatCompletionStream({
         model: "qoder/auto",
-        messages: [{ role: "user", content: "test pat" }],
+        messages: [{ role: "user", content: "test pat" }]
     })) {
         chunks.push(chunk);
     }

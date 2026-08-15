@@ -10,7 +10,7 @@ export class BluesMindsExecutor extends OpenAIExecutor {
             name: options.name ?? "BluesMinds",
             baseUrl: options.baseUrl ?? BLUESMINDS_BASE_URL,
             apiKey: options.apiKey,
-            accessToken: options.accessToken,
+            accessToken: options.accessToken
         });
     }
 }

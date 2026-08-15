@@ -3,7 +3,7 @@ import type {
     LiveModelQuotaItem,
     ProviderQuotaAccount,
     ProviderUsageMetric,
-    QuotaResponse,
+    QuotaResponse
 } from "@srouter/types";
 import { getProviderModelUsageDB } from "./logs.js";
 import { getAllProvidersDB } from "./providers.js";
@@ -39,7 +39,7 @@ export async function fetchAntigravityLiveQuota(
     providerId: string,
     accountName: string,
     accessToken: string,
-    enabled = true,
+    enabled = true
 ): Promise<ProviderQuotaAccount> {
     if (!accessToken || !(accessToken.startsWith("ya29.") || accessToken.length > 20)) {
         throw new Error("Antigravity quota requires a valid access token");
@@ -51,9 +51,9 @@ export async function fetchAntigravityLiveQuota(
             Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
             "User-Agent": "Antigravity/1.0 (VSCode)",
-            "x-goog-api-client": "gl-node/18.0.0 gd/1.0.0",
+            "x-goog-api-client": "gl-node/18.0.0 gd/1.0.0"
         },
-        body: JSON.stringify({}),
+        body: JSON.stringify({})
     });
 
     if (!res.ok) {
@@ -84,7 +84,7 @@ export async function fetchAntigravityLiveQuota(
             percentageValue,
             resetIn,
             resetTime: item.quotaInfo?.resetTime,
-            status,
+            status
         };
     });
 
@@ -95,7 +95,7 @@ export async function fetchAntigravityLiveQuota(
         enabled,
         quotaType: "live_provider_quota",
         totalQuotas: quotas.length,
-        quotas,
+        quotas
     };
 }
 
@@ -122,7 +122,7 @@ export async function getProviderQuotaAccount(p: {
             p.id,
             p.name || "seaavey@gmail.com",
             token,
-            p.enabled,
+            p.enabled
         );
     }
 
@@ -135,7 +135,7 @@ export async function getProviderQuotaAccount(p: {
         totalTokens: row.totalTokens,
         promptTokens: row.promptTokens,
         completionTokens: row.completionTokens,
-        lastUsedAt: row.lastUsedAt ? new Date(row.lastUsedAt).toISOString() : null,
+        lastUsedAt: row.lastUsedAt ? new Date(row.lastUsedAt).toISOString() : null
     }));
 
     let providerName = p.name || p.providerId || p.id;
@@ -149,7 +149,7 @@ export async function getProviderQuotaAccount(p: {
         account: p.name || `${providerName} Account`,
         enabled: p.enabled,
         quotaType: "usage_logged",
-        usageMetrics,
+        usageMetrics
     };
 }
 
@@ -169,6 +169,6 @@ export async function getQuotaSummaryDB(): Promise<QuotaResponse> {
     return {
         object: "quota",
         totalAccounts: providerAccounts.length,
-        providers: providerAccounts,
+        providers: providerAccounts
     };
 }

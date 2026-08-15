@@ -3,7 +3,7 @@
 // Async iterator over the non-empty trimmed lines of a fetch Response body.
 // Handles both OpenAI-style "data: ..." framing and raw NDJSON lines.
 export async function* streamLines(
-    body: ReadableStream<Uint8Array>,
+    body: ReadableStream<Uint8Array>
 ): AsyncGenerator<string, void, void> {
     const reader = body.getReader();
     const decoder = new TextDecoder("utf-8");

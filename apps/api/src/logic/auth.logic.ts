@@ -3,7 +3,7 @@ import {
     deleteOAuthSessionDB,
     getOAuthSessionDB,
     saveOAuthSessionDB,
-    upsertProviderDB,
+    upsertProviderDB
 } from "@srouter/db";
 import { generatePKCE, QoderOAuth } from "@srouter/providers";
 import { QoderExecutor } from "@srouter/executors";
@@ -22,7 +22,7 @@ import {
     type AuthProviderHandler,
     type OAuthLoginParams,
     type OAuthLoginResult,
-    type TokenImportParams,
+    type TokenImportParams
 } from "./auth.providers.js";
 
 export type { OAuthLoginParams, OAuthLoginResult, TokenImportParams } from "./auth.providers.js";
@@ -50,11 +50,11 @@ function resolveRedirectUri(handler: AuthProviderHandler, params: OAuthLoginPara
  */
 function buildAccountIdentity(
     handler: AuthProviderHandler,
-    now: number,
+    now: number
 ): { accountId: string; accountName: string } {
     return {
         accountId: `${handler.idPrefix}_${now}`,
-        accountName: `${handler.displayName} (Account #${now.toString().slice(-4)})`,
+        accountName: `${handler.displayName} (Account #${now.toString().slice(-4)})`
     };
 }
 
@@ -74,7 +74,7 @@ function initiatePKCEFor(handler: AuthProviderHandler, params: OAuthLoginParams)
         codeVerifier: pkce.codeVerifier,
         clientId,
         redirectUri,
-        createdAt: Date.now(),
+        createdAt: Date.now()
     });
 
     const authorizeUrl = oauthInstance.getAuthorizationUrl(pkce);
@@ -83,14 +83,14 @@ function initiatePKCEFor(handler: AuthProviderHandler, params: OAuthLoginParams)
         authorizeUrl,
         state: pkce.state,
         codeVerifier: pkce.codeVerifier,
-        redirectUri,
+        redirectUri
     };
 }
 
 async function processOAuthCallbackFor(
     handler: AuthProviderHandler,
     code: string,
-    state: string,
+    state: string
 ): Promise<ProviderConfig> {
     cleanupExpiredSessions();
 
@@ -103,14 +103,14 @@ async function processOAuthCallbackFor(
 
     const oauthInstance = new handler.oauthClass!({
         clientId: session.clientId,
-        redirectUri: session.redirectUri,
+        redirectUri: session.redirectUri
     });
 
     const rawTokens = await oauthInstance.exchangeCodeForTokens(code, session.codeVerifier);
     const tokens = handler.mapOAuthTokens?.(rawTokens) ?? {
         accessToken: rawTokens.accessToken,
         refreshToken: rawTokens.refreshToken,
-        expiresIn: rawTokens.expiresIn,
+        expiresIn: rawTokens.expiresIn
     };
 
     const timestamp = Date.now();
@@ -131,7 +131,7 @@ async function processOAuthCallbackFor(
         tokenExpiresAt: tokens.expiresIn ? Date.now() + tokens.expiresIn * 1000 : undefined,
         lastRefreshedAt: Date.now(),
         enabled: true,
-        createdAt: timestamp,
+        createdAt: timestamp
     });
 
     const providerInstance = handler.buildExecutor({
@@ -140,7 +140,7 @@ async function processOAuthCallbackFor(
         accountId: tokens.accountId,
         baseUrl,
         accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken,
+        refreshToken: tokens.refreshToken
     });
     registry.registerProvider(providerInstance);
 
@@ -149,7 +149,7 @@ async function processOAuthCallbackFor(
 
 function processTokenImportFor(
     handler: AuthProviderHandler,
-    params: TokenImportParams,
+    params: TokenImportParams
 ): ProviderConfig {
     const timestamp = Date.now();
     const accountId = params.id || `${handler.idPrefix}_${timestamp}`;
@@ -158,7 +158,7 @@ function processTokenImportFor(
     const mapping = handler.mapImportTokens?.(params) ?? {
         accessToken: params.accessToken,
         refreshToken: params.refreshToken,
-        accountId: params.accountId,
+        accountId: params.accountId
     };
     const baseUrl = params.baseUrl || handler.baseUrl?.();
 
@@ -174,7 +174,7 @@ function processTokenImportFor(
         refreshToken: mapping.refreshToken,
         accountId: mapping.accountId,
         enabled: true,
-        createdAt: timestamp,
+        createdAt: timestamp
     });
 
     const providerInstance = handler.buildExecutor({
@@ -184,7 +184,7 @@ function processTokenImportFor(
         baseUrl: mapping.baseUrl ?? baseUrl,
         apiKey: mapping.apiKey,
         accessToken: mapping.accessToken,
-        refreshToken: mapping.refreshToken,
+        refreshToken: mapping.refreshToken
     });
     registry.registerProvider(providerInstance);
 
@@ -214,7 +214,7 @@ export class AuthLogic {
 
     public static async processAntigravityOAuthCallback(
         code: string,
-        state: string,
+        state: string
     ): Promise<ProviderConfig> {
         return processOAuthCallbackFor(antigravityAuthHandler, code, state);
     }
@@ -260,7 +260,7 @@ export class AuthLogic {
 
     public static async processQoderOAuthCallback(
         code: string,
-        state: string,
+        state: string
     ): Promise<ProviderConfig> {
         return processOAuthCallbackFor(qoderAuthHandler, code, state);
     }
@@ -294,7 +294,7 @@ export class AuthLogic {
         try {
             poll = await qoderOAuth.pollDeviceToken({
                 nonce: state,
-                codeVerifier: session.codeVerifier,
+                codeVerifier: session.codeVerifier
             });
         } catch (err) {
             const msg = err instanceof Error ? err.message : String(err);
@@ -330,10 +330,10 @@ export class AuthLogic {
                 userId: poll.userId || userInfo.id || "",
                 email: userInfo.email || "",
                 name: userInfo.name || "",
-                organizationId: userInfo.organizationId || "",
+                organizationId: userInfo.organizationId || ""
             },
             enabled: true,
-            createdAt: timestamp,
+            createdAt: timestamp
         });
 
         const providerInstance = new QoderExecutor({
@@ -346,14 +346,14 @@ export class AuthLogic {
                 userId: poll.userId || userInfo.id || "",
                 email: userInfo.email || "",
                 name: userInfo.name || "",
-                organizationId: userInfo.organizationId || "",
-            },
+                organizationId: userInfo.organizationId || ""
+            }
         });
         registry.registerProvider(providerInstance);
 
         return {
             status: "ok",
-            provider: providerConfig,
+            provider: providerConfig
         };
     }
 }

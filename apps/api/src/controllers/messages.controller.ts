@@ -3,7 +3,7 @@ import { streamSSE } from "hono/streaming";
 import {
     anthropicToOpenAIRequest,
     openAIToAnthropicResponse,
-    openAIToAnthropicStream,
+    openAIToAnthropicStream
 } from "@srouter/translator";
 import type { AnthropicMessageRequest } from "@srouter/types";
 import { ChatLogic } from "@/logic/chat.logic.js";
@@ -20,10 +20,10 @@ export class MessagesController {
                     type: "error",
                     error: {
                         type: "invalid_request_error",
-                        message: "Invalid JSON request body",
-                    },
+                        message: "Invalid JSON request body"
+                    }
                 },
-                400,
+                400
             );
         }
 
@@ -33,10 +33,10 @@ export class MessagesController {
                     type: "error",
                     error: {
                         type: "invalid_request_error",
-                        message: "Missing required field 'model'",
-                    },
+                        message: "Missing required field 'model'"
+                    }
                 },
-                400,
+                400
             );
         }
 
@@ -52,14 +52,14 @@ export class MessagesController {
                 try {
                     const chunkGenerator = ChatLogic.processStreamingCompletion(
                         openAIReq,
-                        startTime,
+                        startTime
                     );
                     const anthropicStream = openAIToAnthropicStream(chunkGenerator, body.model);
 
                     for await (const event of anthropicStream) {
                         await stream.writeSSE({
                             event: event.type,
-                            data: JSON.stringify(event),
+                            data: JSON.stringify(event)
                         });
                     }
                 } catch (error) {
@@ -70,9 +70,9 @@ export class MessagesController {
                             type: "error",
                             error: {
                                 type: "api_error",
-                                message: errorMessage || "Error occurred during streaming",
-                            },
-                        }),
+                                message: errorMessage || "Error occurred during streaming"
+                            }
+                        })
                     });
                 }
             });
@@ -90,10 +90,10 @@ export class MessagesController {
                     type: "error",
                     error: {
                         type: "api_error",
-                        message: errorMessage || "Internal server error",
-                    },
+                        message: errorMessage || "Internal server error"
+                    }
                 },
-                500,
+                500
             );
         }
     }

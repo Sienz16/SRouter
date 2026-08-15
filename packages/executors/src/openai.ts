@@ -5,7 +5,7 @@ import type {
     ChatCompletionRequest,
     ChatCompletionResponse,
     ModelListResponse,
-    ModelObject,
+    ModelObject
 } from "@srouter/types";
 import { parseDataLine, streamLines } from "./base.js";
 
@@ -46,7 +46,7 @@ export class OpenAIExecutor implements AIProvider {
 
     private getHeaders(): Record<string, string> {
         const headers: Record<string, string> = {
-            "Content-Type": "application/json",
+            "Content-Type": "application/json"
         };
         const token = this.accessToken || this.apiKey;
         if (token) {
@@ -65,7 +65,7 @@ export class OpenAIExecutor implements AIProvider {
         try {
             const res = await fetch(`${this.baseUrl}/models`, {
                 method: "GET",
-                headers: this.getHeaders(),
+                headers: this.getHeaders()
             });
             if (!res.ok) {
                 return [];
@@ -78,7 +78,7 @@ export class OpenAIExecutor implements AIProvider {
             return data.data.map((m) => ({
                 id: `${baseId}/${m.id}`,
                 object: "model",
-                owned_by: baseId,
+                owned_by: baseId
             }));
         } catch {
             return [];
@@ -91,7 +91,7 @@ export class OpenAIExecutor implements AIProvider {
         const res = await fetch(`${this.baseUrl}/chat/completions`, {
             method: "POST",
             headers: this.getHeaders(),
-            body: JSON.stringify({ ...req, model: targetModel, stream: false }),
+            body: JSON.stringify({ ...req, model: targetModel, stream: false })
         });
 
         if (!res.ok) {
@@ -103,14 +103,14 @@ export class OpenAIExecutor implements AIProvider {
     }
 
     async *chatCompletionStream(
-        req: ChatCompletionRequest,
+        req: ChatCompletionRequest
     ): AsyncGenerator<ChatCompletionChunk, void, void> {
         const targetModel = stripProviderPrefix(req.model);
 
         const res = await fetch(`${this.baseUrl}/chat/completions`, {
             method: "POST",
             headers: this.getHeaders(),
-            body: JSON.stringify({ ...req, model: targetModel, stream: true }),
+            body: JSON.stringify({ ...req, model: targetModel, stream: true })
         });
 
         if (!res.ok) {

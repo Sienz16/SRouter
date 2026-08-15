@@ -40,7 +40,7 @@ function findNestedMessage(value: unknown, depth = 0): string | null {
  */
 export function extractSseErrorMessage(text: string, fallback: string): string {
     const exact = text?.match(
-        /Selected model is at capacity\. Please try a different model\./i,
+        /Selected model is at capacity\. Please try a different model\./i
     )?.[0];
     if (exact) return exact;
 

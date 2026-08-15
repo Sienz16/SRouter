@@ -10,7 +10,7 @@ export class GoRouterExecutor extends OpenAIExecutor {
             name: options.name ?? "GoRouter",
             baseUrl: options.baseUrl ?? GOROUTER_BASE_URL,
             apiKey: options.apiKey,
-            accessToken: options.accessToken,
+            accessToken: options.accessToken
         });
     }
 }

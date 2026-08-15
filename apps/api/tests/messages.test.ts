@@ -6,13 +6,13 @@ import {
     deleteAPIKeyDB,
     deleteProviderDB,
     setRequireApiKeyDB,
-    upsertProviderDB,
+    upsertProviderDB
 } from "@srouter/db";
 import type {
     AIProvider,
     ChatCompletionRequest,
     ChatCompletionResponse,
-    ProviderConfig,
+    ProviderConfig
 } from "@srouter/types";
 import { messagesRoute } from "../src/routes/v1/messages.js";
 
@@ -52,19 +52,19 @@ test("POST /v1/messages returns Anthropic message response for non-streaming req
                         index: 0,
                         message: {
                             role: "assistant",
-                            content: "Hello from Claude via SRouter!",
+                            content: "Hello from Claude via SRouter!"
                         },
-                        finish_reason: "stop",
-                    },
+                        finish_reason: "stop"
+                    }
                 ],
                 usage: {
                     prompt_tokens: 15,
                     completion_tokens: 8,
-                    total_tokens: 23,
-                },
+                    total_tokens: 23
+                }
             };
         },
-        chatCompletionStream: async function* () {},
+        chatCompletionStream: async function* () {}
     };
     registry.registerProvider(mockProvider);
     createdProviderIds.push(mockProvider.id);
@@ -73,14 +73,14 @@ test("POST /v1/messages returns Anthropic message response for non-streaming req
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "anthropic-version": "2023-06-01",
+            "anthropic-version": "2023-06-01"
         },
         body: JSON.stringify({
             model: "claude-3-7-sonnet-20250219",
             messages: [{ role: "user", content: "Hello" }],
             max_tokens: 1024,
-            stream: false,
-        }),
+            stream: false
+        })
     });
 
     assert.equal(res.status, 200);
@@ -125,15 +125,15 @@ test("POST /v1/messages authenticates with x-api-key header when require_api_key
                         index: 0,
                         message: {
                             role: "assistant",
-                            content: "Authenticated successfully with x-api-key!",
+                            content: "Authenticated successfully with x-api-key!"
                         },
-                        finish_reason: "stop",
-                    },
+                        finish_reason: "stop"
+                    }
                 ],
-                usage: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 },
+                usage: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 }
             };
         },
-        chatCompletionStream: async function* () {},
+        chatCompletionStream: async function* () {}
     };
     registry.registerProvider(mockProvider);
     createdProviderIds.push(mockProvider.id);
@@ -143,13 +143,13 @@ test("POST /v1/messages authenticates with x-api-key header when require_api_key
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "x-api-key": "invalid-key-token",
+            "x-api-key": "invalid-key-token"
         },
         body: JSON.stringify({
             model: "mock-auth-provider/test-model",
             messages: [{ role: "user", content: "Test" }],
-            max_tokens: 512,
-        }),
+            max_tokens: 512
+        })
     });
     assert.equal(resInvalid.status, 401);
 
@@ -158,13 +158,13 @@ test("POST /v1/messages authenticates with x-api-key header when require_api_key
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "x-api-key": keyRecord.key,
+            "x-api-key": keyRecord.key
         },
         body: JSON.stringify({
             model: "mock-auth-provider/test-model",
             messages: [{ role: "user", content: "Test" }],
-            max_tokens: 512,
-        }),
+            max_tokens: 512
+        })
     });
     assert.equal(resValid.status, 200);
     const data = (await resValid.json()) as { content: Array<{ text: string }> };
@@ -190,18 +190,18 @@ test("POST /v1/messages streams Anthropic SSE events", async () => {
                     {
                         index: 0,
                         delta: { role: "assistant", content: "Chunk 1 " },
-                        finish_reason: null,
-                    },
-                ],
+                        finish_reason: null
+                    }
+                ]
             };
             yield {
                 id: "chunk-2",
                 object: "chat.completion.chunk",
                 created: 1786759000,
                 model: "mock-model",
-                choices: [{ index: 0, delta: { content: "Chunk 2" }, finish_reason: "stop" }],
+                choices: [{ index: 0, delta: { content: "Chunk 2" }, finish_reason: "stop" }]
             };
-        },
+        }
     };
     registry.registerProvider(mockProvider);
     createdProviderIds.push(mockProvider.id);
@@ -209,14 +209,14 @@ test("POST /v1/messages streams Anthropic SSE events", async () => {
     const res = await app.request("/v1/messages", {
         method: "POST",
         headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "application/json"
         },
         body: JSON.stringify({
             model: "mock-model",
             messages: [{ role: "user", content: "Stream test" }],
             max_tokens: 256,
-            stream: true,
-        }),
+            stream: true
+        })
     });
 
     assert.equal(res.status, 200);

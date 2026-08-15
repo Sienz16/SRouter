@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/")({
     staticData: { title: "Dashboard" },
-    component: DashboardPage,
+    component: DashboardPage
 });
 
 type StatCardProps = {
@@ -72,12 +72,12 @@ function DashboardPage() {
         data: stats,
         isPending,
         error,
-        refetch,
+        refetch
     } = useQuery({
         queryKey: ["stats"],
         queryFn: () => api.get<UsageStats>("/v1/logs/stats"),
         refetchInterval: 30_000,
-        refetchIntervalInBackground: false,
+        refetchIntervalInBackground: false
     });
 
     if (isPending && !stats) {

@@ -52,14 +52,14 @@ export const CATEGORY_LABELS: Record<ProviderCategory, string> = {
     oauth: "OAuth Provider",
     api_key: "API Key Provider",
     free_tier: "Free Tier Provider",
-    custom: "Custom Provider",
+    custom: "Custom Provider"
 };
 
 export const CATEGORY_DESCRIPTIONS: Record<ProviderCategory, string> = {
     oauth: "Signed in through a provider account rather than a key.",
     api_key: "Authenticated with a platform key you supply.",
     free_tier: "Free or rate-limited public endpoints.",
-    custom: "Endpoints you registered on this gateway.",
+    custom: "Endpoints you registered on this gateway."
 };
 
 export function isProviderCategory(value: string): value is ProviderCategory {
@@ -99,7 +99,7 @@ export const KNOWN_PROVIDERS: KnownProvider[] = [
         websiteUrl: "https://aws.amazon.com/q/",
         requiresApiKey: true,
         supportsCustomUrl: true,
-        statusMessage: "Kiro credential missing",
+        statusMessage: "Kiro credential missing"
     },
     {
         id: "neosantara",
@@ -110,7 +110,7 @@ export const KNOWN_PROVIDERS: KnownProvider[] = [
         websiteUrl: "https://neosantara.xyz",
         requiresApiKey: true,
         supportsCustomUrl: true,
-        statusMessage: "Neosantara API key missing",
+        statusMessage: "Neosantara API key missing"
     },
     {
         id: "gorouter",
@@ -121,7 +121,7 @@ export const KNOWN_PROVIDERS: KnownProvider[] = [
         websiteUrl: "https://gorouter.app/sign-up?aff=cJJn",
         requiresApiKey: true,
         supportsCustomUrl: true,
-        statusMessage: "GoRouter API key missing",
+        statusMessage: "GoRouter API key missing"
     },
     {
         id: "bluesminds",
@@ -132,7 +132,7 @@ export const KNOWN_PROVIDERS: KnownProvider[] = [
         websiteUrl: "https://api.bluesminds.com/sign-up?aff=nCAw",
         requiresApiKey: true,
         supportsCustomUrl: true,
-        statusMessage: "BluesMinds API key missing",
+        statusMessage: "BluesMinds API key missing"
     },
     {
         id: "seekai",
@@ -143,7 +143,7 @@ export const KNOWN_PROVIDERS: KnownProvider[] = [
         websiteUrl: "https://seekai.cc/sign-up?aff=UU0C",
         requiresApiKey: true,
         supportsCustomUrl: true,
-        statusMessage: "SeekAI API key missing",
+        statusMessage: "SeekAI API key missing"
     },
     {
         id: "tabitoken",
@@ -154,7 +154,7 @@ export const KNOWN_PROVIDERS: KnownProvider[] = [
         websiteUrl: "https://tabitoken.com/sign-up?aff=h5iN",
         requiresApiKey: true,
         supportsCustomUrl: true,
-        statusMessage: "TabiToken API key missing",
+        statusMessage: "TabiToken API key missing"
     },
     {
         id: "openai_codex",
@@ -165,7 +165,7 @@ export const KNOWN_PROVIDERS: KnownProvider[] = [
         websiteUrl: "https://chatgpt.com",
         requiresApiKey: false,
         requiresOAuth: true,
-        statusMessage: "OAuth token missing",
+        statusMessage: "OAuth token missing"
     },
     {
         id: "anthropic",
@@ -176,7 +176,7 @@ export const KNOWN_PROVIDERS: KnownProvider[] = [
         websiteUrl: "https://claude.ai",
         requiresApiKey: false,
         requiresOAuth: true,
-        statusMessage: "OAuth token missing",
+        statusMessage: "OAuth token missing"
     },
     {
         id: "antigravity",
@@ -187,7 +187,7 @@ export const KNOWN_PROVIDERS: KnownProvider[] = [
         websiteUrl: "https://ai.google.dev",
         requiresApiKey: false,
         requiresOAuth: true,
-        statusMessage: "Antigravity OAuth token missing",
+        statusMessage: "Antigravity OAuth token missing"
     },
     {
         id: "commandcode",
@@ -198,7 +198,7 @@ export const KNOWN_PROVIDERS: KnownProvider[] = [
         websiteUrl: "https://commandcode.ai",
         requiresApiKey: true,
         supportsCustomUrl: true,
-        statusMessage: "Command Code API key missing",
+        statusMessage: "Command Code API key missing"
     },
     {
         id: "qoder",
@@ -211,12 +211,12 @@ export const KNOWN_PROVIDERS: KnownProvider[] = [
         requiresApiKey: false,
         requiresOAuth: true,
         supportsCustomUrl: true,
-        statusMessage: "Qoder token or session missing",
-    },
+        statusMessage: "Qoder token or session missing"
+    }
 ];
 
 export const KNOWN_PROVIDER_MAP: Record<string, KnownProvider> = Object.fromEntries(
-    KNOWN_PROVIDERS.map((provider) => [provider.id, provider]),
+    KNOWN_PROVIDERS.map((provider) => [provider.id, provider])
 );
 
 export function providerById(id: string): KnownProvider | undefined {
@@ -263,7 +263,7 @@ export function providerTypeForAlias(alias: string): string | null {
  */
 export function getProviderWebsiteUrl(
     providerId: string,
-    defaultBaseUrl?: string,
+    defaultBaseUrl?: string
 ): string | undefined {
     const baseId = providerBaseId(providerId);
     const known = KNOWN_PROVIDER_MAP[providerId] ?? KNOWN_PROVIDER_MAP[baseId];

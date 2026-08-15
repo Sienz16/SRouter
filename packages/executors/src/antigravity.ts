@@ -4,7 +4,7 @@ import type {
     ChatCompletionChunk,
     ChatCompletionRequest,
     ChatCompletionResponse,
-    ModelObject,
+    ModelObject
 } from "@srouter/types";
 import {
     ANTIGRAVITY_IDE_USER_AGENT,
@@ -19,7 +19,7 @@ import {
     isImageModel,
     parseAntigravityModelName,
     parseImageConfig,
-    stripBlacklistedRequest,
+    stripBlacklistedRequest
 } from "@srouter/translator";
 import { OpenAIExecutor } from "./openai.js";
 import { parseDataLine, streamLines } from "./base.js";
@@ -67,7 +67,7 @@ export class AntigravityExecutor implements AIProvider {
             name: this.name,
             baseUrl: options.baseUrl || ANTIGRAVITY_BASE_URL,
             apiKey: options.apiKey,
-            accessToken: this.accessToken,
+            accessToken: this.accessToken
         });
     }
 
@@ -85,7 +85,7 @@ export class AntigravityExecutor implements AIProvider {
     private getHeaders(extra?: Record<string, string>): Record<string, string> {
         const headers: Record<string, string> = {
             "Content-Type": "application/json",
-            "User-Agent": ANTIGRAVITY_IDE_USER_AGENT,
+            "User-Agent": ANTIGRAVITY_IDE_USER_AGENT
         };
         const token = this.accessToken || this.apiKey;
         if (token) {
@@ -142,14 +142,14 @@ export class AntigravityExecutor implements AIProvider {
                 id,
                 object: "model",
                 created: Math.floor(Date.now() / 1000),
-                owned_by: "antigravity",
+                owned_by: "antigravity"
             });
             if (!id.startsWith(`${baseId}/`)) {
                 models.push({
                     id: `${baseId}/${id}`,
                     object: "model",
                     created: Math.floor(Date.now() / 1000),
-                    owned_by: "antigravity",
+                    owned_by: "antigravity"
                 });
             }
         };
@@ -157,7 +157,7 @@ export class AntigravityExecutor implements AIProvider {
         try {
             const res = await fetch(`${cleanBaseUrl}/models`, {
                 method: "GET",
-                headers: this.getHeaders(),
+                headers: this.getHeaders()
             });
             if (res.ok) {
                 const json = (await res.json()) as { models?: Array<{ name?: string }> };
@@ -183,10 +183,10 @@ export class AntigravityExecutor implements AIProvider {
                             Authorization: `Bearer ${token}`,
                             "Content-Type": "application/json",
                             "User-Agent": ANTIGRAVITY_IDE_USER_AGENT,
-                            "x-goog-api-client": "gl-node/18.0.0 gd/1.0.0",
+                            "x-goog-api-client": "gl-node/18.0.0 gd/1.0.0"
                         },
-                        body: JSON.stringify({}),
-                    },
+                        body: JSON.stringify({})
+                    }
                 );
                 if (res.ok) {
                     const data = (await res.json()) as {
@@ -215,7 +215,7 @@ export class AntigravityExecutor implements AIProvider {
     private buildRequest(
         model: string,
         req: ChatCompletionRequest,
-        stream: boolean,
+        stream: boolean
     ): { url: string; body: Record<string, unknown> } {
         const cleanBaseUrl = this.baseUrl.replace(/\/openai$/, "");
         const modelName = parseAntigravityModelName(model);
@@ -234,9 +234,9 @@ export class AntigravityExecutor implements AIProvider {
                     topP: 0.95,
                     topK: 40,
                     maxOutputTokens: 8192,
-                    imageConfig,
+                    imageConfig
                 },
-                sessionId: this.sessionId,
+                sessionId: this.sessionId
             };
             const envelope = buildAntigravityEnvelope({
                 projectId: this.projectId,
@@ -244,7 +244,7 @@ export class AntigravityExecutor implements AIProvider {
                 requestType: "image_gen",
                 request,
                 body: req as unknown as { requestId?: string },
-                sessionId: this.sessionId,
+                sessionId: this.sessionId
             });
             // Image gen MUST use non-streaming generateContent
             const url = `${cleanBaseUrl}/v1internal:generateContent`;
@@ -257,7 +257,7 @@ export class AntigravityExecutor implements AIProvider {
         const request: Record<string, unknown> = {
             contents,
             sessionId: this.sessionId,
-            safetySettings: undefined,
+            safetySettings: undefined
         };
         if (tools.length > 0) {
             request.tools = tools;
@@ -272,7 +272,7 @@ export class AntigravityExecutor implements AIProvider {
             requestType: "agent",
             request,
             body: req as unknown as { requestId?: string },
-            sessionId: this.sessionId,
+            sessionId: this.sessionId
         });
 
         const url = stream
@@ -300,7 +300,7 @@ export class AntigravityExecutor implements AIProvider {
     }
 
     async *chatCompletionStream(
-        req: ChatCompletionRequest,
+        req: ChatCompletionRequest
     ): AsyncGenerator<ChatCompletionChunk, void, void> {
         const isLocalProxy = this.isLocalProxy();
         const isApiKey = this.isApiKey();

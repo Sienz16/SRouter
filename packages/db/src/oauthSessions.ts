@@ -16,13 +16,13 @@ export function saveOAuthSessionDB(session: OAuthSession): OAuthSession {
              code_verifier = excluded.code_verifier,
              client_id = excluded.client_id,
              redirect_uri = excluded.redirect_uri,
-             created_at = excluded.created_at;`,
+             created_at = excluded.created_at;`
     ).run(
         session.state,
         session.codeVerifier,
         session.clientId,
         session.redirectUri,
-        session.createdAt,
+        session.createdAt
     );
 
     return session;
@@ -38,7 +38,7 @@ export function getOAuthSessionDB(state: string): OAuthSession | null {
         codeVerifier: String(row.code_verifier),
         clientId: String(row.client_id),
         redirectUri: String(row.redirect_uri),
-        createdAt: Number(row.created_at ?? 0),
+        createdAt: Number(row.created_at ?? 0)
     };
 }
 
