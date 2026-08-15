@@ -6,7 +6,7 @@ import type {
 import crypto from "node:crypto";
 
 export interface GeminiContentPart {
-    text: string;
+    text?: string;
     functionCall?: { name: string; args?: Record<string, unknown>; thoughtSignature?: string };
     functionResponse?: { name: string; response?: Record<string, unknown> };
     thought?: boolean;
@@ -735,11 +735,29 @@ export function parseAntigravityModelName(rawModel: string): string {
  */
 export function buildAntigravityContents(req: ChatCompletionRequest): GeminiContent[] {
     const contents: GeminiContent[] = [];
+
+    // Map tool_call_id to function name
+    const toolCallNameMap = new Map<string, string>();
+    for (const msg of req.messages) {
+        if (Array.isArray(msg.tool_calls)) {
+            for (const tc of msg.tool_calls) {
+                if (tc.id && tc.function?.name) {
+                    toolCallNameMap.set(tc.id, tc.function.name);
+                }
+            }
+        }
+    }
+
     for (const m of req.messages) {
         const role = m.role === "assistant" ? "model" : "user";
-        const parts: GeminiContent["parts"] = [];
+        const parts: GeminiContentPart[] = [];
 
         if (m.role === "assistant" && Array.isArray(m.tool_calls) && m.tool_calls.length > 0) {
+            const text = typeof m.content === "string" ? m.content.trim() : "";
+            if (text) {
+                parts.push({ text });
+            }
+
             for (const tc of m.tool_calls) {
                 let args: Record<string, unknown> = {};
                 try {
@@ -747,20 +765,38 @@ export function buildAntigravityContents(req: ChatCompletionRequest): GeminiCont
                 } catch {
                     args = { raw: tc.function.arguments };
                 }
+                const name = sanitizeFunctionName(tc.function.name);
                 parts.push({
-                    text: "",
-                    functionCall: { name: tc.function.name, args }
+                    functionCall: { name, args }
                 });
             }
-        } else if (m.role === "tool" && m.tool_call_id) {
+        } else if (m.role === "tool") {
+            const rawName =
+                (m.tool_call_id ? toolCallNameMap.get(m.tool_call_id) : undefined) ||
+                m.name ||
+                m.tool_call_id ||
+                "function";
+            const name = sanitizeFunctionName(rawName);
+
+            let responseObj: Record<string, unknown>;
+            try {
+                const parsed =
+                    typeof m.content === "string"
+                        ? JSON.parse(m.content)
+                        : (m.content as unknown as Record<string, unknown>);
+                if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+                    responseObj = parsed as Record<string, unknown>;
+                } else {
+                    responseObj = { output: parsed ?? "" };
+                }
+            } catch {
+                responseObj = { output: typeof m.content === "string" ? m.content : "" };
+            }
+
             parts.push({
-                text: "",
                 functionResponse: {
-                    name: m.tool_call_id,
-                    response: {
-                        result:
-                            typeof m.content === "string" ? m.content : JSON.stringify(m.content)
-                    }
+                    name,
+                    response: responseObj
                 }
             });
         } else {
@@ -773,7 +809,7 @@ export function buildAntigravityContents(req: ChatCompletionRequest): GeminiCont
             if (text) parts.push({ text });
         }
 
-        if (parts.length === 0) parts.push({ text: "" });
+        if (parts.length === 0) parts.push({ text: "..." });
         contents.push({ role, parts });
     }
     if (contents.length === 0) {
