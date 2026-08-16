@@ -33,12 +33,54 @@ interface CachedProviderModels {
     cachedAt: number;
 }
 
+interface ModelSnapshot {
+    models: ModelObject[];
+    cachedAt: number;
+    retryAt?: number;
+}
+
+interface ProviderModelResult {
+    providerId: string;
+    alias: string;
+    models: ModelObject[];
+}
+
+const DEFAULT_MODELS_FETCH_TIMEOUT_MS = 5_000;
+const INITIAL_MODELS_WAIT_MS = 1_000;
+const MODEL_REFRESH_CONCURRENCY = 4;
+const MODEL_FAILURE_COOLDOWN_MS = 30_000;
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+        const timer = setTimeout(() => {
+            reject(new Error(`Provider model discovery timed out after ${timeoutMs}ms`));
+        }, timeoutMs);
+
+        promise.then(
+            (value) => {
+                clearTimeout(timer);
+                resolve(value);
+            },
+            (error: unknown) => {
+                clearTimeout(timer);
+                reject(error);
+            }
+        );
+    });
+}
+
 export class ProviderRegistry {
     private providers: Map<string, AIProvider> = new Map();
     private defaultProvider: AIProvider;
     private modelsCache: Map<string, CachedProviderModels> = new Map();
     private modelsInflight: Map<string, Promise<ModelObject[]>> = new Map();
+    private modelsFailures: Map<string, number> = new Map();
+    private modelsSnapshot?: ModelSnapshot;
+    private modelsRefreshInflight?: Promise<ModelObject[]>;
+    private modelsGeneration = 0;
+    private modelsRefreshPending = false;
     private modelsTtlMs: number = 5 * 60 * 1000; // 5 minutes default TTL
+    private modelsFetchTimeoutMs: number = DEFAULT_MODELS_FETCH_TIMEOUT_MS;
 
     constructor(defaultProvider?: AIProvider, modelsTtlMs?: number) {
         if (modelsTtlMs !== undefined) {
@@ -70,18 +112,34 @@ export class ProviderRegistry {
         this.modelsTtlMs = ttlMs;
     }
 
+    setModelsFetchTimeoutMs(timeoutMs: number): void {
+        this.modelsFetchTimeoutMs = Math.max(1, timeoutMs);
+    }
+
     clearModelsCache(providerId?: string): void {
         if (providerId) {
             this.modelsCache.delete(providerId);
             this.modelsInflight.delete(providerId);
+            this.modelsFailures.delete(providerId);
         } else {
             this.modelsCache.clear();
             this.modelsInflight.clear();
+            this.modelsFailures.clear();
+        }
+        this.modelsSnapshot = undefined;
+        this.modelsGeneration++;
+        if (this.modelsRefreshInflight) {
+            this.modelsRefreshPending = true;
         }
     }
 
     async getProviderModels(provider: AIProvider, forceRefresh = false): Promise<ModelObject[]> {
         if (!provider || provider.id === "default") return [];
+
+        const inflight = this.modelsInflight.get(provider.id);
+        if (inflight) {
+            return inflight;
+        }
 
         const now = Date.now();
         const cached = this.modelsCache.get(provider.id);
@@ -90,32 +148,131 @@ export class ProviderRegistry {
             return cached.models;
         }
 
-        const inflight = this.modelsInflight.get(provider.id);
-        if (inflight && !forceRefresh) {
-            return inflight;
+        const failureAt = this.modelsFailures.get(provider.id);
+        if (
+            !forceRefresh &&
+            failureAt !== undefined &&
+            now - failureAt < MODEL_FAILURE_COOLDOWN_MS
+        ) {
+            return cached?.models ?? [];
         }
 
         const fetchPromise = (async () => {
             try {
-                const models = await provider.listModels();
+                const models = await withTimeout(provider.listModels(), this.modelsFetchTimeoutMs);
                 const safeModels = Array.isArray(models) ? models : [];
                 this.modelsCache.set(provider.id, {
                     models: safeModels,
                     cachedAt: Date.now()
                 });
+                this.modelsFailures.delete(provider.id);
                 return safeModels;
             } catch (err) {
+                this.modelsFailures.set(provider.id, Date.now());
                 if (cached) {
                     return cached.models;
                 }
                 return [];
-            } finally {
-                this.modelsInflight.delete(provider.id);
             }
         })();
 
         this.modelsInflight.set(provider.id, fetchPromise);
+        void fetchPromise.then(
+            () => {
+                if (this.modelsInflight.get(provider.id) === fetchPromise) {
+                    this.modelsInflight.delete(provider.id);
+                }
+            },
+            () => {
+                if (this.modelsInflight.get(provider.id) === fetchPromise) {
+                    this.modelsInflight.delete(provider.id);
+                }
+            }
+        );
         return fetchPromise;
+    }
+
+    async refreshModels(forceRefresh = false): Promise<ModelObject[]> {
+        if (this.modelsRefreshInflight) {
+            return this.modelsRefreshInflight;
+        }
+
+        const generation = this.modelsGeneration;
+        const refreshPromise = this.refreshModelsInternal(forceRefresh, generation);
+        this.modelsRefreshInflight = refreshPromise;
+        void refreshPromise.then(
+            () => {
+                if (this.modelsRefreshInflight === refreshPromise) {
+                    this.modelsRefreshInflight = undefined;
+                    if (this.modelsRefreshPending || generation !== this.modelsGeneration) {
+                        this.modelsRefreshPending = false;
+                        void this.refreshModels(forceRefresh).catch(() => undefined);
+                    }
+                }
+            },
+            () => {
+                if (this.modelsRefreshInflight === refreshPromise) {
+                    this.modelsRefreshInflight = undefined;
+                    if (this.modelsRefreshPending || generation !== this.modelsGeneration) {
+                        this.modelsRefreshPending = false;
+                        void this.refreshModels(forceRefresh).catch(() => undefined);
+                    }
+                }
+            }
+        );
+        return refreshPromise;
+    }
+
+    private async refreshModelsInternal(
+        forceRefresh: boolean,
+        generation: number
+    ): Promise<ModelObject[]> {
+        const activeProviders = Array.from(this.providers.values()).filter(
+            (provider) => provider.id !== "default"
+        );
+        const results: Array<ProviderModelResult | undefined> = new Array(activeProviders.length);
+        let nextIndex = 0;
+
+        const refreshWorker = async (): Promise<void> => {
+            while (true) {
+                const index = nextIndex++;
+                const provider = activeProviders[index];
+                if (!provider) return;
+
+                results[index] = {
+                    providerId: provider.id,
+                    alias: getProviderAlias(provider.id),
+                    models: await this.getProviderModels(provider, forceRefresh)
+                };
+            }
+        };
+
+        const workerCount = Math.min(MODEL_REFRESH_CONCURRENCY, activeProviders.length);
+        await Promise.all(
+            Array.from({ length: workerCount }, () => refreshWorker())
+        );
+
+        const modelResults = results.filter(
+            (result): result is ProviderModelResult => result !== undefined
+        );
+        const models = this.buildModelList(modelResults);
+        if (generation !== this.modelsGeneration) {
+            return models;
+        }
+
+        const failureTimes = activeProviders
+            .map((provider) => this.modelsFailures.get(provider.id))
+            .filter((failureAt): failureAt is number => failureAt !== undefined);
+
+        this.modelsSnapshot = {
+            models,
+            cachedAt: Date.now(),
+            retryAt:
+                failureTimes.length > 0
+                    ? Math.min(...failureTimes) + MODEL_FAILURE_COOLDOWN_MS
+                    : undefined
+        };
+        return models;
     }
 
     registerProvider(provider: AIProvider): void {
@@ -236,46 +393,69 @@ export class ProviderRegistry {
         );
     }
 
-    async listAllModels(providerFilter?: string, forceRefresh = false): Promise<ModelObject[]> {
+    private buildModelList(results: ProviderModelResult[]): ModelObject[] {
         const allModels: ModelObject[] = [];
         const seenIds = new Set<string>();
 
-        const matchesFilter = (alias: string): boolean => {
-            if (!providerFilter) return true;
-            const filter = providerFilter.toLowerCase();
-            return alias.toLowerCase() === filter || alias.toLowerCase().startsWith(filter);
-        };
+        for (const { providerId, alias, models } of results) {
+            for (const model of models) {
+                const bareId = stripModelPrefix(model.id, alias, providerId);
+                const id = `${alias}/${bareId}`;
+                if (seenIds.has(id)) continue;
 
-        const addModel = (model: ModelObject, alias: string, providerId: string): void => {
-            if (!matchesFilter(alias)) return;
-            const bareId = stripModelPrefix(model.id, alias, providerId);
-            const id = `${alias}/${bareId}`;
-            if (!seenIds.has(id)) {
                 seenIds.add(id);
                 allModels.push({ id, object: "model", owned_by: alias });
-            }
-        };
-
-        const activeProviders = Array.from(this.providers.values()).filter(
-            (p) => p.id !== "default"
-        );
-
-        // Fetch / retrieve cached models concurrently across all active providers
-        const results = await Promise.all(
-            activeProviders.map(async (provider) => {
-                const alias = getProviderAlias(provider.id);
-                const liveModels = await this.getProviderModels(provider, forceRefresh);
-                return { providerId: provider.id, alias, liveModels };
-            })
-        );
-
-        for (const { providerId, alias, liveModels } of results) {
-            for (const model of liveModels) {
-                addModel(model, alias, providerId);
             }
         }
 
         return allModels;
+    }
+
+    private filterModels(models: ModelObject[], providerFilter?: string): ModelObject[] {
+        if (!providerFilter) return models;
+        const filter = providerFilter.toLowerCase();
+        return models.filter((model) => {
+            const owner = model.owned_by.toLowerCase();
+            return owner === filter || owner.startsWith(filter);
+        });
+    }
+
+    async listAllModels(providerFilter?: string, forceRefresh = false): Promise<ModelObject[]> {
+        const snapshot = this.modelsSnapshot;
+        const now = Date.now();
+        const snapshotNeedsRefresh =
+            !snapshot ||
+            now - snapshot.cachedAt >= this.modelsTtlMs ||
+            (snapshot.retryAt !== undefined && now >= snapshot.retryAt);
+
+        if (forceRefresh) {
+            await this.waitForInitialModels(true);
+        } else if (!snapshot) {
+            await this.waitForInitialModels(false);
+        } else if (snapshotNeedsRefresh) {
+            void this.refreshModels().catch(() => undefined);
+        }
+
+        return this.filterModels(this.modelsSnapshot?.models ?? [], providerFilter);
+    }
+
+    private async waitForInitialModels(forceRefresh: boolean): Promise<void> {
+        const deadline = Date.now() + INITIAL_MODELS_WAIT_MS;
+        while (forceRefresh || !this.modelsSnapshot) {
+            const remainingMs = deadline - Date.now();
+            if (remainingMs <= 0) break;
+
+            try {
+                await withTimeout(this.refreshModels(forceRefresh), remainingMs);
+            } catch {
+                break;
+            }
+
+            if (this.modelsSnapshot) return;
+        }
+
+        // A refresh invalidated while it was running is automatically queued
+        // again. The loop above observes that second refresh before returning.
     }
 
     async chatCompletion(req: ChatCompletionRequest): Promise<ChatCompletionResponse> {

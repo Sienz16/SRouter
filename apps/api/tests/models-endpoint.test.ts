@@ -11,12 +11,19 @@ app.route("/v1", modelsRoute);
 
 const mockProviderId = "mock";
 let fetchCount = 0;
+let slowRefresh = false;
+
+const delay = (ms: number): Promise<void> =>
+    new Promise((resolve) => {
+        setTimeout(resolve, ms);
+    });
 
 const mockProvider: AIProvider = {
     id: mockProviderId,
     name: "Mock Models Cached Provider",
     listModels: async () => {
         fetchCount++;
+        if (slowRefresh) await delay(300);
         return [
             { id: `${mockProviderId}/gpt-5-turbo`, object: "model" },
             { id: `${mockProviderId}/claude-sonnet-4`, object: "model" }
@@ -32,6 +39,12 @@ const mockProvider: AIProvider = {
 
 beforeEach(() => {
     fetchCount = 0;
+    slowRefresh = false;
+    for (const providerId of registry.getAllProviders().keys()) {
+        if (providerId !== "default" && providerId !== mockProviderId) {
+            registry.unregisterProvider(providerId);
+        }
+    }
     registry.registerProvider(mockProvider);
     ModelsLogic.clearCache();
 });
@@ -75,7 +88,28 @@ test("GET /v1/models?refresh=true forces a fresh fetch bypassing cache", async (
         headers: { "Cache-Control": "no-cache" }
     });
     assert.equal(resNoCache.status, 200);
+    for (let i = 0; i < 20 && fetchCount < 3; i++) await delay(5);
     assert.equal(fetchCount, 3);
+});
+
+test("GET /v1/models revalidates no-cache requests without blocking", async () => {
+    await app.request("/v1/models", { method: "GET" });
+    slowRefresh = true;
+
+    const startedAt = Date.now();
+    const response = await app.request("/v1/models", {
+        method: "GET",
+        headers: { "Cache-Control": "no-cache" }
+    });
+    const elapsedMs = Date.now() - startedAt;
+
+    assert.equal(response.status, 200);
+    assert.ok(elapsedMs < 150, `no-cache request took ${elapsedMs}ms`);
+    const body = (await response.json()) as { data: Array<{ id: string }> };
+    assert.ok(body.data.some((model) => model.id.includes("gpt-5-turbo")));
+
+    for (let i = 0; i < 60 && fetchCount < 2; i++) await delay(10);
+    assert.equal(fetchCount, 2);
 });
 
 test("GET /v1/models/:model returns single model or 404", async () => {

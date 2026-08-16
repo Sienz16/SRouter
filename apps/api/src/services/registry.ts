@@ -241,6 +241,15 @@ export function loadSavedProvidersFromDB(): void {
     }
 }
 
+/**
+ * Warm model discovery after the HTTP server starts. Keeping this outside the
+ * database reload helper avoids network side effects for provider mutations
+ * and keeps reloads lazy when a connection is added or removed.
+ */
+export function warmModelRegistry(): void {
+    void registry.refreshModels().catch(() => undefined);
+}
+
 // Seed built-in driver rows, then auto load saved DB providers
 seedDefaultProviders();
 loadSavedProvidersFromDB();

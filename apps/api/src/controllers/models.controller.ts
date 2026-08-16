@@ -7,13 +7,15 @@ export class ModelsController {
     public static async listModels(c: Context): Promise<Response> {
         const refreshParam = c.req.query("refresh") || c.req.query("force");
         const cacheControlReq = c.req.header("cache-control");
-        const forceRefresh =
-            refreshParam === "true" ||
-            refreshParam === "1" ||
-            cacheControlReq?.includes("no-cache") ||
-            cacheControlReq?.includes("no-store");
+        const explicitRefresh = refreshParam === "true" || refreshParam === "1";
+        const revalidate =
+            cacheControlReq?.includes("no-cache") || cacheControlReq?.includes("no-store");
 
-        const models = await ModelsLogic.getAllModels(undefined, forceRefresh);
+        if (revalidate && !explicitRefresh) {
+            void ModelsLogic.refreshModels(true).catch(() => undefined);
+        }
+
+        const models = await ModelsLogic.getAllModels(undefined, explicitRefresh);
         const response: ModelListResponse = {
             object: "list",
             data: models

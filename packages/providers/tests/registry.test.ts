@@ -3,6 +3,11 @@ import { test } from "node:test";
 import { getProviderAlias, ProviderRegistry } from "../src/registry.js";
 import type { AIProvider } from "@srouter/types";
 
+const delay = (ms: number): Promise<void> =>
+    new Promise((resolve) => {
+        setTimeout(resolve, ms);
+    });
+
 const provider: AIProvider = {
     id: "kiro_test_runtime",
     name: "Kiro Runtime Test",
@@ -154,4 +159,120 @@ test("ProviderRegistry invalidates cache on register and unregister", async () =
     registry.unregisterProvider(testProvider.id);
     const models = await registry.listAllModels();
     assert.equal(models.length, 0);
+});
+
+test("ProviderRegistry serves a stale aggregate snapshot while refreshing", async () => {
+    let callCount = 0;
+    const testProvider: AIProvider = {
+        id: "test_snapshot_provider",
+        name: "Test Snapshot Provider",
+        listModels: async () => {
+            callCount++;
+            if (callCount === 2) await delay(120);
+            return [
+                {
+                    id: `test_snapshot_provider/${callCount === 1 ? "stale" : "fresh"}`,
+                    object: "model"
+                }
+            ];
+        },
+        chatCompletion: async () => {
+            throw new Error("not used");
+        },
+        chatCompletionStream: async function* () {
+            throw new Error("not used");
+        }
+    };
+
+    const registry = new ProviderRegistry(undefined, 100);
+    registry.registerProvider(testProvider);
+    await registry.listAllModels();
+    await delay(110);
+
+    const startedAt = Date.now();
+    const staleModels = await registry.listAllModels();
+    const elapsedMs = Date.now() - startedAt;
+
+    assert.ok(elapsedMs < 60, `stale read took ${elapsedMs}ms`);
+    assert.equal(staleModels[0]?.id, "test/stale");
+    assert.equal(callCount, 2);
+
+    await delay(140);
+    const freshModels = await registry.listAllModels();
+    assert.equal(freshModels[0]?.id, "test/fresh");
+    assert.equal(callCount, 2);
+});
+
+test("ProviderRegistry bounds slow refreshes and keeps cached models", async () => {
+    let callCount = 0;
+    const testProvider: AIProvider = {
+        id: "test_timeout_provider",
+        name: "Test Timeout Provider",
+        listModels: async () => {
+            callCount++;
+            if (callCount > 1) await delay(300);
+            return [
+                {
+                    id: `test_timeout_provider/${callCount === 1 ? "cached" : "fresh"}`,
+                    object: "model"
+                }
+            ];
+        },
+        chatCompletion: async () => {
+            throw new Error("not used");
+        },
+        chatCompletionStream: async function* () {
+            throw new Error("not used");
+        }
+    };
+
+    const registry = new ProviderRegistry();
+    registry.registerProvider(testProvider);
+    await registry.listAllModels();
+    registry.setModelsFetchTimeoutMs(20);
+
+    const startedAt = Date.now();
+    const models = await registry.listAllModels(undefined, true);
+    const elapsedMs = Date.now() - startedAt;
+
+    assert.ok(elapsedMs < 150, `timed out read took ${elapsedMs}ms`);
+    assert.equal(models[0]?.id, "test/cached");
+    assert.equal(callCount, 2);
+});
+
+test("ProviderRegistry coalesces concurrent forced refreshes", async () => {
+    let callCount = 0;
+    const pending: Array<() => void> = [];
+    const testProvider: AIProvider = {
+        id: "test_forced_refresh_provider",
+        name: "Test Forced Refresh Provider",
+        listModels: async () => {
+            callCount++;
+            if (callCount > 1) {
+                await new Promise<void>((resolve) => {
+                    pending.push(resolve);
+                });
+            }
+            return [{ id: "test_forced_refresh_provider/model", object: "model" }];
+        },
+        chatCompletion: async () => {
+            throw new Error("not used");
+        },
+        chatCompletionStream: async function* () {
+            throw new Error("not used");
+        }
+    };
+
+    const registry = new ProviderRegistry();
+    registry.registerProvider(testProvider);
+    await registry.listAllModels();
+
+    const firstRefresh = registry.listAllModels(undefined, true);
+    const secondRefresh = registry.listAllModels(undefined, true);
+    await delay(10);
+
+    assert.equal(callCount, 2);
+    pending.forEach((resolve) => resolve());
+    await Promise.all([firstRefresh, secondRefresh]);
+    assert.equal(callCount, 2);
 });
