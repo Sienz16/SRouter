@@ -8,19 +8,30 @@ import { Input } from "@/components/ui/input";
 interface AdminStatus {
     setupRequired: boolean;
     authenticated: boolean;
+    setupTokenConfigured: boolean;
+    clientIsLoopback: boolean;
 }
 
 interface AdminAuthFormProps {
     setupRequired: boolean;
+    setupTokenConfigured: boolean;
+    clientIsLoopback: boolean;
     onAuthenticated: () => void;
 }
 
-function AdminAuthForm({ setupRequired, onAuthenticated }: AdminAuthFormProps) {
+function AdminAuthForm({
+    setupRequired,
+    setupTokenConfigured,
+    clientIsLoopback,
+    onAuthenticated
+}: AdminAuthFormProps) {
     const [password, setPassword] = useState("");
     const [confirmation, setConfirmation] = useState("");
     const [setupToken, setSetupToken] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const remoteSetupLocked = setupRequired && !clientIsLoopback && !setupTokenConfigured;
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -91,19 +102,42 @@ function AdminAuthForm({ setupRequired, onAuthenticated }: AdminAuthFormProps) {
                                         required
                                     />
                                 </label>
-                                <label className="flex flex-col gap-1.5 text-xs font-medium">
-                                    Remote setup token
-                                    <Input
-                                        type="password"
-                                        autoComplete="off"
-                                        value={setupToken}
-                                        onChange={(event) => setSetupToken(event.target.value)}
-                                        placeholder="Only needed outside localhost"
-                                    />
-                                    <span className="text-[11px] font-normal text-muted-foreground">
-                                        Leave empty when opening SRouter on the same machine.
-                                    </span>
-                                </label>
+
+                                {clientIsLoopback ? (
+                                    <p className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-3 py-2 text-[11px] font-normal text-emerald-600 dark:text-emerald-400">
+                                        You are on the server machine — no setup token needed.
+                                    </p>
+                                ) : remoteSetupLocked ? (
+                                    <p className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-[11px] font-normal text-destructive">
+                                        Remote setup is not enabled on this server. Ask your server
+                                        administrator to configure the{" "}
+                                        <code className="rounded bg-destructive/10 px-1 py-0.5 font-mono text-[10px]">
+                                            SROUTER_SETUP_TOKEN
+                                        </code>{" "}
+                                        environment variable, or open SRouter from the server
+                                        machine to finish setup.
+                                    </p>
+                                ) : (
+                                    <>
+                                        <label className="flex flex-col gap-1.5 text-xs font-medium">
+                                            Setup token
+                                            <Input
+                                                type="password"
+                                                autoComplete="off"
+                                                value={setupToken}
+                                                onChange={(event) =>
+                                                    setSetupToken(event.target.value)
+                                                }
+                                                placeholder="Provided by your server administrator"
+                                            />
+                                            <span className="text-[11px] font-normal text-muted-foreground">
+                                                This server requires a setup token for first-time
+                                                setup from outside the server machine. Ask your
+                                                server administrator for it.
+                                            </span>
+                                        </label>
+                                    </>
+                                )}
                             </>
                         ) : null}
 
@@ -172,6 +206,8 @@ export function AdminAuthGate({ children }: { children: ReactNode }) {
         return (
             <AdminAuthForm
                 setupRequired={statusQuery.data.setupRequired}
+                setupTokenConfigured={statusQuery.data.setupTokenConfigured}
+                clientIsLoopback={statusQuery.data.clientIsLoopback}
                 onAuthenticated={() => void statusQuery.refetch()}
             />
         );
