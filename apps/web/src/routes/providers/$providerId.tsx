@@ -403,6 +403,7 @@ function ProviderDetailPage() {
                                 key={m.id}
                                 model={m}
                                 copied={copied === m.id}
+                                onCopy={(id) => void copy(id)}
                                 onDelete={handleDeleteModel}
                             />
                         ))}
