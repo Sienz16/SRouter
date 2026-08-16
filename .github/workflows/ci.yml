@@ -21,8 +21,10 @@ jobs:
 
             - name: Install pnpm
               uses: pnpm/action-setup@v4
-              with:
-                  version: 11
+              # No explicit version: pnpm/action-setup reads the
+              # `packageManager` field from package.json (pnpm@11.20.0).
+              # Pinning `version: 11` here conflicts with package.json and
+              # makes the action fail with "Multiple versions of pnpm specified".
 
             - name: Setup Node.js ${{ matrix.node-version }}
               uses: actions/setup-node@v4
