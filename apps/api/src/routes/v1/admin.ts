@@ -76,7 +76,14 @@ export function createAdminRoute(options: AdminRouteOptions = {}): Hono {
 
     route.get("/admin/status", (c) => {
         const authenticated = verifyAdminSession(store, getCookie(c, ADMIN_SESSION_COOKIE), now());
-        return ok(c, { setupRequired: !store.hasAdminAccount(), authenticated });
+        const address = getClientAddress(c);
+        const configuredSetupToken = getSetupToken();
+        return ok(c, {
+            setupRequired: !store.hasAdminAccount(),
+            authenticated,
+            setupTokenConfigured: Boolean(configuredSetupToken),
+            clientIsLoopback: isLoopbackAddress(address)
+        });
     });
 
     route.post("/admin/setup", async (c) => {

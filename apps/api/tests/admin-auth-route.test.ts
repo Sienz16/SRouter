@@ -32,7 +32,32 @@ test("admin status reports setup and authentication state", async () => {
 
     const initial = await app.request("/v1/admin/status");
     assert.equal(initial.status, 200);
-    assert.deepEqual(await initial.json(), { setupRequired: true, authenticated: false });
+    assert.deepEqual(await initial.json(), {
+        setupRequired: true,
+        authenticated: false,
+        setupTokenConfigured: false,
+        clientIsLoopback: false
+    });
+});
+
+test("admin status reports loopback and setup token configuration", async () => {
+    const local = createTestApp({ address: "127.0.0.1" });
+    const localStatus = await local.app.request("/v1/admin/status");
+    assert.deepEqual(await localStatus.json(), {
+        setupRequired: true,
+        authenticated: false,
+        setupTokenConfigured: false,
+        clientIsLoopback: true
+    });
+
+    const remote = createTestApp({ address: "192.168.1.10", setupToken: "setup-secret" });
+    const remoteStatus = await remote.app.request("/v1/admin/status");
+    assert.deepEqual(await remoteStatus.json(), {
+        setupRequired: true,
+        authenticated: false,
+        setupTokenConfigured: true,
+        clientIsLoopback: false
+    });
 });
 
 test("local setup creates an account and establishes a session", async () => {
@@ -54,7 +79,12 @@ test("local setup creates an account and establishes a session", async () => {
     const status = await app.request("/v1/admin/status", {
         headers: { Cookie: getSessionCookie(setup) }
     });
-    assert.deepEqual(await status.json(), { setupRequired: false, authenticated: true });
+    assert.deepEqual(await status.json(), {
+        setupRequired: false,
+        authenticated: true,
+        setupTokenConfigured: false,
+        clientIsLoopback: true
+    });
 });
 
 test("remote setup requires the configured one-time setup token", async () => {
@@ -118,7 +148,12 @@ test("login and logout manage the admin session", async () => {
     assert.equal(logout.status, 204);
 
     const status = await app.request("/v1/admin/status", { headers: { Cookie: cookie } });
-    assert.deepEqual(await status.json(), { setupRequired: false, authenticated: false });
+    assert.deepEqual(await status.json(), {
+        setupRequired: false,
+        authenticated: false,
+        setupTokenConfigured: false,
+        clientIsLoopback: true
+    });
 });
 
 test("repeated failed logins are throttled", async () => {
