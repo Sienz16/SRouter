@@ -1,9 +1,9 @@
 services:
     srouter:
+        image: ghcr.io/seaavey/srouter:latest
         build:
             context: .
             dockerfile: Dockerfile
-        image: srouter:latest
         container_name: srouter
         restart: unless-stopped
         ports:

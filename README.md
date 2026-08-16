@@ -144,9 +144,29 @@ Navigate to [http://localhost:5173](http://localhost:5173) in your browser:
 
 ## 🐳 Docker Deployment
 
-Deploy SRouter easily to any VPS, home server, or cloud VM using Docker Compose.
+Deploy SRouter easily to any VPS, home server, or cloud VM using Docker or Docker Compose with official images from GitHub Packages (`ghcr.io`).
 
-### 1. Using Docker Compose (Recommended)
+### 1. One-Liner (Pre-built Image via GitHub Packages)
+
+Run directly without cloning the codebase:
+
+```bash
+docker run -d \
+  --name srouter \
+  --restart unless-stopped \
+  -p 3000:3000 \
+  -p 1455:1455 \
+  -v srouter_data:/app/data \
+  ghcr.io/seaavey/srouter:latest
+```
+
+Or pull a specific release tag:
+
+```bash
+docker pull ghcr.io/seaavey/srouter:v0.1.0-rc.2
+```
+
+### 2. Using Docker Compose
 
 Clone the repository and spin up the unified container:
 
@@ -156,7 +176,7 @@ cd SRouter
 docker compose up -d
 ```
 
-SRouter will build and run in the background:
+SRouter will run in the background:
 
 - **Web Dashboard & API Gateway**: [http://localhost:3000](http://localhost:3000) (or `http://<your-vps-ip>:3000`)
 - **OAuth Callback Server**: `http://localhost:1455`
