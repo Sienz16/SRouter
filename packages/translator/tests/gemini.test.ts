@@ -52,7 +52,10 @@ test("buildAntigravityContents produces valid parts without empty text in oneof 
     const toolPart = contents[2]?.parts[0];
     assert.ok(toolPart?.functionResponse);
     assert.equal(toolPart.functionResponse.name, "get_weather");
-    assert.deepEqual(toolPart.functionResponse.response, { temperature: "22C", condition: "Sunny" });
+    assert.deepEqual(toolPart.functionResponse.response, {
+        temperature: "22C",
+        condition: "Sunny"
+    });
     // Verify text is undefined (not empty string) to satisfy protobuf oneof constraint
     assert.equal(toolPart.text, undefined);
     assert.equal(Object.prototype.hasOwnProperty.call(toolPart, "text"), false);

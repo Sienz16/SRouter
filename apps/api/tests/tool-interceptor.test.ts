@@ -6,6 +6,7 @@ import type {
     ChatCompletionRequest,
     ChatCompletionResponse
 } from "@srouter/types";
+import { deleteLogsByProviderDB } from "@srouter/db";
 import {
     extractSearchQuery,
     isToolProvidedByClient,
@@ -187,6 +188,7 @@ beforeEach(() => {
 
 afterEach(() => {
     registry.unregisterProvider(mockInterceptProviderId);
+    deleteLogsByProviderDB(mockInterceptProviderId);
 });
 
 test("ChatLogic intercepts non-streaming web_search and returns final answer without tool error", async () => {

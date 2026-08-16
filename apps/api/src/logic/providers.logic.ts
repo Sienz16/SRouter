@@ -262,4 +262,120 @@ export class ProvidersLogic {
 
         return providerDefinitionFromConfig(config);
     }
+
+    public static async verifyConnection(payload: {
+        protocol: ProviderProtocol;
+        baseUrl?: string;
+        apiKey?: string;
+    }): Promise<{ success: boolean; message: string; modelsCount?: number }> {
+        const protocol = payload.protocol || "openai";
+        const baseUrl = (payload.baseUrl?.trim() || "").replace(/\/+$/, "");
+        const apiKey = payload.apiKey?.trim();
+
+        if (baseUrl) {
+            try {
+                const url = new URL(baseUrl);
+                if (!["http:", "https:"].includes(url.protocol)) {
+                    return {
+                        success: false,
+                        message: "URL endpoint harus berformat HTTP atau HTTPS."
+                    };
+                }
+            } catch {
+                return { success: false, message: "Format Endpoint Base URL tidak valid." };
+            }
+        }
+
+        try {
+            if (protocol === "anthropic") {
+                const targetUrl = baseUrl
+                    ? `${baseUrl}/v1/models`
+                    : "https://api.anthropic.com/v1/models";
+                const headers: Record<string, string> = {
+                    "anthropic-version": "2023-06-01"
+                };
+                if (apiKey) {
+                    headers["x-api-key"] = apiKey;
+                }
+
+                const res = await fetch(targetUrl, {
+                    method: "GET",
+                    headers,
+                    signal: AbortSignal.timeout(8000)
+                });
+
+                if (res.ok) {
+                    const data = (await res.json().catch(() => ({}))) as {
+                        data?: unknown[];
+                    };
+                    const count = Array.isArray(data?.data) ? data.data.length : undefined;
+                    return {
+                        success: true,
+                        message:
+                            count !== undefined
+                                ? `Koneksi Anthropic valid! (${count} model ditemukan)`
+                                : "Koneksi Anthropic berhasil diverifikasi.",
+                        modelsCount: count
+                    };
+                }
+
+                if (res.status === 401) {
+                    return {
+                        success: false,
+                        message: "Autentikasi gagal: API key Anthropic tidak valid (HTTP 401)."
+                    };
+                }
+
+                const errBody = await res.text().catch(() => "");
+                return {
+                    success: false,
+                    message: `Upstream error (HTTP ${res.status}): ${res.statusText || errBody.slice(0, 100)}`
+                };
+            }
+
+            // OpenAI / Custom OpenAI compatible
+            const targetUrl = baseUrl ? `${baseUrl}/models` : "https://api.openai.com/v1/models";
+            const headers: Record<string, string> = {};
+            if (apiKey) {
+                headers["Authorization"] = `Bearer ${apiKey}`;
+            }
+
+            const res = await fetch(targetUrl, {
+                method: "GET",
+                headers,
+                signal: AbortSignal.timeout(8000)
+            });
+
+            if (res.ok) {
+                const data = (await res.json().catch(() => ({}))) as {
+                    data?: unknown[];
+                };
+                const count = Array.isArray(data?.data) ? data.data.length : undefined;
+                return {
+                    success: true,
+                    message:
+                        count !== undefined
+                            ? `Koneksi OpenAI valid! (${count} model ditemukan)`
+                            : "Koneksi OpenAI berhasil diverifikasi.",
+                    modelsCount: count
+                };
+            }
+
+            if (res.status === 401) {
+                return {
+                    success: false,
+                    message: "Autentikasi gagal: API key salah atau kedaluwarsa (HTTP 401)."
+                };
+            }
+
+            const errBody = await res.text().catch(() => "");
+            return {
+                success: false,
+                message: `Upstream error (HTTP ${res.status}): ${res.statusText || errBody.slice(0, 100)}`
+            };
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : "Tidak dapat terhubung ke endpoint.";
+            return { success: false, message: `Gagal terhubung ke host: ${msg}` };
+        }
+    }
 }

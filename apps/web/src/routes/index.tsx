@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Activity, Boxes, Coins, CircleDollarSign, RefreshCw, TriangleAlert } from "lucide-react";
 import { api } from "@/lib/api";
+import { formatCompactNumber } from "@/lib/utils";
 import type { UsageStats } from "@srouter/types";
 import { ModelUsageOverview } from "@/components/dashboard/ModelUsageOverview";
 import { NetworkStatus } from "@/components/dashboard/NetworkStatus";
@@ -20,9 +21,10 @@ type StatCardProps = {
     value: string;
     detail: string;
     icon: ComponentType<{ className?: string; strokeWidth?: number }>;
+    tooltip?: string;
 };
 
-function StatCard({ label, value, detail, icon: Icon }: StatCardProps) {
+function StatCard({ label, value, detail, icon: Icon, tooltip }: StatCardProps) {
     return (
         <article className="relative min-w-0 px-4 py-5 xl:[&:not(:first-child)]:border-l xl:[&:not(:first-child)]:border-border/70">
             <div className="flex items-center gap-2 text-muted-foreground">
@@ -31,7 +33,10 @@ function StatCard({ label, value, detail, icon: Icon }: StatCardProps) {
                     {label}
                 </span>
             </div>
-            <div className="mt-3 text-2xl font-semibold tracking-tight text-foreground">
+            <div
+                className="mt-3 text-2xl font-semibold tracking-tight text-foreground cursor-default"
+                title={tooltip ?? value}
+            >
                 {value}
             </div>
             <p className="mt-1 truncate text-[11px] text-muted-foreground" title={detail}>
@@ -137,14 +142,16 @@ function DashboardPage() {
             >
                 <StatCard
                     label="Total requests"
-                    value={stats.totalRequests.toLocaleString()}
+                    value={formatCompactNumber(stats.totalRequests)}
+                    tooltip={`${stats.totalRequests.toLocaleString()} recorded requests`}
                     detail="All recorded requests"
                     icon={Activity}
                 />
                 <StatCard
                     label="Total tokens"
-                    value={stats.totalTokens.toLocaleString()}
-                    detail={`${stats.totalInputTokens.toLocaleString()} input · ${stats.totalOutputTokens.toLocaleString()} output`}
+                    value={formatCompactNumber(stats.totalTokens)}
+                    tooltip={`${stats.totalTokens.toLocaleString()} total tokens (${stats.totalInputTokens.toLocaleString()} input · ${stats.totalOutputTokens.toLocaleString()} output)`}
+                    detail={`${formatCompactNumber(stats.totalInputTokens)} input · ${formatCompactNumber(stats.totalOutputTokens)} output`}
                     icon={Coins}
                 />
                 <StatCard

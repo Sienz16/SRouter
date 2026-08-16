@@ -248,9 +248,7 @@ export class ProviderRegistry {
         };
 
         const workerCount = Math.min(MODEL_REFRESH_CONCURRENCY, activeProviders.length);
-        await Promise.all(
-            Array.from({ length: workerCount }, () => refreshWorker())
-        );
+        await Promise.all(Array.from({ length: workerCount }, () => refreshWorker()));
 
         const modelResults = results.filter(
             (result): result is ProviderModelResult => result !== undefined

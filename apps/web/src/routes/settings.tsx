@@ -163,11 +163,11 @@ function SettingsPage() {
             </header>
 
             {/* Layout: Sidebar Tabs + Content Panel */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
                 {/* Navigation Tabs */}
                 <nav
                     aria-label="Settings sections"
-                    className="flex md:flex-col gap-1 overflow-x-auto md:overflow-visible pb-2 md:pb-0"
+                    className="flex md:flex-col gap-1 overflow-x-auto md:overflow-visible pb-2 md:pb-0 md:sticky md:top-0 z-10"
                 >
                     {tabs.map(({ id, label, icon: Icon, hasBadge }) => {
                         const isActive = activeTab === id;

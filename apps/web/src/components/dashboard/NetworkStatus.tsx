@@ -42,7 +42,7 @@ export function NetworkStatus() {
             aria-labelledby="api-integration-title"
             className="flex min-w-0 flex-col overflow-hidden bg-card/30"
         >
-            <div className="p-4">
+            <div className="p-4 sm:p-5 lg:p-6">
                 <div className="flex items-center justify-between gap-3">
                     <div className="flex min-w-0 items-center gap-3">
                         <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-secondary/45 shadow-xs">
@@ -78,7 +78,7 @@ export function NetworkStatus() {
                 </div>
             </div>
 
-            <div className="border-t border-border/60 px-4 pb-4 pt-3.5">
+            <div className="border-t border-border/60 px-4 pb-4 pt-3.5 sm:px-5 sm:pb-5 sm:pt-4 lg:px-6 lg:pb-6 lg:pt-5">
                 <div className="mb-2.5 flex items-center justify-between gap-3 px-0.5">
                     <div>
                         <h3 className="text-[11px] font-semibold text-foreground">

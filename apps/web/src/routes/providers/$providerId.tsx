@@ -3,17 +3,17 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
     AlertTriangle,
     ArrowLeft,
-    Check,
-    Copy,
     ExternalLink,
     LayoutGrid,
     List,
     Plus,
     RotateCcw,
-    Search
+    Search,
+    X
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ProviderIcon } from "@/components/ProviderIcon";
 import { ConnectOAuthModal } from "@/components/ui/ConnectOAuthModal";
 import { useProvider, type AddConnectionPayload } from "@/hooks/useProvider";
@@ -28,6 +28,35 @@ import { CATEGORY_LABELS, getProviderWebsiteUrl } from "@srouter/constants";
 export const Route = createFileRoute("/providers/$providerId")({
     component: ProviderDetailPage
 });
+
+function ProviderDetailSkeleton() {
+    return (
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 font-mono animate-in fade-in-50 duration-300">
+            <Skeleton className="h-4 w-40" />
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/60 pb-5">
+                <div className="flex items-center gap-3">
+                    <Skeleton className="size-12 rounded-xl" />
+                    <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                            <Skeleton className="h-6 w-36" />
+                            <Skeleton className="h-5 w-24 rounded-full" />
+                        </div>
+                        <Skeleton className="h-3 w-48" />
+                    </div>
+                </div>
+                <Skeleton className="h-8 w-32 rounded-md" />
+            </div>
+            <Skeleton className="h-44 rounded-xl" />
+            <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                    <Skeleton className="h-4 w-36" />
+                    <Skeleton className="h-8 w-60 rounded-md" />
+                </div>
+                <Skeleton className="h-80 rounded-xl" />
+            </div>
+        </div>
+    );
+}
 
 function ProviderDetailPage() {
     const { providerId } = Route.useParams();
@@ -111,29 +140,22 @@ function ProviderDetailPage() {
     };
 
     if (isLoading) {
-        return (
-            <div className="mx-auto w-full max-w-6xl space-y-6 font-mono">
-                <Skeleton className="h-6 w-36 rounded-[6px]" />
-                <Skeleton className="h-28 rounded-[12px]" />
-                <Skeleton className="h-44 rounded-[12px]" />
-                <Skeleton className="h-64 rounded-[12px]" />
-            </div>
-        );
+        return <ProviderDetailSkeleton />;
     }
 
     if (error || !provider) {
         return (
-            <div className="mx-auto w-full max-w-6xl space-y-4 font-mono">
+            <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 font-mono">
                 <Link
                     to="/providers"
-                    className="inline-flex items-center gap-1.5 text-xs text-[var(--ink-3)] hover:text-[var(--ink)] transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
                 >
                     <ArrowLeft className="size-3.5" />
                     <span>Back to Providers Catalog</span>
                 </Link>
-                <div className="rounded-[12px] border border-rose-500/30 bg-rose-500/10 p-6 text-xs text-rose-500 space-y-2">
+                <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-6 text-xs text-destructive space-y-2">
                     <p className="font-bold text-sm">Provider '{providerId}' not found.</p>
-                    <p className="text-[var(--ink-3)]">
+                    <p className="text-muted-foreground">
                         {error instanceof Error
                             ? error.message
                             : "Provider definition missing in gateway registry."}
@@ -153,12 +175,12 @@ function ProviderDetailPage() {
     const websiteUrl = getProviderWebsiteUrl(provider.id, provider.defaultBaseUrl);
 
     return (
-        <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 font-mono">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 font-mono">
             {/* Top Navigation Back Link */}
             <div>
                 <Link
                     to="/providers"
-                    className="inline-flex items-center gap-1.5 text-xs text-[var(--ink-3)] hover:text-[var(--ink)] transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
                 >
                     <ArrowLeft className="size-3.5" />
                     <span>Back to Providers Catalog</span>
@@ -166,20 +188,20 @@ function ProviderDetailPage() {
             </div>
 
             {/* Editorial Header Section */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[var(--line)] pb-5">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/60 pb-5">
                 <div className="flex items-center gap-3">
                     {websiteUrl ? (
                         <a
                             href={websiteUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex size-12 shrink-0 items-center justify-center rounded-[10px] border border-[var(--line)] bg-[var(--surface)] p-2 shadow-2xs hover:border-[var(--ink-2)] hover:bg-[var(--field)] transition-all cursor-pointer"
+                            className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-card p-2 shadow-2xs hover:border-border hover:bg-secondary/40 transition-all cursor-pointer"
                             title={`Open ${provider.name} website (${websiteUrl})`}
                         >
                             <ProviderIcon providerId={provider.id} className="size-7" />
                         </a>
                     ) : (
-                        <div className="flex size-12 shrink-0 items-center justify-center rounded-[10px] border border-[var(--line)] bg-[var(--surface)] p-2 shadow-2xs">
+                        <div className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-card p-2 shadow-2xs">
                             <ProviderIcon providerId={provider.id} className="size-7" />
                         </div>
                     )}
@@ -190,14 +212,14 @@ function ProviderDetailPage() {
                                     href={websiteUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="group inline-flex items-center gap-1.5 text-xl font-bold tracking-tight text-[var(--ink)] hover:text-orange-500 transition-colors cursor-pointer"
+                                    className="group inline-flex items-center gap-1.5 text-xl font-bold tracking-tight text-foreground hover:text-amber-500 transition-colors cursor-pointer"
                                     title={`Visit ${provider.name} (${websiteUrl})`}
                                 >
                                     <span>{provider.name}</span>
-                                    <ExternalLink className="size-4 text-[var(--ink-3)] group-hover:text-orange-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                                    <ExternalLink className="size-3.5 text-muted-foreground group-hover:text-amber-500 transition-colors" />
                                 </a>
                             ) : (
-                                <h1 className="text-xl font-bold tracking-tight text-[var(--ink)]">
+                                <h1 className="text-xl font-bold tracking-tight text-foreground">
                                     {provider.name}
                                 </h1>
                             )}
@@ -205,14 +227,14 @@ function ProviderDetailPage() {
                                 className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
                                     activeConnectionsCount > 0
                                         ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                                        : "border border-[var(--line)] bg-[var(--field)] text-[var(--ink-3)]"
+                                        : "border border-border/60 bg-secondary/50 text-muted-foreground"
                                 }`}
                             >
                                 <span
                                     className={`size-1.5 rounded-full ${
                                         activeConnectionsCount > 0
                                             ? "bg-emerald-500 animate-pulse"
-                                            : "bg-[var(--ink-3)]"
+                                            : "bg-muted-foreground"
                                     }`}
                                 />
                                 <span>
@@ -222,8 +244,8 @@ function ProviderDetailPage() {
                                 </span>
                             </span>
                         </div>
-                        <p className="text-xs text-[var(--ink-3)]">
-                            Driver ID: <span className="text-[var(--ink-2)]">{provider.id}</span> ·{" "}
+                        <p className="text-xs text-muted-foreground">
+                            Driver ID: <span className="text-foreground">{provider.id}</span> ·{" "}
                             {CATEGORY_LABELS[provider.category as keyof typeof CATEGORY_LABELS] ??
                                 provider.category}
                         </p>
@@ -234,9 +256,9 @@ function ProviderDetailPage() {
                     <Button
                         type="button"
                         onClick={handleAddConnection}
-                        className="h-8 text-xs bg-[var(--ink)] text-[var(--canvas)] hover:opacity-90 cursor-pointer shadow-xs transition-transform active:scale-[0.98]"
+                        className="h-8 text-xs font-semibold cursor-pointer shadow-xs gap-1.5"
                     >
-                        <Plus className="size-3.5 mr-1" />
+                        <Plus className="size-3.5" />
                         <span>{provider.requiresOAuth ? "Connect Account" : "Add Key"}</span>
                     </Button>
                 </div>
@@ -244,7 +266,7 @@ function ProviderDetailPage() {
 
             {/* Risk Notice Alert Banner if OAuth */}
             {provider.requiresOAuth && (
-                <div className="flex items-start gap-3 rounded-[10px] border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs leading-relaxed text-amber-600 dark:text-amber-400">
+                <div className="flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs leading-relaxed text-amber-600 dark:text-amber-400">
                     <AlertTriangle className="size-4 shrink-0 mt-0.5 text-amber-500" />
                     <div>
                         <strong>OAuth Refresh Notice:</strong> SRouter manages token lifecycle and
@@ -272,10 +294,10 @@ function ProviderDetailPage() {
 
             {/* Available Models Section */}
             <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--line)] pb-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/60 pb-3">
                     <div>
                         <div className="flex items-center gap-2">
-                            <h2 className="text-xs font-bold uppercase tracking-wider text-[var(--ink)]">
+                            <h2 className="text-xs font-bold uppercase tracking-wider text-foreground">
                                 Available Models ({activeModels.length})
                             </h2>
                             {deletedModelIds.length > 0 && (
@@ -289,7 +311,7 @@ function ProviderDetailPage() {
                                 </button>
                             )}
                         </div>
-                        <p className="text-xs text-[var(--ink-3)] mt-0.5">
+                        <p className="text-xs text-muted-foreground mt-0.5">
                             Models exposed by {provider.name} and routed through this gateway.
                         </p>
                     </div>
@@ -297,39 +319,51 @@ function ProviderDetailPage() {
                     <div className="flex items-center gap-2">
                         {/* Search Input */}
                         <div className="relative w-full sm:w-60">
-                            <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3 -translate-y-1/2 text-[var(--ink-3)]" />
-                            <input
-                                type="search"
+                            <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+                            <Input
+                                type="text"
                                 placeholder="Filter model ID…"
                                 value={modelSearch}
                                 onChange={(e) => setModelSearch(e.target.value)}
-                                className="w-full rounded-[6px] border border-[var(--line)] bg-[var(--canvas)] pl-7 pr-3 py-1 text-xs text-[var(--ink)] placeholder:text-[var(--ink-3)] focus:outline-none font-mono"
+                                className="h-8 pl-8 pr-7 font-mono text-xs rounded-md bg-background"
                             />
+                            {modelSearch && (
+                                <button
+                                    type="button"
+                                    onClick={() => setModelSearch("")}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-xs p-0.5 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                                    aria-label="Clear search"
+                                >
+                                    <X className="size-3" />
+                                </button>
+                            )}
                         </div>
 
                         {/* View Mode Switcher (Table / Grid) */}
-                        <div className="flex items-center rounded-[6px] border border-[var(--line)] bg-[var(--surface)] p-0.5">
+                        <div className="flex items-center rounded-md border border-border/70 bg-secondary/30 p-0.5">
                             <button
                                 type="button"
                                 onClick={() => setViewMode("table")}
-                                className={`flex size-6 items-center justify-center rounded-[4px] transition-colors cursor-pointer ${
+                                className={`flex size-7 items-center justify-center rounded-xs transition-colors cursor-pointer ${
                                     viewMode === "table"
-                                        ? "bg-[var(--field)] text-[var(--ink)] shadow-2xs font-semibold"
-                                        : "text-[var(--ink-3)] hover:text-[var(--ink)]"
+                                        ? "bg-background text-foreground shadow-xs font-semibold"
+                                        : "text-muted-foreground hover:text-foreground"
                                 }`}
                                 title="Table view (Compact)"
+                                aria-label="Table view"
                             >
                                 <List className="size-3.5" />
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setViewMode("grid")}
-                                className={`flex size-6 items-center justify-center rounded-[4px] transition-colors cursor-pointer ${
+                                className={`flex size-7 items-center justify-center rounded-xs transition-colors cursor-pointer ${
                                     viewMode === "grid"
-                                        ? "bg-[var(--field)] text-[var(--ink)] shadow-2xs font-semibold"
-                                        : "text-[var(--ink-3)] hover:text-[var(--ink)]"
+                                        ? "bg-background text-foreground shadow-xs font-semibold"
+                                        : "text-muted-foreground hover:text-foreground"
                                 }`}
                                 title="Grid view (Cards)"
+                                aria-label="Grid view"
                             >
                                 <LayoutGrid className="size-3.5" />
                             </button>
@@ -338,7 +372,7 @@ function ProviderDetailPage() {
                 </div>
 
                 {filteredModels.length === 0 ? (
-                    <div className="rounded-[10px] border border-[var(--line)] p-12 text-center text-xs text-[var(--ink-3)] space-y-2">
+                    <div className="rounded-xl border border-dashed border-border/80 p-12 text-center text-xs text-muted-foreground space-y-2">
                         <p>
                             {modelSearch
                                 ? `No models matched your search query "${modelSearch}".`
@@ -363,13 +397,12 @@ function ProviderDetailPage() {
                         onDelete={handleDeleteModel}
                     />
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
                         {filteredModels.map((m) => (
                             <ProviderModelCard
                                 key={m.id}
                                 model={m}
                                 copied={copied === m.id}
-                                onCopy={() => void copy(m.id)}
                                 onDelete={handleDeleteModel}
                             />
                         ))}

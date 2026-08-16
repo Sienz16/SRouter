@@ -54,4 +54,15 @@ export class ProvidersController {
         loadSavedProvidersFromDB();
         return ok(c, { message: "Connection deleted" });
     }
+
+    public static async verifyProvider(c: Context): Promise<Response> {
+        const body = await c.req.json<{
+            protocol: "openai" | "anthropic" | "gemini" | "custom";
+            baseUrl?: string;
+            apiKey?: string;
+        }>();
+
+        const result = await ProvidersLogic.verifyConnection(body);
+        return ok(c, result);
+    }
 }

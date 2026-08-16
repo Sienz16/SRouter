@@ -178,3 +178,13 @@ export function getUsageByModelDB(): UsageByModelRow[] {
         estCost: Number(row.estCost ?? 0)
     }));
 }
+
+export function deleteLogsByModelDB(model: string): void {
+    const query = db.prepare("DELETE FROM request_logs WHERE model = ?");
+    query.run(model);
+}
+
+export function deleteLogsByProviderDB(providerId: string): void {
+    const query = db.prepare("DELETE FROM request_logs WHERE provider_id = ?");
+    query.run(providerId);
+}

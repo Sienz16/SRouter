@@ -9,10 +9,7 @@ import type {
 } from "@srouter/types";
 import { registry } from "@/services/registry.js";
 import { ensureFreshToken } from "@/services/tokenRefresh.js";
-import {
-    executeInterceptedSearch,
-    shouldInterceptToolCall
-} from "@/services/toolInterceptor.js";
+import { executeInterceptedSearch, shouldInterceptToolCall } from "@/services/toolInterceptor.js";
 
 const MAX_INTERCEPT_DEPTH = 3;
 

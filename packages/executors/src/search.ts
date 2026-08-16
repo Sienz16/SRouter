@@ -84,7 +84,9 @@ export async function performWebSearch(
             );
             if (res.ok) {
                 const data = (await res.json()) as {
-                    web?: { results?: Array<{ title?: string; url?: string; description?: string }> };
+                    web?: {
+                        results?: Array<{ title?: string; url?: string; description?: string }>;
+                    };
                 };
                 if (Array.isArray(data.web?.results) && data.web!.results.length > 0) {
                     return {

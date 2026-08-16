@@ -52,7 +52,7 @@ export function ProviderIcon({
         const initial = providerId.trim().charAt(0).toUpperCase() || "P";
         return (
             <div
-                className={`${className} flex items-center justify-center rounded-[4px] bg-[var(--field)] text-[10.5px] font-bold text-[var(--ink-2)] select-none shrink-0 font-mono`}
+                className={`${className} flex items-center justify-center rounded-md bg-secondary text-[10.5px] font-bold text-foreground select-none shrink-0 font-mono`}
                 title={providerId}
             >
                 {initial}
@@ -86,9 +86,6 @@ export function ProviderIcon({
             onError={(e) => {
                 const img = e.target as HTMLImageElement;
                 if (!img.dataset.fallbackTried) {
-                    img.dataset.fallbackTried = "true";
-                    img.src = `/providers/${id.replace(/[^a-z0-9_-]/g, "")}.png`;
-                } else if (img.dataset.fallbackTried === "true") {
                     img.dataset.fallbackTried = "remote";
                     img.src = `https://raw.githubusercontent.com/decolua/9router/master/public/providers/${id}.png`;
                 } else {

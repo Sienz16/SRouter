@@ -16,7 +16,8 @@ import {
     ChevronLeft,
     ChevronRight,
     Database,
-    Search
+    Search,
+    X
 } from "lucide-react";
 import type { UsageStats } from "@srouter/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,6 +30,8 @@ import {
     TableHeader,
     TableRow
 } from "@/components/ui/table";
+import { useDebounce } from "@/hooks/useDebounce";
+import { formatCompactNumber } from "@/lib/utils";
 
 type ModelUsageItem = UsageStats["byModel"][number];
 
@@ -38,17 +41,18 @@ type UsageByModelTableProps = {
 
 export function UsageByModelTable({ models }: UsageByModelTableProps) {
     const [searchModel, setSearchModel] = useState("");
+    const debouncedSearch = useDebounce(searchModel, 150);
     const [sorting, setSorting] = useState<SortingState>([{ id: "totalRequests", desc: true }]);
     const [pagination, setPagination] = useState<PaginationState>({
         pageIndex: 0,
         pageSize: 10
     });
 
-    const normalizedSearch = searchModel.trim().toLowerCase();
-    const filteredModels = useMemo(
-        () => models.filter((model) => model.model.toLowerCase().includes(normalizedSearch)),
-        [models, normalizedSearch]
-    );
+    const filteredModels = useMemo(() => {
+        const query = debouncedSearch.trim().toLowerCase();
+        if (!query) return models;
+        return models.filter((model) => model.model.toLowerCase().includes(query));
+    }, [models, debouncedSearch]);
     const hasUsage = models.length > 0;
 
     const columns = useMemo<ColumnDef<ModelUsageItem>[]>(
@@ -105,8 +109,11 @@ export function UsageByModelTable({ models }: UsageByModelTableProps) {
                     );
                 },
                 cell: ({ row }) => (
-                    <span className="font-mono text-foreground tabular-nums">
-                        {row.original.totalRequests.toLocaleString()}
+                    <span
+                        className="font-mono text-foreground tabular-nums cursor-default"
+                        title={`Requests: ${row.original.totalRequests.toLocaleString()}`}
+                    >
+                        {formatCompactNumber(row.original.totalRequests)}
                     </span>
                 )
             },
@@ -132,8 +139,11 @@ export function UsageByModelTable({ models }: UsageByModelTableProps) {
                     );
                 },
                 cell: ({ row }) => (
-                    <span className="font-mono text-muted-foreground tabular-nums">
-                        {row.original.totalInputTokens.toLocaleString()}
+                    <span
+                        className="font-mono text-muted-foreground tabular-nums cursor-default"
+                        title={`Prompt Tokens: ${row.original.totalInputTokens.toLocaleString()}`}
+                    >
+                        {formatCompactNumber(row.original.totalInputTokens)}
                     </span>
                 )
             },
@@ -159,8 +169,11 @@ export function UsageByModelTable({ models }: UsageByModelTableProps) {
                     );
                 },
                 cell: ({ row }) => (
-                    <span className="font-mono text-muted-foreground tabular-nums">
-                        {row.original.totalOutputTokens.toLocaleString()}
+                    <span
+                        className="font-mono text-muted-foreground tabular-nums cursor-default"
+                        title={`Completion Tokens: ${row.original.totalOutputTokens.toLocaleString()}`}
+                    >
+                        {formatCompactNumber(row.original.totalOutputTokens)}
                     </span>
                 )
             },
@@ -186,8 +199,11 @@ export function UsageByModelTable({ models }: UsageByModelTableProps) {
                     );
                 },
                 cell: ({ row }) => (
-                    <span className="font-mono text-muted-foreground tabular-nums">
-                        {row.original.totalCachedTokens.toLocaleString()}
+                    <span
+                        className="font-mono text-muted-foreground tabular-nums cursor-default"
+                        title={`Cached Tokens: ${row.original.totalCachedTokens.toLocaleString()}`}
+                    >
+                        {formatCompactNumber(row.original.totalCachedTokens)}
                     </span>
                 )
             },
@@ -216,8 +232,11 @@ export function UsageByModelTable({ models }: UsageByModelTableProps) {
                 cell: ({ row }) => {
                     const total = row.original.totalInputTokens + row.original.totalOutputTokens;
                     return (
-                        <span className="font-mono font-medium text-foreground tabular-nums">
-                            {total.toLocaleString()}
+                        <span
+                            className="font-mono font-medium text-foreground tabular-nums cursor-default"
+                            title={`Total Tokens: ${total.toLocaleString()} (${row.original.totalInputTokens.toLocaleString()} in · ${row.original.totalOutputTokens.toLocaleString()} out)`}
+                        >
+                            {formatCompactNumber(total)}
                         </span>
                     );
                 }
@@ -264,7 +283,8 @@ export function UsageByModelTable({ models }: UsageByModelTableProps) {
         onPaginationChange: setPagination,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
-        getPaginationRowModel: getPaginationRowModel()
+        getPaginationRowModel: getPaginationRowModel(),
+        autoResetPageIndex: true
     });
 
     const pageCount = table.getPageCount();
@@ -289,17 +309,26 @@ export function UsageByModelTable({ models }: UsageByModelTableProps) {
                     </div>
                 </div>
 
-                <label className="relative w-full sm:w-64">
-                    <span className="sr-only">Search models</span>
+                <div className="relative w-full sm:w-64">
                     <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                        type="search"
+                        type="text"
                         placeholder="Search models…"
                         value={searchModel}
                         onChange={(event) => setSearchModel(event.target.value)}
-                        className="pl-8 font-mono text-xs"
+                        className="pl-8 pr-7 font-mono text-xs"
                     />
-                </label>
+                    {searchModel && (
+                        <button
+                            type="button"
+                            onClick={() => setSearchModel("")}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-xs p-0.5 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                            aria-label="Clear search"
+                        >
+                            <X className="size-3" />
+                        </button>
+                    )}
+                </div>
             </CardHeader>
 
             <CardContent className="p-0">

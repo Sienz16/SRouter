@@ -11,6 +11,9 @@ providersRoute.get("/providers", ProvidersController.listProviders);
 // GET /v1/providers/catalog - Grouped by categories
 providersRoute.get("/providers/catalog", ProvidersController.getCatalog);
 
+// POST /v1/providers/verify - Verify / test connection & API key
+providersRoute.post("/providers/verify", ProvidersController.verifyProvider);
+
 // GET /v1/providers/:providerId - Get single provider details
 providersRoute.get("/providers/:providerId", ProvidersController.getProvider);
 

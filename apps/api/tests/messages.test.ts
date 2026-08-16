@@ -4,6 +4,7 @@ import { Hono } from "hono";
 import {
     createAPIKeyDB,
     deleteAPIKeyDB,
+    deleteLogsByProviderDB,
     deleteProviderDB,
     setRequireApiKeyDB,
     upsertProviderDB
@@ -30,9 +31,13 @@ afterEach(async () => {
     }
     const { registry } = await import("../src/services/registry.js");
     for (const id of createdProviderIds.splice(0)) {
+        deleteLogsByProviderDB(id);
         deleteProviderDB(id);
         registry.unregisterProvider(id);
     }
+    deleteLogsByProviderDB("anthropic_test");
+    deleteLogsByProviderDB("mock-auth-provider");
+    deleteLogsByProviderDB("mock-model");
 });
 
 test("POST /v1/messages returns Anthropic message response for non-streaming request", async () => {

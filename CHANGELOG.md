@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.0-rc.2] - 2026-08-16
+
+### 🚀 Release Candidate 2 Highlights
+
+#### 🧩 Providers Catalog & Custom Provider Wizard
+
+- **2-Step Custom Provider Wizard Modal**: Clean step-by-step modal with official OpenAI and Anthropic branding logos.
+- **Upstream Connection Verification**: Added `POST /v1/providers/verify` endpoint and interactive "Uji API Key" tool in the wizard.
+- **Protocol-Strict URL Validation**: Enforcement of `http://` / `https://` schemes with clear Toast-only error reporting.
+- **Redesigned Providers Catalog**: Clean modern grid layout with responsive filters, count badges, live connection state pulses, and optimized search.
+
+#### ⚙️ Settings & UI Polish
+
+- **Sticky Desktop Navigation Tabs**: Settings navigation tabs remain sticky at the top during scroll.
+- **Keys Management Cleanup**: Modularized virtual API keys tables, dialogs, and metrics.
+- **Styling Token Standardization**: Consistent use of semantic CSS theme tokens across all dashboard views.
+
+---
+
 ## [0.1.0-rc.1] - 2026-08-15
 
 ### 🚀 Release Candidate 1 Highlights
