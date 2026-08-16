@@ -17,6 +17,10 @@ export class ModelsLogic {
         return models.find((m) => m.id === modelId);
     }
 
+    public static refreshModels(forceRefresh = false): Promise<ModelObject[]> {
+        return registry.refreshModels(forceRefresh);
+    }
+
     public static clearCache(providerId?: string): void {
         registry.clearModelsCache(providerId);
     }

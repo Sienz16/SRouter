@@ -21,6 +21,7 @@ import { quotaRoute } from "@/routes/v1/quota.js";
 import { settingsRoute } from "@/routes/v1/settings.js";
 import { startTokenRefreshSweeper } from "@/services/tokenRefresh.js";
 import { resolveWebDistPath } from "@/services/webDist.js";
+import { warmModelRegistry } from "@/services/registry.js";
 
 const app = new Hono();
 
@@ -86,6 +87,7 @@ serve(
     },
     (info) => {
         console.log(`🚀 SRouter API Server running at http://localhost:${info.port}`);
+        warmModelRegistry();
     }
 );
 
